@@ -35,6 +35,8 @@
     border:2px solid #8a8f98; border-radius:4px;}
   .diagram{background:#f7f5f0; border:2px solid #5a5a5a; border-radius:6px; padding:10px; margin:10px 0;}
   .diagram svg{display:block; width:100%; height:auto;}
+  figure.diagram{margin:10px 0;}
+  figcaption{font-size:.9rem; color:#1a1a1a; margin-top:6px;}
   .glossary dt{font-weight:bold; margin-top:10px;}
   .glossary dd{margin-left:0;}
   .term-en{color:var(--sub); font-size:.88rem;}
@@ -57,106 +59,160 @@
   <h1>Unit 1：レベルデザインとは何か</h1>
   <div class="meta">
     <span>主軸：感情</span>
-    <span>担当変数：体験の提示順序（同じ仕組みを「いつ体験させるか」）</span>
+    <span>担当変数：体験の提示順序（いつ体験させるか）</span>
   </div>
   <div class="goals">
     <p>この Unit の学習目標</p>
     <ul>
-      <li>レベルデザインを「プレイヤーの体験を設計すること」と自分の言葉で説明できる</li>
-      <li>ゲームデザインとレベルデザインの違いと、両者が影響し合う関係を説明できる</li>
-      <li>同じマップでも、情報の出し方でプレイヤーの体験が変わることを具体例で示せる</li>
+      <li>レベルデザインを「プレイヤーの体験を設計すること」と説明できる</li>
+      <li>ゲームデザインとの違いと、両者が影響し合う関係を説明できる</li>
+      <li>同じマップでも情報の出し方で体験が変わることを、具体例で示せる</li>
     </ul>
   </div>
 
   <h2>1. 中心となる定義</h2>
   <blockquote>レベルデザインとは、プレイヤーの体験を設計することである</blockquote>
-  <p>レベルデザインというと、「ステージの形を作ること」「敵やアイテムを配置すること」を思い浮かべるかもしれません。
-  それらはいずれもレベルデザインの<strong>作業の一部</strong>ですが、本質ではありません。
-  配置した結果として、プレイヤーが<strong>何を見て、何を考え、どう行動し、何を感じるか</strong>――その体験の流れこそが設計の対象です。</p>
-  <p>たとえば「分かれ道」を1つ置くという作業は同じでも、片方の道の先に明かりが見えていれば、
-  プレイヤーは「あっちに何かありそうだ」と期待して進みます。何も見えなければ、迷いや不安が生まれます。
-  マップの形は同じでも、生まれる体験は別物です。この違いを意図して作ることが、レベルデザインの仕事です。</p>
+  <p>「ステージを作ること」「敵やアイテムを配置すること」を思い浮かべがちですが、
+  それらは<strong>作業の一部</strong>にすぎません。本質は、プレイヤーが<strong>何を見て、何を考え、どう行動し、何を感じるか</strong>――その体験の流れを設計することです。</p>
+  <p>たとえば「分かれ道」は、片方の先に明かりが見えれば期待が、何も見えなければ迷いや不安が生まれます。
+  マップの形は同じでも体験は別物。この違いを意図して作ることが仕事です。</p>
 
   <h2>2. ゲームデザインとの違いと相互作用</h2>
   <p>よく使われる整理として、ゲームデザインが「<strong>何ができるか</strong>」を決めるのに対し、
   レベルデザインは「それを、<strong>いつ、どこで、どのように体験させるか</strong>」を決める、と言われます。</p>
-  <table>
-    <thead><tr><th></th><th>ゲームデザイン</th><th>レベルデザイン</th></tr></thead>
-    <tbody>
-      <tr><th>決めること</th><td>ルール、操作、できること、目的や勝敗の仕組みそのもの</td><td>その仕組みを体験させる順序、場所、状況、情報の出し方</td></tr>
-      <tr><th>具体例</th><td>「二段ジャンプができる」という能力の決定</td><td>二段ジャンプを、まず安全な足場で試させ、次に浅い谷で使わせ、最後に本番の崖で使わせる構成</td></tr>
-      <tr><th>問いかけ</th><td>「プレイヤーは何ができるのか？」</td><td>「プレイヤーはそれをどう体験するのか？」</td></tr>
-    </tbody>
-  </table>
-  <p>ただし、この2つはきれいに分離できるものではありません。
-  レベルを作る中で「この仕組みは、この順番では伝わらない」と分かれば、仕組み自体の見直しにつながります。
-  逆に仕組みが変われば、体験のさせ方も組み直しになります。
-  実際の開発では両者は相互に影響し合うものであり、「違い」は役割を考えるための目安として捉えてください。</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 640 240" role="img" aria-label="ゲームデザインとレベルデザインの関係図">
+    <rect x="0" y="0" width="100%" height="100%" rx="8" fill="#f7f9fc"/>
+      <rect x="0" y="0" width="640" height="240" fill="#ffffff"></rect>
+      <rect x="110" y="26" width="460" height="66" fill="#e3efe7" stroke="#2f6f4e" stroke-width="2"></rect>
+      <text x="340" y="54" font-size="17" fill="#1a1a1a" text-anchor="middle" font-weight="bold">ゲームデザイン（仕組みの層）</text>
+      <text x="340" y="78" font-size="14" fill="#1a1a1a" text-anchor="middle">「何ができるか」を決める：ルール・操作・能力</text>
+      <rect x="110" y="146" width="460" height="66" fill="#fdeeda" stroke="#b45309" stroke-width="2"></rect>
+      <text x="340" y="174" font-size="17" fill="#1a1a1a" text-anchor="middle" font-weight="bold">レベルデザイン（体験の層）</text>
+      <text x="340" y="198" font-size="14" fill="#1a1a1a" text-anchor="middle">「いつ・どこで・どう体験させるか」を決める：順序・場所・情報</text>
+      <line x1="70" y1="66" x2="70" y2="172" stroke="#1a1a1a" stroke-width="3"></line>
+      <polygon points="70,52 61,70 79,70" fill="#1a1a1a"></polygon>
+      <polygon points="70,186 61,168 79,168" fill="#1a1a1a"></polygon>
+      <text x="34" y="122" font-size="14" fill="#1a1a1a" text-anchor="middle" transform="rotate(-90 34 122)">相互に影響</text>
+      <line x1="592" y1="92" x2="592" y2="146" stroke="#5a5a5a" stroke-width="2" stroke-dasharray="6 4"></line>
+      <polygon points="592,146 586,134 598,134" fill="#5a5a5a"></polygon>
+    </svg>
+    <figcaption>図：仕組みの層と体験の層は、双方向に影響し合う。</figcaption>
+  </figure>
+  <p>ただし両者はきれいに分離できません。「この順番では伝わらない」と分かれば仕組みの見直しにつながり、
+  仕組みが変わればさせ方も組み直しになります。</p>
 
   <h2>3. 「ステージ制作」と「体験設計」の違い</h2>
-  <p>ステージ制作は、地形を作り、敵やアイテムを配置する<strong>作業</strong>を指します。
-  一方、体験設計は、そのステージを遊んだプレイヤーに<strong>どのような行動・判断・感情が生まれるか</strong>を意図して組み立てることです。</p>
-  <p>配置作業そのものが悪いわけではありません。問題は、配置して終わりになり、
-  「なぜそこに置いたのか」「プレイヤーはどう感じると予想するのか」を問わない場合です。
-  本教材では、配置の1つ1つに「意図」を持たせ、その意図が実際のプレイで実現したかを確かめる（仮説と検証）姿勢を大切にします。</p>
+  <p>ステージ制作は、地形や敵・アイテムを配置する<strong>作業</strong>です。
+  体験設計は、プレイヤーに<strong>どんな行動・判断・感情が生まれるか</strong>を意図して組み立てることです。</p>
+  <p>配置そのものが悪いわけではありません。問題は「なぜそこに置いたのか」を問わないまま終わることです。
+  本教材では、配置に意図を持たせ、実現したかを確かめる（仮説と検証）姿勢を大切にします。</p>
+  <figure class="diagram">
+    <svg viewBox="0 0 640 236" role="img" aria-label="同じ仕組みを体験させる順序の対比図">
+    <rect x="0" y="0" width="100%" height="100%" rx="8" fill="#f7f9fc"/>
+      <rect x="0" y="0" width="640" height="236" fill="#ffffff"></rect>
+      <text x="16" y="34" font-size="15" fill="#1a1a1a" font-weight="bold">A：いきなり本番</text>
+      <line x1="180" y1="58" x2="400" y2="58" stroke="#9aa0a6" stroke-width="3" stroke-dasharray="7 5"></line>
+      <rect x="410" y="30" width="180" height="56" fill="#f3b8b0" stroke="#b3261e" stroke-width="2"></rect>
+      <text x="500" y="55" font-size="15" fill="#1a1a1a" text-anchor="middle" font-weight="bold">本番（高い崖）</text>
+      <text x="500" y="76" font-size="13" fill="#1a1a1a" text-anchor="middle">✕ 不安・失敗しやすい</text>
+      <text x="16" y="140" font-size="15" fill="#1a1a1a" font-weight="bold">B：導入 → 練習 → 応用</text>
+      <rect x="16" y="156" width="168" height="56" fill="#e3efe7" stroke="#2f6f4e" stroke-width="2"></rect>
+      <text x="100" y="181" font-size="14" fill="#1a1a1a" text-anchor="middle" font-weight="bold">導入：安全な足場</text>
+      <text x="100" y="201" font-size="13" fill="#1a1a1a" text-anchor="middle">まず試させる</text>
+      <polygon points="196,178 214,184 196,190" fill="#1a1a1a"></polygon>
+      <rect x="226" y="156" width="168" height="56" fill="#fdf3d8" stroke="#b45309" stroke-width="2"></rect>
+      <text x="310" y="181" font-size="14" fill="#1a1a1a" text-anchor="middle" font-weight="bold">練習：浅い谷</text>
+      <text x="310" y="201" font-size="13" fill="#1a1a1a" text-anchor="middle">失敗しても軽い</text>
+      <polygon points="406,178 424,184 406,190" fill="#1a1a1a"></polygon>
+      <rect x="436" y="156" width="168" height="56" fill="#f3b8b0" stroke="#b3261e" stroke-width="2"></rect>
+      <text x="520" y="181" font-size="14" fill="#1a1a1a" text-anchor="middle" font-weight="bold">応用：本番の崖</text>
+      <text x="520" y="201" font-size="13" fill="#1a1a1a" text-anchor="middle">自信を持って挑める</text>
+    </svg>
+    <figcaption>図：同じ仕組みでも、体験させる順序で感じ方と学びやすさが変わる。</figcaption>
+  </figure>
 
   <h2>4. 設計対象はプレイヤーの行動・判断・感情</h2>
-  <p>レベルデザインが最終的に設計するのは、プレイヤーの内側で起きることです。大きく3つに分けて考えます。</p>
+  <p>設計の対象はプレイヤーの内側で起きることです。大きく3つに分けます。</p>
   <table>
     <thead><tr><th>対象</th><th>意味</th><th>設計の例</th></tr></thead>
     <tbody>
-      <tr><th>行動</th><td>プレイヤーが実際にする動き（進む、止まる、戻る、調べる）</td><td>見晴らしのよい場所に立つと、自然に周囲を見渡して次の目的地を探す</td></tr>
-      <tr><th>判断</th><td>情報に基づいて選ぶこと（どちらの道か、今戦うか、温存するか）</td><td>2つの道の先に違う手がかりを見せ、「どちらから行くか」を自分で選ばせる</td></tr>
-      <tr><th>感情</th><td>緊張、安心、好奇心、達成感などの気持ちの動き</td><td>暗い通路の先に明るい広場を置き、「不安 → 安心」の落差を作る</td></tr>
+      <tr><th>行動</th><td>進む・止まる・戻る・調べるなどの動き</td><td>見晴らしのよい場所では周囲を見渡し、次の目的地を探す</td></tr>
+      <tr><th>判断</th><td>情報に基づいて選ぶこと（どちらの道か、今戦うか等）</td><td>2つの道に違う手がかりを見せ、選ばせる</td></tr>
+      <tr><th>感情</th><td>緊張、安心、好奇心、達成感などの気持ち</td><td>暗い通路の先に明るい広場を置き、「不安 → 安心」の落差を作る</td></tr>
     </tbody>
   </table>
-  <p>この3つは連動しています。情報（判断の材料）の出し方を変えれば判断が変わり、判断が変われば行動が変わり、行動の結果が感情を生みます。
-  レベルデザインは、この連鎖を環境側から組み立てる技術だと言えます。</p>
+  <p>この3つは連動しています。情報→判断→行動→感情という連鎖を、環境側から組み立てるのがレベルデザインです。</p>
 
   <h2>5. ゲームジャンルによる違い</h2>
-  <p>「体験を設計する」という目的は共通でも、ジャンルによってレベルデザインの重点は変わります。
-  同じ手法がどのジャンルでも同じ効果を持つとは限りません。</p>
-  <table>
-    <thead><tr><th>ジャンル</th><th>レベルデザインの重点の例</th></tr></thead>
-    <tbody>
-      <tr><th>アクション</th><td>移動と戦闘のリズム。足場の間隔や敵の配置が、そのまま操作の気持ちよさと難しさになる</td></tr>
-      <tr><th>パズル</th><td>情報の出し方と試行のしやすさ。解法に気づく順序をどう作るかが中心になる</td></tr>
-      <tr><th>RPG</th><td>探索の動機づけと物語との接続。町の配置、ダンジョンの構造が世界への没入と関わる</td></tr>
-      <tr><th>ホラー</th><td>視界の制限と情報の欠如そのものが演出になる。他ジャンルでは「見えない＝悪い」とされがちな要素が、意図すれば恐怖を生む資源になる</td></tr>
-    </tbody>
-  </table>
-  <p>ホラーの例が示すように、「分かりやすさ」や「快適さ」は常に正解とは限りません。
-  ジャンルと対象プレイヤーが求める体験によって、何が良い設計かは変わります。</p>
+  <p>目的は共通でも、ジャンルによって重点は変わります。</p>
+  <figure class="diagram">
+    <svg viewBox="0 0 640 268" role="img" aria-label="ジャンル別のレベルデザインの重点">
+    <rect x="0" y="0" width="100%" height="100%" rx="8" fill="#f7f9fc"/>
+      <rect x="0" y="0" width="640" height="268" fill="#ffffff"></rect>
+      <g>
+        <rect x="8" y="16" width="148" height="216" fill="#eef4fb" stroke="#0b5394" stroke-width="2"></rect>
+        <text x="82" y="48" font-size="16" fill="#1a1a1a" text-anchor="middle" font-weight="bold">アクション</text>
+        <text x="82" y="82" font-size="15" fill="#0b5394" text-anchor="middle" font-weight="bold">リズム</text>
+        <text x="82" y="112" font-size="13" fill="#1a1a1a" text-anchor="middle">移動と戦闘の</text>
+        <text x="82" y="132" font-size="13" fill="#1a1a1a" text-anchor="middle">気持ちよさ</text>
+        <text x="82" y="168" font-size="12" fill="#1a1a1a" text-anchor="middle">足場間隔と敵配置が</text>
+        <text x="82" y="188" font-size="12" fill="#1a1a1a" text-anchor="middle">難しさに直結する</text>
+      </g>
+      <g>
+        <rect x="166" y="16" width="148" height="216" fill="#f3eefb" stroke="#6a4fa3" stroke-width="2"></rect>
+        <text x="240" y="48" font-size="16" fill="#1a1a1a" text-anchor="middle" font-weight="bold">パズル</text>
+        <text x="240" y="82" font-size="15" fill="#6a4fa3" text-anchor="middle" font-weight="bold">気づきの順序</text>
+        <text x="240" y="112" font-size="13" fill="#1a1a1a" text-anchor="middle">情報の出し方と</text>
+        <text x="240" y="132" font-size="13" fill="#1a1a1a" text-anchor="middle">試しやすさ</text>
+      </g>
+      <g>
+        <rect x="324" y="16" width="148" height="216" fill="#e3efe7" stroke="#2f6f4e" stroke-width="2"></rect>
+        <text x="398" y="48" font-size="16" fill="#1a1a1a" text-anchor="middle" font-weight="bold">RPG</text>
+        <text x="398" y="82" font-size="15" fill="#2f6f4e" text-anchor="middle" font-weight="bold">探索と物語</text>
+        <text x="398" y="112" font-size="13" fill="#1a1a1a" text-anchor="middle">探索の動機づけと</text>
+        <text x="398" y="132" font-size="13" fill="#1a1a1a" text-anchor="middle">世界への没入</text>
+      </g>
+      <g>
+        <rect x="482" y="16" width="148" height="216" fill="#ececec" stroke="#1a1a1a" stroke-width="2"></rect>
+        <text x="556" y="48" font-size="16" fill="#1a1a1a" text-anchor="middle" font-weight="bold">ホラー</text>
+        <text x="556" y="82" font-size="15" fill="#1a1a1a" text-anchor="middle" font-weight="bold">見せない演出</text>
+        <text x="556" y="112" font-size="13" fill="#1a1a1a" text-anchor="middle">視界の制限と</text>
+        <text x="556" y="132" font-size="13" fill="#1a1a1a" text-anchor="middle">情報の欠如</text>
+      </g>
+    </svg>
+    <figcaption>図：重点はジャンルで異なる。ホラーでは「見えないこと」が資源になる。</figcaption>
+  </figure>
+  <p>「分かりやすさ」や「快適さ」が常に正解とは限らない点に注意してください。</p>
 
   <h2>6. 良いレベル／悪いレベルの比較</h2>
-  <p>同じ「分かれ道」という構造でも、情報の出し方ひとつで体験は変わります。</p>
+  <p>同じ「分かれ道」でも、情報の出し方ひとつで体験は変わります。</p>
   <table>
     <thead><tr><th>分かれ道の作り方</th><th>プレイヤーに起きやすいこと</th><th>評価の分かれ目</th></tr></thead>
     <tbody>
       <tr>
-        <td>片方の先に明かりと目的地の塔が見える。もう片方は暗いが、足元にコインが落ちている</td>
-        <td>「塔へ急ぐか、コインを拾ってから行くか」を<strong>情報を持って選べる</strong>。迷っても「自分で選んだ」と感じやすい</td>
-        <td>選択に意味があるため、寄り道も含めて体験として成立しやすい</td>
+        <td>片方の先に明かりと塔が見え、もう片方は暗いが足元にコイン</td>
+        <td>「塔か、コインか」を<strong>情報を持って選べ</strong>、「自分で選んだ」と感じやすい</td>
+        <td>選択に意味があり、寄り道も体験になる</td>
       </tr>
       <tr>
-        <td>両方とも先が見えず、違いを示す手がかりが一切ない</td>
-        <td>選ぶ根拠がないため、選択が<strong>当てずっぽう</strong>になる。行き止まりだった場合、「だまされた」と感じやすい</td>
-        <td>偶然に左右される体験になりやすく、再挑戦の動機も生まれにくい</td>
+        <td>両方とも先が見えず、手がかりなし</td>
+        <td>選ぶ根拠がなく<strong>当てずっぽう</strong>に。行き止まりだと「だまされた」と感じやすい</td>
+        <td>偶然に左右され、再挑戦の動機が生まれにくい</td>
       </tr>
       <tr>
-        <td>両方とも先が見えないが、このゲームは「未知への探索」自体が売りで、地図もあえて与えられない</td>
-        <td>不安や緊張そのものを楽しむプレイヤーには<strong>発見の喜び</strong>につながる</td>
-        <td>対象プレイヤーとジャンルの約束に合っていれば、情報の欠如が長所にもなりうる</td>
+        <td>両方とも先が見えないが、「未知への探索」が売りで地図もなし</td>
+        <td>不安や緊張を楽しむプレイヤーには<strong>発見の喜び</strong>につながる</td>
+        <td>目的と対象プレイヤーに合えば、情報の欠如が長所にもなる</td>
       </tr>
     </tbody>
   </table>
-  <div class="warn">⚠ <strong>注意：</strong>「良い／悪い」は絶対的なものではありません。
-  同じ構造でも、設計の目的と対象プレイヤーによって評価は変わります。
-  大切なのは「一般に良いとされる形」ではなく、「意図した体験が、狙った相手に届いているか」を確かめることです。</div>
+  <div class="warn">⚠ <strong>注意：</strong>「良い／悪い」は絶対ではありません。
+  目的と対象プレイヤーで評価は変わります。大切なのは「意図した体験が、狙った相手に届いているか」を確かめることです。</div>
 
   <h2>7. 比べてみよう：「同じマップ、違う体験」</h2>
-  <p>下の2枚は、まったく同じ形の分かれ道の模式図です。切り替えて、何が違うかを見比べてみてください。
-  操作はこの切り替え1つだけです。</p>
+  <p>下の2枚は同じ形の分かれ道です。切り替えて見比べてみてください（操作は切り替え1つだけ）。</p>
   <div>
     <button type="button" id="tabPlain" aria-pressed="true">A：手がかりなし</button>
     <button type="button" id="tabGuided" class="secondary" aria-pressed="false">B：手がかりあり</button>
@@ -173,7 +229,7 @@
       <text x="330" y="60" font-size="15" fill="#1a1a1a">上ルート（先は見えない）</text>
       <text x="330" y="252" font-size="15" fill="#1a1a1a">下ルート（先は見えない）</text>
       <text x="180" y="138" font-size="22" fill="#1a1a1a" font-weight="bold">？</text>
-      <text x="30" y="292" font-size="14" fill="#1a1a1a">分かれ道で得られる情報はゼロ。選ぶ根拠がない。</text>
+      <text x="30" y="292" font-size="14" fill="#1a1a1a">得られる情報はゼロ。選ぶ根拠がない。</text>
     </svg>
   </div>
   <div class="diagram" id="panelGuided" hidden>
@@ -194,41 +250,42 @@
       <text x="300" y="196" font-size="13" fill="#1a1a1a">コイン</text>
       <text x="330" y="60" font-size="15" fill="#1a1a1a">上ルート（光の帯＋塔が見える）</text>
       <text x="420" y="252" font-size="15" fill="#1a1a1a">下ルート（コインの気配）</text>
-      <text x="30" y="292" font-size="14" fill="#1a1a1a">形は同じ。情報があるため「選ぶ理由」を持てる。</text>
+      <text x="30" y="292" font-size="14" fill="#1a1a1a">形は同じ。情報があり「選ぶ理由」を持てる。</text>
     </svg>
   </div>
-  <p>マップの形（配置作業）は同一です。違っているのは、光・ランドマーク・コインという<strong>情報の出し方</strong>だけ。
-  それでもプレイヤーの判断と感情は変わります。これが「ステージ制作」と「体験設計」の違いの、最も小さな実例です。
-  この先の Unit 4 と実験Cでは、この情報の出し方を実際に操作して確かめます。</p>
+  <p>マップの形は同一で、違うのは情報の出し方だけ。それでも判断と感情は変わります。
+  「ステージ制作」と「体験設計」の違いの最も小さな実例です。</p>
 
   <h2>用語メモ</h2>
   <dl class="glossary">
     <dt>Level Design <span class="term-en">レベルデザイン</span></dt>
-    <dd>意味：ゲームの仕組みを使い、プレイヤーが「いつ、どこで、どのように」体験するかを設計すること。本教材の中心定義は「プレイヤーの体験を設計すること」。<br>
-    具体例：アクションゲームで、ジャンプを安全な場所で覚えさせてから穴越えに使わせるステージ構成。</dd>
+    <dd>意味：プレイヤーが「いつ、どこで、どのように」体験するかを設計すること。中心定義は「プレイヤーの体験を設計すること」。<br>
+    具体例：ジャンプを安全な場所で覚えさせてから、穴越えに使わせる構成。</dd>
     <dt>Game Design <span class="term-en">ゲームデザイン</span></dt>
-    <dd>意味：ゲーム全体のルール、できること（操作・行動）、勝敗や目的などの仕組みそのものを設計すること。<br>
-    具体例：「コインを100枚集めると残機が増える」というルール自体の決定。</dd>
+    <dd>意味：ルール、できること、勝敗や目的など、仕組みそのものを設計すること。<br>
+    具体例：「コイン100枚で残機が増える」というルールの決定。</dd>
     <dt>Player Agency <span class="term-en">プレイヤー・エージェンシー（主体性）</span></dt>
-    <dd>意味：プレイヤーが「自分で選んで行動している」と感じられる度合い。選択肢の多さだけでなく、選択の結果が返ってくる感覚も含む。詳しくは Unit 2 で扱う。<br>
-    具体例：分岐ルートのどちらを選んでも進めるが、得られる報酬や難しさが変わるマップ。</dd>
+    <dd>意味：「自分で選んで行動している」と感じられる度合い。結果が返ってくる感覚も含む（Unit 2）。<br>
+    具体例：どちらの分岐でも進めるが、報酬や難しさが変わるマップ。</dd>
   </dl>
 
   <h2>考えてみよう</h2>
-  <p>入力した内容は保存されません（ブラウザを閉じると消えます）。授業での話し合いのメモとして使ってください。</p>
-  <p><strong>質問1：</strong>最近遊んだゲームで、「配置は地味なのに印象に残っている場面」はありますか？ その場面で、自分の行動・判断・感情はどう動いていましたか？</p>
-  <textarea aria-label="質問1の回答"></textarea>
-  <p><strong>質問2：</strong>「情報が一切ない分かれ道」が、良い体験になるのはどんなゲーム・どんなプレイヤーの場合だと思いますか？</p>
-  <textarea aria-label="質問2の回答"></textarea>
-  <p><strong>質問3：</strong>ゲームデザインとレベルデザインの境界があいまいになる例を、自分の知っているゲームから1つ挙げてみましょう。</p>
-  <textarea aria-label="質問3の回答"></textarea>
+  <p>入力内容はこのブラウザの中にだけ保存され、外部に送信されません。ページを開き直すと自動で復元されます。</p>
+  <p><button type="button" id="saveBtn" class="secondary">保存する</button>
+  <span id="saveStatus" aria-live="polite"></span></p>
+  <p><strong>質問1：</strong>最近遊んだゲームで「配置は地味なのに印象に残っている場面」はありますか？ そのとき行動・判断・感情はどう動いていましたか？</p>
+  <textarea id="q1" aria-label="質問1の回答"></textarea>
+  <p><strong>質問2：</strong>「情報が一切ない分かれ道」が良い体験になるのは、どんなゲーム・どんなプレイヤーの場合だと思いますか？</p>
+  <textarea id="q2" aria-label="質問2の回答"></textarea>
+  <p><strong>質問3：</strong>両者の境界があいまいになる例を、知っているゲームから1つ挙げてみましょう。</p>
+  <textarea id="q3" aria-label="質問3の回答"></textarea>
 
   <h2>実験で確かめる</h2>
-  <p>この Unit の「情報の出し方で体験が変わる」という話は、Unit 4 の実験で実際に操作して確かめられます。</p>
-  <p>→ <a href="../../experiments/exp-c-guidance/">実験C「プレイヤー誘導実験」</a>（Unit 4 対応。光・ランドマーク・コインなどの誘導要素を1つだけ変えて、選ばれるルートがどう変わるかを比べる実験です）</p>
+  <p>「情報の出し方で体験が変わる」は、Unit 4 の実験で実際に操作して確かめられます。</p>
+  <p>→ <a href="../../experiments/exp-c-guidance/">実験C「プレイヤー誘導実験」</a>（Unit 4 対応。誘導要素を1つだけ変え、ルートの変化を比べる）</p>
 
   <nav class="unitnav">
-    <p>→ 次の Unit：<a href="../unit-02/">Unit 2「プレイヤー体験の設計」</a> ― 目的と動機、達成感、主体性、フローなど、「体験」の中身を分解していきます。</p>
+    <p>→ 次の Unit：<a href="../unit-02/">Unit 2「プレイヤー体験の設計」</a> ― 「体験」の中身を分解していきます。</p>
     <p><a href="../../">← 講座ハブへ戻る</a></p>
   </nav>
 </main>
@@ -247,6 +304,53 @@
   }
   tabPlain.addEventListener("click", function () { show(false); });
   tabGuided.addEventListener("click", function () { show(true); });
+</script>
+
+<script>
+(function () {
+  var PREFIX = "gld:unit01:";
+  var status = document.getElementById("saveStatus");
+  var fields = ["q1", "q2", "q3"].map(function (id) { return document.getElementById(id); }).filter(Boolean);
+  function setStatus(t) { if (status) status.textContent = t; }
+  function storageOK() {
+    try { var k = PREFIX + "__test"; localStorage.setItem(k, "1"); localStorage.removeItem(k); return true; }
+    catch (e) { return false; }
+  }
+  var ok = storageOK();
+  if (!ok) {
+    setStatus("このブラウザでは保存できません（保存機能が無効です）。");
+  } else {
+    var restored = false;
+    fields.forEach(function (el) {
+      try {
+        var v = localStorage.getItem(PREFIX + el.id);
+        if (v !== null && v !== "") { el.value = v; restored = true; }
+      } catch (e) {}
+    });
+    if (restored) setStatus("前回の入力を復元しました。");
+  }
+  function saveAll(manual) {
+    if (!ok) { setStatus("このブラウザでは保存できません（保存機能が無効です）。"); return; }
+    try { fields.forEach(function (el) { localStorage.setItem(PREFIX + el.id, el.value); }); }
+    catch (e) { setStatus("保存できませんでした。"); return; }
+    if (manual) {
+      var d = new Date();
+      var hh = ("0" + d.getHours()).slice(-2), mm = ("0" + d.getMinutes()).slice(-2);
+      setStatus("保存しました（" + hh + ":" + mm + "）");
+    } else {
+      setStatus("自動保存しました");
+    }
+  }
+  var timer = null;
+  fields.forEach(function (el) {
+    el.addEventListener("input", function () {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () { saveAll(false); }, 500);
+    });
+  });
+  var btn = document.getElementById("saveBtn");
+  if (btn) btn.addEventListener("click", function () { saveAll(true); });
+})();
 </script>
 </body>
 </html>
