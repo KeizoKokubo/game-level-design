@@ -116,10 +116,7 @@
     <button type="button" data-move="right" aria-label="右へ移動">→</button>
   </div>
   <fieldset>
-    <legend>自動エージェントの設定</legend>
-    <label>乱数シード（同じシードでは同じ結果が再現されます）：
-      <input type="number" id="seedInput" value="42" style="width:90px; font-size:1rem;">
-    </label>
+    <legend>自動エージェントについて</legend>
     <p style="margin:4px 0;">エージェントのルート選択は、各誘導要素に設定した「引力（重み）」で決まります。
     基本の重みは上下とも <strong>1.0</strong>。光 <strong>+1.5</strong>（上）、旗・矢印サイン <strong>+1.0</strong>（上）、
     ランドマークの塔 <strong>+1.2</strong>（下）、コイン列 <strong>+1.8</strong>（下）を加え、
@@ -460,13 +457,13 @@ document.querySelectorAll("[data-move]").forEach(function (btn) {
 // ---- 自動エージェント ----
 document.getElementById("btnAgent").addEventListener("click", function () {
   var el = currentElements();
-  var seedBase = parseInt(document.getElementById("seedInput").value, 10) || 0;
-  var seed = seedBase + state.batchIndex;
+  // 乱数の起点は学習課題に関係ない設定のため UI には出さず、実行ごとに内部で自動生成する
+  var seed = (Date.now() ^ Math.floor(Math.random() * 0x100000000)) | 0;
   state.batchIndex++;
   var counts = runBatch(el, 10, seed);
   var w = computeWeights(el);
   var pctU = Math.round(counts.upper / 10 * 100), pctL = 100 - pctU;
-  var html = "<h3 style='margin:8px 0 4px;'>エージェント10回の結果（シナリオ " + scenarioLabel() + "、シード " + seed + "）</h3>" +
+  var html = "<h3 style='margin:8px 0 4px;'>エージェント10回の結果（シナリオ " + scenarioLabel() + "）</h3>" +
     "<div class='bar'><div class='up' style='width:" + pctU + "%'>▲ 上 " + counts.upper + "回</div>" +
     "<div class='lo' style='width:" + pctL + "%'>▼ 下 " + counts.lower + "回</div></div>" +
     "<p style='margin:4px 0;'>モデルの重み：上 " + w.upper.toFixed(1) + " ／ 下 " + w.lower.toFixed(1) +
