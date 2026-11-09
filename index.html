@@ -93,7 +93,7 @@
       </thead>
       <tbody id="unit-list"></tbody>
     </table>
-    <p>各 Unit には、パラメータを変えて結果を比べられるインタラクティブ実験を対応させる予定です（最初の試作は Unit 4 対応の「プレイヤー誘導実験」）。</p>
+    <p>各 Unit には、パラメータを変えて結果を比べられるインタラクティブ実験を対応させる予定です。最初の試作として、Unit 4 対応の実験C「<a href="experiments/exp-c-guidance/">プレイヤー誘導実験</a>」を公開中です。</p>
   </section>
 </main>
 <footer>ゲーム・レベルデザイン講座 — 準備中</footer>
@@ -102,7 +102,7 @@
     [1, "レベルデザインとは何か", "Part 1：基礎"],
     [2, "プレイヤー体験の設計", "Part 1：基礎"],
     [3, "空間構造とマップ設計", "Part 2：空間"],
-    [4, "プレイヤーの誘導と視線制御", "Part 2：空間"],
+    [4, "プレイヤーの誘導と視線制御", "Part 2：空間", "experiments/exp-c-guidance/"],
     [5, "空間の意味と環境ストーリーテリング", "Part 2：空間"],
     [6, "難易度曲線と学習設計", "Part 3：難易度"],
     [7, "チャレンジと報酬", "Part 3：難易度"],
@@ -117,8 +117,12 @@
     var tr = document.createElement("tr");
     tr.innerHTML = "<td>Unit " + u[0] + "</td><td>" + u[1] + "</td><td>" + u[2] + "</td>";
     var td = document.createElement("td");
-    td.className = "prep";
-    td.textContent = "準備中";
+    if (u[3]) {
+      td.innerHTML = '<a href="' + u[3] + '">試作公開中（実験C）</a>';
+    } else {
+      td.className = "prep";
+      td.textContent = "準備中";
+    }
     tr.appendChild(td);
     tbody.appendChild(tr);
   });
