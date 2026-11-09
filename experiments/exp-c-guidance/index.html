@@ -142,6 +142,9 @@
 
   <h2><span class="step">⑤</span>考察する</h2>
   <p id="verdict" class="status" aria-live="polite">実行すると、仮説と結果の一致／不一致がここに表示されます。</p>
+  <p style="margin:4px 0;"><button type="button" id="saveBtn" class="secondary">保存する</button>
+  <span id="saveStatus" class="status" aria-live="polite"></span></p>
+  <p style="margin:4px 0;">考察の入力内容はこのブラウザの中にだけ保存され、外部に送信されません。ページを開き直すと自動で復元されます。</p>
   <p><strong>考察質問1：</strong>仮説と結果は一致しましたか？ 一致した／しなかった理由を、追加した誘導要素1つに絞って説明してみましょう。</p>
   <textarea id="q1" aria-label="考察質問1の回答"></textarea>
   <p><strong>考察質問2：</strong>この誘導は「誘導するが、操らない」になっていましたか？ プレイヤーが「自分で選んだ」と感じられる点と、強制的だと感じる点はどこですか？</p>
@@ -568,6 +571,53 @@ document.getElementById("btnAgent").addEventListener("click", function () {
 
 resetPlay();
 draw();
+</script>
+
+<script>
+(function () {
+  var PREFIX = "gld:expc:";
+  var status = document.getElementById("saveStatus");
+  var fields = ["q1", "q2", "q3"].map(function (id) { return document.getElementById(id); }).filter(Boolean);
+  function setStatus(t) { if (status) status.textContent = t; }
+  function storageOK() {
+    try { var k = PREFIX + "__test"; localStorage.setItem(k, "1"); localStorage.removeItem(k); return true; }
+    catch (e) { return false; }
+  }
+  var ok = storageOK();
+  if (!ok) {
+    setStatus("このブラウザでは保存できません（保存機能が無効です）。");
+  } else {
+    var restored = false;
+    fields.forEach(function (el) {
+      try {
+        var v = localStorage.getItem(PREFIX + el.id);
+        if (v !== null && v !== "") { el.value = v; restored = true; }
+      } catch (e) {}
+    });
+    if (restored) setStatus("前回の入力を復元しました。");
+  }
+  function saveAll(manual) {
+    if (!ok) { setStatus("このブラウザでは保存できません（保存機能が無効です）。"); return; }
+    try { fields.forEach(function (el) { localStorage.setItem(PREFIX + el.id, el.value); }); }
+    catch (e) { setStatus("保存できませんでした。"); return; }
+    if (manual) {
+      var d = new Date();
+      var hh = ("0" + d.getHours()).slice(-2), mm = ("0" + d.getMinutes()).slice(-2);
+      setStatus("保存しました（" + hh + ":" + mm + "）");
+    } else {
+      setStatus("自動保存しました");
+    }
+  }
+  var timer = null;
+  fields.forEach(function (el) {
+    el.addEventListener("input", function () {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () { saveAll(false); }, 500);
+    });
+  });
+  var btn = document.getElementById("saveBtn");
+  if (btn) btn.addEventListener("click", function () { saveAll(true); });
+})();
 </script>
 </body>
 </html>
