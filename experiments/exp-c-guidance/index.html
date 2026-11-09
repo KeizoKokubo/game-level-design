@@ -77,6 +77,7 @@
     <label><input type="radio" name="scenario" value="S2"> S2：ランドマーク ― 下ルートの先に大きな塔を追加</label>
     <label><input type="radio" name="scenario" value="S3"> S3：報酬 ― 下ルート沿いにコイン列を追加</label>
     <label><input type="radio" name="scenario" value="S4"> S4：色とサインポスティング ― 上ルート入口に旗と矢印サインを追加</label>
+    <label><input type="radio" name="scenario" value="S5"> S5：視界の遮蔽 ― 下ルート入口の手前に背の高い遮蔽壁を追加（スタートから入口が見えなくなる）</label>
     <label><input type="radio" name="scenario" value="FREE"> 発展モード：要素を自由に ON/OFF する</label>
   </fieldset>
   <fieldset id="freeField" disabled>
@@ -85,6 +86,7 @@
     <label><input type="checkbox" id="elSign"> 🚩 旗・矢印サイン（上ルート入口）</label>
     <label><input type="checkbox" id="elLandmark"> 🗼 ランドマークの塔（下ルート）</label>
     <label><input type="checkbox" id="elCoins"> 🪙 コイン列（下ルート）</label>
+    <label><input type="checkbox" id="elOcclusion"> 🧱 遮蔽壁（下ルート入口を隠す）</label>
   </fieldset>
   <div class="warn" id="freeWarn" hidden>
     ⚠ <strong>注意：</strong>複数の変数を同時に変えると、結果が変わっても<strong>「どの要素が効いたのか」を切り分けられません</strong>。
@@ -120,7 +122,9 @@
     <p style="margin:4px 0;">エージェントのルート選択は、各誘導要素に設定した「引力（重み）」で決まります。
     基本の重みは上下とも <strong>1.0</strong>。光 <strong>+1.5</strong>（上）、旗・矢印サイン <strong>+1.0</strong>（上）、
     ランドマークの塔 <strong>+1.2</strong>（下）、コイン列 <strong>+1.8</strong>（下）を加え、
-    上が選ばれる確率 ＝ 上の重み ÷（上の重み＋下の重み）として、乱数で1回ごとに選びます。</p>
+    遮蔽壁がある場合は「見えていないルートは選ばれにくい」として下の重みに <strong>−0.5</strong>（下 1.0 → 0.5）し、
+    上が選ばれる確率 ＝ 上の重み ÷（上の重み＋下の重み）として、乱数で1回ごとに選びます。
+    なお、これらの数値は実測データに基づくものではなく、<strong>モデル上の仮置き</strong>です。</p>
     <div class="warn">⚠ <strong>限界の注記：</strong>このエージェントは<strong>実際のプレイヤーではありません</strong>。
     「誘導要素があると、そちらへ注意が向きやすい」という傾向を、重みという形で<strong>単純にモデル化したもの</strong>です。
     実際のプレイヤーは、好み・経験・その時の目的によって、誘導に逆らうこともあります。</div>
@@ -152,7 +156,12 @@
     違いを作るのは地形ではなく「情報」だけです。光・ランドマーク・報酬・サインは、
     プレイヤーの進路を禁止や壁で決めるのではなく、<strong>「なんとなくそちらが気になる」</strong>という形で注意を向けます。
     それでも最終的に選ぶのはプレイヤーであり、誘導に逆らって進んでも損はしない設計です。これが「誘導するが、操らない」の狙いです。</p>
-    <p><strong>限界：</strong>エージェントの重み（光+1.5 など）は教材用に置いた仮の数値で、実測データに基づくものではありません。
+    <p><strong>「見せない」ことも誘導になりうる：</strong>S5 の遮蔽壁は、目立つものへ引き寄せるのとは逆に、
+    入口を視界から外すことで「そもそも選択肢として意識されにくくする」仕掛けです。
+    意図的に隠すことが、隠し要素や探索の楽しさにつながる場合もあれば、単に迷子やストレスの原因になる場合もあり、
+    どちらになるかはゲームの目的や対象プレイヤーによって変わります。隠せばよい、という話ではありません。</p>
+    <p><strong>限界：</strong>エージェントの重み（光+1.5、遮蔽 −0.5 など）は教材用に置いた仮の数値で、実測データに基づくものではありません。
+    また S5 のモデルは「見えていない＝選ばれにくい」を重みの減算だけで単純化しており、実際の視界はカメラの向きやプレイヤーの注意の向け方でも変わります。
     また、この実験で分かるのは「このモデルではこう流れた」ということで、実際のプレイヤーでも同じ割合になるとは限りません。
     相関（要素があるときに流れた）と因果（要素があったから流れた）を混同しないよう、1変数ずつ比べることが大切です。</p>
   </details>
@@ -163,6 +172,8 @@
     <dd>言葉で直接指示せず、光・色・配置・音などで進む方向や注意点をほのめかす情報設計。例：出口の扉の上だけ明るい照明を置く。この実験の S4 の旗・矢印や、S1 の光も広い意味でこれにあたります。</dd>
     <dt><span class="term" title="遠くからでも見え、位置や目的地を把握する助けになる目立つ構造物">Landmark</span>（ランドマーク／目印）</dt>
     <dd>遠くからでも見え、自分の位置や目的地を把握する助けになる目立つ構造物や物体。例：マップ中央の大きな塔。この実験では S2 で下ルートの先に置きました。</dd>
+    <dt><span class="term" title="壁や地形で視線を遮り、対象を見えなくすること">Occlusion</span>（オクルージョン／視界の遮蔽）</dt>
+    <dd>壁や地形で視線を遮り、対象を見えなくすること。見えないものは選択肢として意識されにくくなります。この実験では S5 で下ルート入口の手前に遮蔽壁を置きました。意図的に隠すことが探索の楽しさになる場合もあれば、迷子の原因になる場合もあります。</dd>
     <dt><span class="term" title="物や地形の見た目が「何ができるか」を示唆する性質">Affordance</span>（アフォーダンス）</dt>
     <dd>物や地形の見た目が「何ができるか」を示唆する性質。「掴めそう」「乗れそう」といった読み取りやすさ。例：明るく照らされた通路は「こちらへ進めそう」に見え、暗い通路は「まだ行くな」と読まれることがあります。</dd>
   </dl>
@@ -187,14 +198,17 @@ var ELEMENT_WEIGHTS = {
   light:    { route: "upper", value: 1.5 },
   sign:     { route: "upper", value: 1.0 },
   landmark: { route: "lower", value: 1.2 },
-  coins:    { route: "lower", value: 1.8 }
+  coins:    { route: "lower", value: 1.8 },
+  // 視界の遮蔽：見えていないルートは選ばれにくい、というモデル上の仮置き（下の重みを減らす）
+  occlusion: { route: "lower", value: -0.5 }
 };
 var SCENARIO_ELEMENTS = {
-  S0:   { light: false, sign: false, landmark: false, coins: false },
-  S1:   { light: true,  sign: false, landmark: false, coins: false },
-  S2:   { light: false, sign: false, landmark: true,  coins: false },
-  S3:   { light: false, sign: false, landmark: false, coins: true },
-  S4:   { light: false, sign: true,  landmark: false, coins: false }
+  S0:   { light: false, sign: false, landmark: false, coins: false, occlusion: false },
+  S1:   { light: true,  sign: false, landmark: false, coins: false, occlusion: false },
+  S2:   { light: false, sign: false, landmark: true,  coins: false, occlusion: false },
+  S3:   { light: false, sign: false, landmark: false, coins: true,  occlusion: false },
+  S4:   { light: false, sign: true,  landmark: false, coins: false, occlusion: false },
+  S5:   { light: false, sign: false, landmark: false, coins: false, occlusion: true }
 };
 function computeWeights(elements) {
   var w = { upper: BASE_WEIGHT, lower: BASE_WEIGHT };
@@ -230,6 +244,10 @@ var GRID = [
 ];
 var COLS = 16, ROWS = 7, CELL = 50;
 var START = { x: 0, y: 3 }, GOAL = { x: 14, y: 3 };
+// S5：遮蔽壁の位置。壁セル（GRID では #）の上に置くため経路は塞がず、
+// スタート (0,3) から下ルート入口 (3,5) への視線がちょうどこのセルを通る
+var OCCLUDER = { x: 2, y: 4 };
+var LOWER_ENTRANCE = { x: 3, y: 5 };
 var UPPER_PATH = [[0,3],[1,3],[2,3],[3,3],[3,2],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[12,2],[12,3],[13,3],[14,3]];
 var LOWER_PATH = [[0,3],[1,3],[2,3],[3,3],[3,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[11,5],[12,5],[12,4],[12,3],[13,3],[14,3]];
 function isFloor(x, y) {
@@ -259,7 +277,8 @@ function currentElements() {
       light: document.getElementById("elLight").checked,
       sign: document.getElementById("elSign").checked,
       landmark: document.getElementById("elLandmark").checked,
-      coins: document.getElementById("elCoins").checked
+      coins: document.getElementById("elCoins").checked,
+      occlusion: document.getElementById("elOcclusion").checked
     };
   }
   return SCENARIO_ELEMENTS[state.scenario];
@@ -269,6 +288,7 @@ function scenarioLabel() {
     var el = currentElements(), on = [];
     if (el.light) on.push("光"); if (el.sign) on.push("サイン");
     if (el.landmark) on.push("塔"); if (el.coins) on.push("コイン");
+    if (el.occlusion) on.push("遮蔽");
     return "発展（" + (on.length ? on.join("＋") : "なし") + "）";
   }
   return state.scenario;
@@ -283,6 +303,41 @@ function draw() {
     ctx.fillStyle = isFloor(x, y) ? "#fafafa" : "#263238";
     ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
     if (isFloor(x, y)) { ctx.strokeStyle = "#cccccc"; ctx.strokeRect(x * CELL, y * CELL, CELL, CELL); }
+  }
+  // S5: 視界の遮蔽（下ルート入口の手前に背の高い遮蔽壁）
+  if (el.occlusion) {
+    var ox = OCCLUDER.x * CELL, oy = OCCLUDER.y * CELL;
+    // スタートから下ルート入口への視線（破線）。遮蔽壁の本体を後から描くので、線が壁で遮られて見える
+    ctx.save();
+    ctx.strokeStyle = "#c62828"; ctx.lineWidth = 2.5; ctx.setLineDash([7, 6]);
+    ctx.beginPath();
+    ctx.moveTo(START.x * CELL + CELL / 2, START.y * CELL + CELL / 2);
+    ctx.lineTo(LOWER_ENTRANCE.x * CELL + CELL / 2, LOWER_ENTRANCE.y * CELL + CELL / 2);
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = "#c62828"; ctx.font = "bold 11px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("視線", START.x * CELL + 2, START.y * CELL + 14);
+    // 壁本体：通常の壁より濃くし、上面（天面）を描いて「背の高さ」を出す
+    ctx.fillStyle = "#546e7a"; ctx.fillRect(ox, oy - 9, CELL, 11);
+    ctx.fillStyle = "#0d1117"; ctx.fillRect(ox, oy, CELL, CELL);
+    // 斜線パターン（色だけに頼らず模様でも区別する）
+    ctx.save();
+    ctx.beginPath(); ctx.rect(ox, oy, CELL, CELL); ctx.clip();
+    ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 2;
+    for (var h = -CELL; h < CELL * 2; h += 12) {
+      ctx.beginPath(); ctx.moveTo(ox + h, oy + CELL); ctx.lineTo(ox + h + CELL, oy); ctx.stroke();
+    }
+    ctx.restore();
+    ctx.strokeStyle = "#eceff1"; ctx.lineWidth = 2; ctx.strokeRect(ox + 1, oy + 1, CELL - 2, CELL - 2);
+    // ラベル
+    ctx.fillStyle = "#ffffff"; ctx.font = "bold 12px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("遮蔽壁", ox + CELL / 2, oy + 31);
+    // 視線が遮られた印（視線が壁の左端に当たる位置に ✕）
+    ctx.strokeStyle = "#c62828"; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(ox - 8, 218); ctx.lineTo(ox + 6, 232);
+    ctx.moveTo(ox + 6, 218); ctx.lineTo(ox - 8, 232);
+    ctx.stroke();
   }
   // S1: 光の帯（上ルート）
   if (el.light) {
@@ -374,7 +429,7 @@ document.querySelectorAll('input[name="scenario"]').forEach(function (r) {
     draw();
   });
 });
-["elLight", "elSign", "elLandmark", "elCoins"].forEach(function (id) {
+["elLight", "elSign", "elLandmark", "elCoins", "elOcclusion"].forEach(function (id) {
   document.getElementById(id).addEventListener("change", draw);
 });
 
