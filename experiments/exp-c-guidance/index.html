@@ -31,13 +31,13 @@
     background:#fafafa; margin:10px 0;}
   canvas:focus{outline:4px solid #f2b01e; outline-offset:2px;}
   .warn{background:var(--warn-bg); border:2px solid var(--warn-border); border-radius:6px;
-    padding:8px 12px; margin:10px 0;}
+    padding:8px 12px; margin:10px 0; color:#1a1a1a;}
   .note{background:#eef4fb; border:1px solid var(--accent); border-radius:6px; padding:8px 12px; margin:10px 0;}
   table{border-collapse:collapse; width:100%; margin:8px 0; font-size:.92rem;}
   th,td{border:1px solid var(--line); padding:4px 8px; text-align:left;}
   th{background:#e8e8e8;}
   .term{border-bottom:2px dotted var(--accent); cursor:help;}
-  textarea{width:100%; min-height:56px; font-size:1rem; padding:6px;}
+  textarea{width:100%; min-height:56px; font-size:1rem; padding:6px; background:#fff; color:var(--ink);}
   .dpad{display:grid; grid-template-columns:56px 56px 56px; gap:4px; justify-content:center; margin:8px 0;}
   .dpad button{padding:10px 0; font-size:1.2rem;}
   .dpad .spacer{visibility:hidden;}
@@ -133,6 +133,8 @@
     <thead><tr><th>#</th><th>方法</th><th>シナリオ</th><th>結果</th><th>所要時間</th><th>仮説との一致</th></tr></thead>
     <tbody><tr><td colspan="6">まだ記録がありません。</td></tr></tbody>
   </table>
+  <p style="margin:4px 0;"><button type="button" id="btnClearHistory" class="secondary" disabled>記録をクリア</button>
+  <span id="historyStatus" class="status" aria-live="polite"></span></p>
 
   <h2><span class="step">⑤</span>考察する</h2>
   <p id="verdict" class="status" aria-live="polite">実行すると、仮説と結果の一致／不一致がここに表示されます。</p>
@@ -389,19 +391,39 @@ function judgeHypothesis(route) {
   if (state.hypothesis === "even") return "―（半々予測）";
   return "不一致";
 }
-function addHistory(method, resultText, timeText, judge) {
-  state.history.push({ method: method, scenario: scenarioLabel(), result: resultText, time: timeText, judge: judge });
+function renderHistory() {
   var tbody = document.querySelector("#historyTable tbody");
   tbody.innerHTML = "";
-  state.history.forEach(function (h, i) {
-    var tr = document.createElement("tr");
-    [String(i + 1), h.method, h.scenario, h.result, h.time, h.judge].forEach(function (v) {
-      var td = document.createElement("td"); td.textContent = v; tr.appendChild(td);
+  if (state.history.length === 0) {
+    var tr0 = document.createElement("tr");
+    var td0 = document.createElement("td");
+    td0.colSpan = 6; td0.textContent = "まだ記録がありません。";
+    tr0.appendChild(td0); tbody.appendChild(tr0);
+  } else {
+    state.history.forEach(function (h, i) {
+      var tr = document.createElement("tr");
+      [String(i + 1), h.method, h.scenario, h.result, h.time, h.judge].forEach(function (v) {
+        var td = document.createElement("td"); td.textContent = v; tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
     });
-    tbody.appendChild(tr);
-  });
+  }
+  document.getElementById("btnClearHistory").disabled = state.history.length === 0;
 }
+function addHistory(method, resultText, timeText, judge) {
+  state.history.push({ method: method, scenario: scenarioLabel(), result: resultText, time: timeText, judge: judge });
+  document.getElementById("historyStatus").textContent = "";
+  renderHistory();
+}
+var VERDICT_INITIAL = "実行すると、仮説と結果の一致／不一致がここに表示されます。";
 function setVerdict(text) { document.getElementById("verdict").textContent = text; }
+document.getElementById("btnClearHistory").addEventListener("click", function () {
+  if (state.history.length === 0) return;
+  state.history = [];
+  renderHistory();
+  setVerdict(VERDICT_INITIAL);
+  document.getElementById("historyStatus").textContent = "記録をクリアしました。";
+});
 
 document.getElementById("btnPlay").addEventListener("click", function () {
   resetPlay();
