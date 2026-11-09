@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 1：レベルデザインとは何か | ゲーム・レベルデザイン講座</title>
+<style>
+  :root{
+    --bg:#f7f5f0; --card:#ffffff; --ink:#23272f; --sub:#5b6472;
+    --accent:#2f6f4e; --accent-soft:#e3efe7; --line:#cfc9ba;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP",sans-serif;
+    color:var(--ink); background:var(--bg); margin:0; line-height:1.8;}
+  main{max-width:880px; margin:0 auto; padding:24px 16px 48px; background:var(--card);}
+  h1{font-size:1.5rem; margin:0 0 4px;}
+  h2{font-size:1.15rem; border-left:6px solid var(--accent); padding-left:8px; margin:30px 0 8px;}
+  .sub{color:var(--sub); margin:0 0 12px;}
+  .meta{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px;}
+  .meta span{border:2px solid var(--accent); border-radius:999px; padding:0 12px; font-size:.88rem; font-weight:bold;}
+  .goals{background:var(--accent-soft); border-radius:6px; padding:10px 16px 10px 32px; margin:12px 0;}
+  .goals p{margin:4px 0 4px -16px; font-weight:bold;}
+  blockquote{border-left:6px solid var(--accent); background:var(--accent-soft);
+    margin:14px 0; padding:10px 16px; font-size:1.08rem; font-weight:bold;}
+  .note{background:#e8f0e9; color:#1c2a20; border:1px solid #2f6f4e; border-radius:6px; padding:8px 12px; margin:10px 0;}
+  .warn{background:#fff4d6; color:#1a1a1a; border:2px solid #b45309; border-radius:6px; padding:8px 12px; margin:10px 0;}
+  table{border-collapse:collapse; width:100%; margin:8px 0; font-size:.93rem;}
+  th,td{border:1px solid var(--line); padding:5px 9px; text-align:left; color:var(--ink);}
+  th{background:var(--accent-soft);}
+  button{font-size:1rem; padding:8px 16px; margin:4px 4px 4px 0; border:2px solid var(--accent);
+    background:var(--accent); color:#fff; border-radius:6px; cursor:pointer;}
+  button.secondary{background:#ffffff; color:#2f6f4e;}
+  button[aria-pressed="true"]{outline:4px solid #f2b01e; outline-offset:1px;}
+  textarea{width:100%; min-height:56px; font-size:1rem; padding:6px; background:#ffffff; color:#1a1a1a;
+    border:2px solid #8a8f98; border-radius:4px;}
+  .diagram{background:#f7f5f0; border:2px solid #5a5a5a; border-radius:6px; padding:10px; margin:10px 0;}
+  .diagram svg{display:block; width:100%; height:auto;}
+  .glossary dt{font-weight:bold; margin-top:10px;}
+  .glossary dd{margin-left:0;}
+  .term-en{color:var(--sub); font-size:.88rem;}
+  nav.unitnav{border-top:2px solid var(--line); margin-top:36px; padding-top:14px;}
+  nav.unitnav p{margin:4px 0;}
+  a{color:var(--accent); font-weight:bold;}
+  @media (prefers-color-scheme: dark){
+    :root{--bg:#141518; --card:#1e2126; --ink:#ece9e0; --sub:#b7bcc4; --line:#4a5058; --accent-soft:#24382c;}
+    a{color:#7fc79b;}
+    .meta span{border-color:#7fc79b;}
+    h2{border-left-color:#7fc79b;}
+    blockquote{border-left-color:#7fc79b;}
+    button{border-color:#7fc79b; background:#2f6f4e;}
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="sub"><a href="../../">ゲーム・レベルデザイン講座</a> ／ Part 1：レベルデザインの基礎</p>
+  <h1>Unit 1：レベルデザインとは何か</h1>
+  <div class="meta">
+    <span>主軸：感情</span>
+    <span>担当変数：体験の提示順序（同じ仕組みを「いつ体験させるか」）</span>
+  </div>
+  <div class="goals">
+    <p>この Unit の学習目標</p>
+    <ul>
+      <li>レベルデザインを「プレイヤーの体験を設計すること」と自分の言葉で説明できる</li>
+      <li>ゲームデザインとレベルデザインの違いと、両者が影響し合う関係を説明できる</li>
+      <li>同じマップでも、情報の出し方でプレイヤーの体験が変わることを具体例で示せる</li>
+    </ul>
+  </div>
+
+  <h2>1. 中心となる定義</h2>
+  <blockquote>レベルデザインとは、プレイヤーの体験を設計することである</blockquote>
+  <p>レベルデザインというと、「ステージの形を作ること」「敵やアイテムを配置すること」を思い浮かべるかもしれません。
+  それらはいずれもレベルデザインの<strong>作業の一部</strong>ですが、本質ではありません。
+  配置した結果として、プレイヤーが<strong>何を見て、何を考え、どう行動し、何を感じるか</strong>――その体験の流れこそが設計の対象です。</p>
+  <p>たとえば「分かれ道」を1つ置くという作業は同じでも、片方の道の先に明かりが見えていれば、
+  プレイヤーは「あっちに何かありそうだ」と期待して進みます。何も見えなければ、迷いや不安が生まれます。
+  マップの形は同じでも、生まれる体験は別物です。この違いを意図して作ることが、レベルデザインの仕事です。</p>
+
+  <h2>2. ゲームデザインとの違いと相互作用</h2>
+  <p>よく使われる整理として、ゲームデザインが「<strong>何ができるか</strong>」を決めるのに対し、
+  レベルデザインは「それを、<strong>いつ、どこで、どのように体験させるか</strong>」を決める、と言われます。</p>
+  <table>
+    <thead><tr><th></th><th>ゲームデザイン</th><th>レベルデザイン</th></tr></thead>
+    <tbody>
+      <tr><th>決めること</th><td>ルール、操作、できること、目的や勝敗の仕組みそのもの</td><td>その仕組みを体験させる順序、場所、状況、情報の出し方</td></tr>
+      <tr><th>具体例</th><td>「二段ジャンプができる」という能力の決定</td><td>二段ジャンプを、まず安全な足場で試させ、次に浅い谷で使わせ、最後に本番の崖で使わせる構成</td></tr>
+      <tr><th>問いかけ</th><td>「プレイヤーは何ができるのか？」</td><td>「プレイヤーはそれをどう体験するのか？」</td></tr>
+    </tbody>
+  </table>
+  <p>ただし、この2つはきれいに分離できるものではありません。
+  レベルを作る中で「この仕組みは、この順番では伝わらない」と分かれば、仕組み自体の見直しにつながります。
+  逆に仕組みが変われば、体験のさせ方も組み直しになります。
+  実際の開発では両者は相互に影響し合うものであり、「違い」は役割を考えるための目安として捉えてください。</p>
+
+  <h2>3. 「ステージ制作」と「体験設計」の違い</h2>
+  <p>ステージ制作は、地形を作り、敵やアイテムを配置する<strong>作業</strong>を指します。
+  一方、体験設計は、そのステージを遊んだプレイヤーに<strong>どのような行動・判断・感情が生まれるか</strong>を意図して組み立てることです。</p>
+  <p>配置作業そのものが悪いわけではありません。問題は、配置して終わりになり、
+  「なぜそこに置いたのか」「プレイヤーはどう感じると予想するのか」を問わない場合です。
+  本教材では、配置の1つ1つに「意図」を持たせ、その意図が実際のプレイで実現したかを確かめる（仮説と検証）姿勢を大切にします。</p>
+
+  <h2>4. 設計対象はプレイヤーの行動・判断・感情</h2>
+  <p>レベルデザインが最終的に設計するのは、プレイヤーの内側で起きることです。大きく3つに分けて考えます。</p>
+  <table>
+    <thead><tr><th>対象</th><th>意味</th><th>設計の例</th></tr></thead>
+    <tbody>
+      <tr><th>行動</th><td>プレイヤーが実際にする動き（進む、止まる、戻る、調べる）</td><td>見晴らしのよい場所に立つと、自然に周囲を見渡して次の目的地を探す</td></tr>
+      <tr><th>判断</th><td>情報に基づいて選ぶこと（どちらの道か、今戦うか、温存するか）</td><td>2つの道の先に違う手がかりを見せ、「どちらから行くか」を自分で選ばせる</td></tr>
+      <tr><th>感情</th><td>緊張、安心、好奇心、達成感などの気持ちの動き</td><td>暗い通路の先に明るい広場を置き、「不安 → 安心」の落差を作る</td></tr>
+    </tbody>
+  </table>
+  <p>この3つは連動しています。情報（判断の材料）の出し方を変えれば判断が変わり、判断が変われば行動が変わり、行動の結果が感情を生みます。
+  レベルデザインは、この連鎖を環境側から組み立てる技術だと言えます。</p>
+
+  <h2>5. ゲームジャンルによる違い</h2>
+  <p>「体験を設計する」という目的は共通でも、ジャンルによってレベルデザインの重点は変わります。
+  同じ手法がどのジャンルでも同じ効果を持つとは限りません。</p>
+  <table>
+    <thead><tr><th>ジャンル</th><th>レベルデザインの重点の例</th></tr></thead>
+    <tbody>
+      <tr><th>アクション</th><td>移動と戦闘のリズム。足場の間隔や敵の配置が、そのまま操作の気持ちよさと難しさになる</td></tr>
+      <tr><th>パズル</th><td>情報の出し方と試行のしやすさ。解法に気づく順序をどう作るかが中心になる</td></tr>
+      <tr><th>RPG</th><td>探索の動機づけと物語との接続。町の配置、ダンジョンの構造が世界への没入と関わる</td></tr>
+      <tr><th>ホラー</th><td>視界の制限と情報の欠如そのものが演出になる。他ジャンルでは「見えない＝悪い」とされがちな要素が、意図すれば恐怖を生む資源になる</td></tr>
+    </tbody>
+  </table>
+  <p>ホラーの例が示すように、「分かりやすさ」や「快適さ」は常に正解とは限りません。
+  ジャンルと対象プレイヤーが求める体験によって、何が良い設計かは変わります。</p>
+
+  <h2>6. 良いレベル／悪いレベルの比較</h2>
+  <p>同じ「分かれ道」という構造でも、情報の出し方ひとつで体験は変わります。</p>
+  <table>
+    <thead><tr><th>分かれ道の作り方</th><th>プレイヤーに起きやすいこと</th><th>評価の分かれ目</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>片方の先に明かりと目的地の塔が見える。もう片方は暗いが、足元にコインが落ちている</td>
+        <td>「塔へ急ぐか、コインを拾ってから行くか」を<strong>情報を持って選べる</strong>。迷っても「自分で選んだ」と感じやすい</td>
+        <td>選択に意味があるため、寄り道も含めて体験として成立しやすい</td>
+      </tr>
+      <tr>
+        <td>両方とも先が見えず、違いを示す手がかりが一切ない</td>
+        <td>選ぶ根拠がないため、選択が<strong>当てずっぽう</strong>になる。行き止まりだった場合、「だまされた」と感じやすい</td>
+        <td>偶然に左右される体験になりやすく、再挑戦の動機も生まれにくい</td>
+      </tr>
+      <tr>
+        <td>両方とも先が見えないが、このゲームは「未知への探索」自体が売りで、地図もあえて与えられない</td>
+        <td>不安や緊張そのものを楽しむプレイヤーには<strong>発見の喜び</strong>につながる</td>
+        <td>対象プレイヤーとジャンルの約束に合っていれば、情報の欠如が長所にもなりうる</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="warn">⚠ <strong>注意：</strong>「良い／悪い」は絶対的なものではありません。
+  同じ構造でも、設計の目的と対象プレイヤーによって評価は変わります。
+  大切なのは「一般に良いとされる形」ではなく、「意図した体験が、狙った相手に届いているか」を確かめることです。</div>
+
+  <h2>7. 比べてみよう：「同じマップ、違う体験」</h2>
+  <p>下の2枚は、まったく同じ形の分かれ道の模式図です。切り替えて、何が違うかを見比べてみてください。
+  操作はこの切り替え1つだけです。</p>
+  <div>
+    <button type="button" id="tabPlain" aria-pressed="true">A：手がかりなし</button>
+    <button type="button" id="tabGuided" class="secondary" aria-pressed="false">B：手がかりあり</button>
+  </div>
+  <div class="diagram" id="panelPlain">
+    <svg viewBox="0 0 640 300" role="img" aria-label="手がかりのない分かれ道の模式図">
+      <rect x="0" y="0" width="640" height="300" fill="#f7f5f0"></rect>
+      <path d="M30 150 H220 M220 150 V84 H540 M220 150 V216 H540 M540 84 V216" stroke="#9aa0a6" stroke-width="34" fill="none"></path>
+      <path d="M30 150 H220 M220 150 V84 H540 M220 150 V216 H540 M540 84 V216" stroke="#5a5a5a" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+      <circle cx="48" cy="150" r="13" fill="#b3261e"></circle>
+      <text x="48" y="155" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">P</text>
+      <rect x="566" y="128" width="44" height="44" fill="#146c2e"></rect>
+      <text x="588" y="156" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="bold">G</text>
+      <text x="330" y="60" font-size="15" fill="#1a1a1a">上ルート（先は見えない）</text>
+      <text x="330" y="252" font-size="15" fill="#1a1a1a">下ルート（先は見えない）</text>
+      <text x="180" y="138" font-size="22" fill="#1a1a1a" font-weight="bold">？</text>
+      <text x="30" y="292" font-size="14" fill="#1a1a1a">分かれ道で得られる情報はゼロ。選ぶ根拠がない。</text>
+    </svg>
+  </div>
+  <div class="diagram" id="panelGuided" hidden>
+    <svg viewBox="0 0 640 300" role="img" aria-label="光とランドマークで誘導された分かれ道の模式図">
+      <rect x="0" y="0" width="640" height="300" fill="#f7f5f0"></rect>
+      <path d="M220 150 V84 H540" stroke="#f2b01e" stroke-width="34" fill="none" opacity="0.45"></path>
+      <path d="M30 150 H220 M220 150 V84 H540 M220 150 V216 H540 M540 84 V216" stroke="#9aa0a6" stroke-width="34" fill="none"></path>
+      <path d="M30 150 H220 M220 150 V84 H540 M220 150 V216 H540 M540 84 V216" stroke="#5a5a5a" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+      <circle cx="48" cy="150" r="13" fill="#b3261e"></circle>
+      <text x="48" y="155" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">P</text>
+      <rect x="566" y="128" width="44" height="44" fill="#146c2e"></rect>
+      <text x="588" y="156" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="bold">G</text>
+      <polygon points="540,96 556,40 572,96" fill="#6a4fa3"></polygon>
+      <text x="556" y="30" font-size="13" fill="#1a1a1a" text-anchor="middle">塔（ランドマーク）</text>
+      <circle cx="300" cy="216" r="6" fill="#d97706"></circle>
+      <circle cx="340" cy="216" r="6" fill="#d97706"></circle>
+      <circle cx="380" cy="216" r="6" fill="#d97706"></circle>
+      <text x="300" y="196" font-size="13" fill="#1a1a1a">コイン</text>
+      <text x="330" y="60" font-size="15" fill="#1a1a1a">上ルート（光の帯＋塔が見える）</text>
+      <text x="420" y="252" font-size="15" fill="#1a1a1a">下ルート（コインの気配）</text>
+      <text x="30" y="292" font-size="14" fill="#1a1a1a">形は同じ。情報があるため「選ぶ理由」を持てる。</text>
+    </svg>
+  </div>
+  <p>マップの形（配置作業）は同一です。違っているのは、光・ランドマーク・コインという<strong>情報の出し方</strong>だけ。
+  それでもプレイヤーの判断と感情は変わります。これが「ステージ制作」と「体験設計」の違いの、最も小さな実例です。
+  この先の Unit 4 と実験Cでは、この情報の出し方を実際に操作して確かめます。</p>
+
+  <h2>用語メモ</h2>
+  <dl class="glossary">
+    <dt>Level Design <span class="term-en">レベルデザイン</span></dt>
+    <dd>意味：ゲームの仕組みを使い、プレイヤーが「いつ、どこで、どのように」体験するかを設計すること。本教材の中心定義は「プレイヤーの体験を設計すること」。<br>
+    具体例：アクションゲームで、ジャンプを安全な場所で覚えさせてから穴越えに使わせるステージ構成。</dd>
+    <dt>Game Design <span class="term-en">ゲームデザイン</span></dt>
+    <dd>意味：ゲーム全体のルール、できること（操作・行動）、勝敗や目的などの仕組みそのものを設計すること。<br>
+    具体例：「コインを100枚集めると残機が増える」というルール自体の決定。</dd>
+    <dt>Player Agency <span class="term-en">プレイヤー・エージェンシー（主体性）</span></dt>
+    <dd>意味：プレイヤーが「自分で選んで行動している」と感じられる度合い。選択肢の多さだけでなく、選択の結果が返ってくる感覚も含む。詳しくは Unit 2 で扱う。<br>
+    具体例：分岐ルートのどちらを選んでも進めるが、得られる報酬や難しさが変わるマップ。</dd>
+  </dl>
+
+  <h2>考えてみよう</h2>
+  <p>入力した内容は保存されません（ブラウザを閉じると消えます）。授業での話し合いのメモとして使ってください。</p>
+  <p><strong>質問1：</strong>最近遊んだゲームで、「配置は地味なのに印象に残っている場面」はありますか？ その場面で、自分の行動・判断・感情はどう動いていましたか？</p>
+  <textarea aria-label="質問1の回答"></textarea>
+  <p><strong>質問2：</strong>「情報が一切ない分かれ道」が、良い体験になるのはどんなゲーム・どんなプレイヤーの場合だと思いますか？</p>
+  <textarea aria-label="質問2の回答"></textarea>
+  <p><strong>質問3：</strong>ゲームデザインとレベルデザインの境界があいまいになる例を、自分の知っているゲームから1つ挙げてみましょう。</p>
+  <textarea aria-label="質問3の回答"></textarea>
+
+  <h2>実験で確かめる</h2>
+  <p>この Unit の「情報の出し方で体験が変わる」という話は、Unit 4 の実験で実際に操作して確かめられます。</p>
+  <p>→ <a href="../../experiments/exp-c-guidance/">実験C「プレイヤー誘導実験」</a>（Unit 4 対応。光・ランドマーク・コインなどの誘導要素を1つだけ変えて、選ばれるルートがどう変わるかを比べる実験です）</p>
+
+  <nav class="unitnav">
+    <p>→ 次の Unit：<a href="../unit-02/">Unit 2「プレイヤー体験の設計」</a> ― 目的と動機、達成感、主体性、フローなど、「体験」の中身を分解していきます。</p>
+    <p><a href="../../">← 講座ハブへ戻る</a></p>
+  </nav>
+</main>
+<script>
+  var tabPlain = document.getElementById("tabPlain");
+  var tabGuided = document.getElementById("tabGuided");
+  var panelPlain = document.getElementById("panelPlain");
+  var panelGuided = document.getElementById("panelGuided");
+  function show(guided) {
+    panelPlain.hidden = guided;
+    panelGuided.hidden = !guided;
+    tabPlain.setAttribute("aria-pressed", String(!guided));
+    tabGuided.setAttribute("aria-pressed", String(guided));
+    tabPlain.className = guided ? "secondary" : "";
+    tabGuided.className = guided ? "" : "secondary";
+  }
+  tabPlain.addEventListener("click", function () { show(false); });
+  tabGuided.addEventListener("click", function () { show(true); });
+</script>
+</body>
+</html>

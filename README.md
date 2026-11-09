@@ -14,6 +14,11 @@
 
 公開サイトは講座のハブ（概要・全12 Unit 一覧）です。インタラクティブな実験教材は順次追加していきます。
 
+## 公開中の Unit 本文
+
+- Unit 1「レベルデザインとは何か」: https://keizokokubo.github.io/game-level-design/units/unit-01/
+- Unit 2「プレイヤー体験の設計」: https://keizokokubo.github.io/game-level-design/units/unit-02/
+
 ## 公開中の実験
 
 - 実験C「プレイヤー誘導実験」（Unit 4 対応、試作公開中）: https://keizokokubo.github.io/game-level-design/experiments/exp-c-guidance/

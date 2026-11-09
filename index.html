@@ -99,10 +99,10 @@
 <footer>ゲーム・レベルデザイン講座 — 準備中</footer>
 <script>
   var units = [
-    [1, "レベルデザインとは何か", "Part 1：基礎"],
-    [2, "プレイヤー体験の設計", "Part 1：基礎"],
+    [1, "レベルデザインとは何か", "Part 1：基礎", "units/unit-01/", "公開中"],
+    [2, "プレイヤー体験の設計", "Part 1：基礎", "units/unit-02/", "公開中"],
     [3, "空間構造とマップ設計", "Part 2：空間"],
-    [4, "プレイヤーの誘導と視線制御", "Part 2：空間", "experiments/exp-c-guidance/"],
+    [4, "プレイヤーの誘導と視線制御", "Part 2：空間", "experiments/exp-c-guidance/", "試作公開中（実験C）"],
     [5, "空間の意味と環境ストーリーテリング", "Part 2：空間"],
     [6, "難易度曲線と学習設計", "Part 3：難易度"],
     [7, "チャレンジと報酬", "Part 3：難易度"],
@@ -118,7 +118,7 @@
     tr.innerHTML = "<td>Unit " + u[0] + "</td><td>" + u[1] + "</td><td>" + u[2] + "</td>";
     var td = document.createElement("td");
     if (u[3]) {
-      td.innerHTML = '<a href="' + u[3] + '">試作公開中（実験C）</a>';
+      td.innerHTML = '<a href="' + u[3] + '">' + (u[4] || "公開中") + '</a>';
     } else {
       td.className = "prep";
       td.textContent = "準備中";

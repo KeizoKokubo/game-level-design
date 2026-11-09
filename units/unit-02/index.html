@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 2：プレイヤー体験の設計 | ゲーム・レベルデザイン講座</title>
+<style>
+  :root{
+    --bg:#f7f5f0; --card:#ffffff; --ink:#23272f; --sub:#5b6472;
+    --accent:#2f6f4e; --accent-soft:#e3efe7; --line:#cfc9ba;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP",sans-serif;
+    color:var(--ink); background:var(--bg); margin:0; line-height:1.8;}
+  main{max-width:880px; margin:0 auto; padding:24px 16px 48px; background:var(--card);}
+  h1{font-size:1.5rem; margin:0 0 4px;}
+  h2{font-size:1.15rem; border-left:6px solid var(--accent); padding-left:8px; margin:30px 0 8px;}
+  .sub{color:var(--sub); margin:0 0 12px;}
+  .meta{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px;}
+  .meta span{border:2px solid var(--accent); border-radius:999px; padding:0 12px; font-size:.88rem; font-weight:bold;}
+  .goals{background:var(--accent-soft); border-radius:6px; padding:10px 16px 10px 32px; margin:12px 0;}
+  .goals p{margin:4px 0 4px -16px; font-weight:bold;}
+  .note{background:#e8f0e9; color:#1c2a20; border:1px solid #2f6f4e; border-radius:6px; padding:8px 12px; margin:10px 0;}
+  .warn{background:#fff4d6; color:#1a1a1a; border:2px solid #b45309; border-radius:6px; padding:8px 12px; margin:10px 0;}
+  table{border-collapse:collapse; width:100%; margin:8px 0; font-size:.93rem;}
+  th,td{border:1px solid var(--line); padding:5px 9px; text-align:left; color:var(--ink);}
+  th{background:var(--accent-soft);}
+  textarea{width:100%; min-height:56px; font-size:1rem; padding:6px; background:#ffffff; color:#1a1a1a;
+    border:2px solid #8a8f98; border-radius:4px;}
+  .diagram{background:#f7f5f0; border:2px solid #5a5a5a; border-radius:6px; padding:10px; margin:10px 0;}
+  .diagram svg{display:block; width:100%; max-width:420px; height:auto; margin:0 auto;}
+  .slider-row{margin:8px 0;}
+  .slider-row label{font-weight:bold; display:block;}
+  input[type="range"]{width:100%; max-width:420px; height:32px;}
+  .zone-label{font-size:1.15rem; font-weight:bold;}
+  .glossary dt{font-weight:bold; margin-top:10px;}
+  .glossary dd{margin-left:0;}
+  .term-en{color:var(--sub); font-size:.88rem;}
+  nav.unitnav{border-top:2px solid var(--line); margin-top:36px; padding-top:14px;}
+  nav.unitnav p{margin:4px 0;}
+  a{color:var(--accent); font-weight:bold;}
+  @media (prefers-color-scheme: dark){
+    :root{--bg:#141518; --card:#1e2126; --ink:#ece9e0; --sub:#b7bcc4; --line:#4a5058; --accent-soft:#24382c;}
+    a{color:#7fc79b;}
+    .meta span{border-color:#7fc79b;}
+    h2{border-left-color:#7fc79b;}
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="sub"><a href="../../">ゲーム・レベルデザイン講座</a> ／ Part 1：レベルデザインの基礎</p>
+  <h1>Unit 2：プレイヤー体験の設計</h1>
+  <div class="meta">
+    <span>主軸：感情</span>
+    <span>担当変数：目標の提示方法（目的・短期目標の見せ方）</span>
+  </div>
+  <div class="goals">
+    <p>この Unit の学習目標</p>
+    <ul>
+      <li>プレイヤーの目的と動機（外発的／内発的）を区別し、目標の提示方法が行動を変えることを説明できる</li>
+      <li>達成感・主体性・フローなど、体験を形づくる感情の生まれ方を具体例で説明できる</li>
+      <li>「感情そのものの種類と生まれ方」を扱う本 Unit と、「時間配分とリズム」を扱う Unit 9・10 の違いを説明できる</li>
+    </ul>
+  </div>
+  <p>Unit 1 では、レベルデザインの設計対象はプレイヤーの<strong>行動・判断・感情</strong>だと言いました。
+  この Unit では、その中でも特に「感情」に注目し、目的と動機、達成感、発見、ストレス、主体性、フローといった
+  体験の部品を1つずつ分解していきます。</p>
+  <div class="note"><strong>この Unit の担当変数について：</strong>
+  本 Unit で体験を変える主な手がかりは<strong>感情の設計</strong>です。その入口として、カリキュラムでは担当変数を
+  「目標の提示方法（目的・短期目標の見せ方）」と定めています。目標をどう見せるかは、プレイヤーの動機と感情を最も直接に動かす手段の1つだからです。
+  なお Unit 9・10 も感情に触れますが、あちらは感情そのものではなく<strong>時間配分とリズム</strong>（緊張と緩和の並べ方）が担当です。
+  本 Unit は「どんな感情が、なぜ生まれるか」、Unit 9・10 は「それを時間軸のどこに置くか」を扱う、と分けて考えてください。</div>
+
+  <h2>1. プレイヤーの目的と動機</h2>
+  <p>プレイヤーは、何かしらの<strong>目的</strong>を持って行動します。ゴールへ到達する、アイテムを集める、謎を解く、といった目的です。
+  そして目的へ向かわせる力――「なぜそれをしたいのか」が<strong>動機</strong>です。動機は大きく2種類に分けられます。</p>
+  <table>
+    <thead><tr><th>動機の種類</th><th>意味</th><th>例</th></tr></thead>
+    <tbody>
+      <tr><th>外発的動機</th><td>報酬や評価など、活動の外側にあるものによって生まれる動機</td><td>スコア、コイン、実績（トロフィー）、ランキングのために繰り返し遊ぶ</td></tr>
+      <tr><th>内発的動機</th><td>活動そのものの面白さや好奇心から生まれる動機</td><td>「あの扉の先が気になる」「この操作が気持ちいい」から進み続ける</td></tr>
+    </tbody>
+  </table>
+  <p>どちらが優れているという話ではありません。報酬は短期的な行動を強く促しますが、報酬だけに頼ると、報酬が尽きた途端に動機も尽きやすくなります。
+  一方、好奇心や上達の手応えは持続しやすいものの、立ち上がりは弱くなりがちです。多くのゲームは両方を組み合わせて設計されています。</p>
+  <p>レベルデザインの観点で重要なのは、<strong>目標の提示方法</strong>が動機の働き方を変えることです。
+  たとえば、遠くの最終目標だけを見せる場合と、目の前に届きそうな短期目標を段階的に見せる場合とでは、
+  同じマップでも「あと少しやってみよう」という気持ちの生まれ方が変わります。</p>
+
+  <h2>2. 挑戦と達成感</h2>
+  <p>達成感は、挑戦の大きさだけで決まるわけではありません。難しい課題を解いたときに達成感が大きいのは確かですが、
+  それだけでは説明できない場面があります。達成感は、主に次の3つがそろったときに生まれやすいと考えられます。</p>
+  <ul>
+    <li><strong>乗り越えた実感のある挑戦</strong>：偶然では解けないが、不可能でもない課題だったこと</li>
+    <li><strong>分かりやすいフィードバック</strong>：成功したこと、その理由がプレイヤーに伝わること（音、演出、結果の表示など）</li>
+    <li><strong>「自分の力でできた」という感覚</strong>：運や他人の助けではなく、自分の判断と操作が結果につながったと感じられること</li>
+  </ul>
+  <p>逆に、敵を強くしただけでは達成感は増えません。理不尽に感じられる挑戦は「自分の力でできた」という感覚を壊しますし、
+  フィードバックのない成功は、達成した実感そのものが薄くなります。
+  挑戦の設計は Unit 6〜8 で詳しく扱いますが、ここでは「達成感は挑戦・フィードバック・主体感の組み合わせで生まれる」と押さえてください。</p>
+
+  <h2>3. 探索、発見、驚き</h2>
+  <p>「見つけた！」という発見の喜びは、探索型の体験の中心です。発見が成立するには、2つの条件のバランスが必要です。</p>
+  <ul>
+    <li><strong>隠されていること</strong>：最初から全部見えていたら、それは発見ではなく確認になってしまう</li>
+    <li><strong>見つけられること</strong>：手がかりがまったくなければ、発見は偶然頼みになり、見つけられなかったプレイヤーには存在しないのと同じになる</li>
+  </ul>
+  <p>このバランスを調整する道具が、Unit 1 と実験Cで扱った情報の設計です。
+  実験Cの S5「視界の遮蔽」では、遮蔽壁で下ルートの入口を隠しました。隠すことは、誘導であると同時に発見の仕掛けにもなります。
+  ただし、何でも隠せばよいわけではありません。隠した先に「見つける価値のあるもの」と「見つけられる手がかり」がなければ、
+  それは発見の設計ではなく、単なる迷子の原因になります。</p>
+  <p>驚きも同じ構造です。予想があるところに、それを裏切る出来事が起きて初めて驚きになります。
+  つまり驚きを設計するには、先に「プレイヤーはこう予想するだろう」という通常の流れを作っておく必要があります。</p>
+
+  <h2>4. ストレスと快感</h2>
+  <p>ストレスは、単純に「悪いもの」ではありません。緊張感のある場面をくぐり抜けた直後の解放感のように、
+  適度なストレスは快感の前提になることがあります。ホラーゲームや高難度ゲームのように、
+  意図的に強いストレスを与えることが有効な演出になる場合もあります（Unit 1 のジャンルの話を思い出してください）。</p>
+  <p>一方で、ストレスが離脱につながる場合もあります。分かれ目は、ストレスの<strong>種類</strong>にあります。</p>
+  <table>
+    <thead><tr><th>ストレスの種類</th><th>特徴</th><th>例</th></tr></thead>
+    <tbody>
+      <tr><th>挑戦としてのストレス</th><td>原因が分かり、自分の工夫で対処できる。乗り越えれば達成感につながる</td><td>強い敵がいるが、弱点や回避ルートが見えている</td></tr>
+      <tr><th>不当なストレス</th><td>原因が分からない、対処のしようがない、失敗のコストだけが大きい</td><td>予兆なく即死する仕掛け、長すぎるリトライ、理屈の通らない判定</td></tr>
+    </tbody>
+  </table>
+  <p>設計の目安は「ストレスをなくすこと」ではなく、「そのストレスが、対象プレイヤーにとって挑戦として受け取れる形になっているか」を確かめることです。
+  緊張と緩和を時間軸でどう並べるかは、Unit 9 のペーシングで改めて扱います。</p>
+
+  <h2>5. Player Agency（主体性）</h2>
+  <p><span class="term-en">Player Agency</span>（主体性）とは、プレイヤーが「自分で選んで行動している」と感じられる度合いのことです。
+  ここで大切なのは、主体性の本質は<strong>選択肢の数ではない</strong>という点です。</p>
+  <p>たとえば、分岐が10個あっても、どれを選んでも結果が同じで、選んだ理由も手応えもなければ、主体性は感じにくいものです。
+  逆に分岐が2つだけでも、「危険だが近道」と「安全だが遠回り」のように違いが分かり、自分の判断で選んで、
+  その結果（近道できた／安全に着けた）が返ってくれば、「自分で選んだ」という感覚は強くなります。</p>
+  <div class="note"><strong>主体性の材料：</strong>①違いが分かる選択肢があること、②選ぶための情報があること、③選択の結果が自分に返ってくること。
+  本教材の背骨の1つ「誘導するが、操らない」は、まさにこの主体性を守りながら導くための考え方です。</div>
+  <p>なお、主体性は強ければ常に良いというものでもありません。選択が多すぎると判断の負担になり、休みたい場面では一本道のほうが体験が滑らかになることもあります。
+  場面に応じて「選ばせる場所」と「任せてもらう場所」を分けるのも設計です。</p>
+
+  <h2>6. フロー状態と没入感</h2>
+  <p><strong>フロー（Flow）</strong>は、心理学者のミハイ・チクセントミハイによって提案された理論で、
+  挑戦の水準と自分のスキル（能力）の水準がつり合ったときに生じる、活動に深く没入し時間を忘れるような心理状態を指します。
+  これは心理学で提案された理論であり、ゲームデザインでは体験の目安として広く参照されていますが、
+  「常にこの状態を作ればよい」という絶対的な法則としてではなく、1つの物差しとして扱ってください。</p>
+  <ul>
+    <li>挑戦がスキルを大きく上回る → <strong>不安</strong>（できない、つらい）</li>
+    <li>挑戦とスキルがつり合う → <strong>フロー</strong>（集中、没入、時間感覚の喪失）</li>
+    <li>スキルが挑戦を大きく上回る → <strong>退屈</strong>（簡単すぎる、作業感）</li>
+  </ul>
+  <p>下の図で、2つのスライダーを動かして確かめてみてください。操作はこの2つだけです。</p>
+  <div class="diagram">
+    <svg viewBox="0 0 300 300" role="img" aria-label="挑戦とスキルのバランス図（フロー理論の模式図）">
+      <rect x="0" y="0" width="300" height="300" fill="#f7f5f0"></rect>
+      <polygon points="30,30 222,30 30,222" fill="#f3b8b0"></polygon>
+      <polygon points="78,270 270,270 270,78" fill="#b9cfe8"></polygon>
+      <polygon points="30,222 222,30 270,30 270,78 78,270 30,270" fill="#a8d5a2"></polygon>
+      <text x="52" y="58" font-size="15" fill="#1a1a1a" font-weight="bold">不安</text>
+      <text x="216" y="252" font-size="15" fill="#1a1a1a" font-weight="bold">退屈</text>
+      <text x="138" y="146" font-size="15" fill="#1a1a1a" font-weight="bold" transform="rotate(-45 150 150)">フロー</text>
+      <text x="30" y="292" font-size="12" fill="#1a1a1a">スキル →</text>
+      <text x="6" y="40" font-size="12" fill="#1a1a1a">挑戦 ↑</text>
+      <circle id="flowPoint" cx="150" cy="150" r="9" fill="#b3261e" stroke="#ffffff" stroke-width="2"></circle>
+    </svg>
+    <div class="slider-row">
+      <label for="skillRange">あなたのスキル：<span id="skillVal">5</span> / 10</label>
+      <input type="range" id="skillRange" min="0" max="10" step="1" value="5">
+    </div>
+    <div class="slider-row">
+      <label for="challengeRange">課題の挑戦レベル：<span id="challengeVal">5</span> / 10</label>
+      <input type="range" id="challengeRange" min="0" max="10" step="1" value="5">
+    </div>
+    <p class="zone-label" id="zoneLabel" aria-live="polite">現在地：フロー</p>
+    <p id="zoneDesc" aria-live="polite">挑戦とスキルがつり合っています。集中しやすく、時間を忘れやすい状態です。</p>
+  </div>
+  <p><strong>没入感（Immersion）</strong>は、ゲームの世界や活動に深く入り込み、周囲や時間の感覚が薄れる状態を指します。
+  フローが「挑戦と能力のバランス」に注目する概念であるのに対し、没入感は物語や世界への入り込みなども含む、より広い言葉です。
+  静かな探索で景色と環境音に引き込まれる体験は、必ずしも高い挑戦を伴わなくても没入感を生みます。</p>
+  <div class="warn">⚠ <strong>注意：</strong>フローを「常に維持すべき正解」と考えないでください。
+  ずっと緊張の釣り合いが続く体験は、かえって疲労を招きます。実際のゲームでは、挑戦の合間に休息や探索を挟む<strong>緩急</strong>が必要です。
+  その時間配分の設計は Unit 9「ペーシング」で扱います。</div>
+
+  <h2>用語メモ</h2>
+  <dl class="glossary">
+    <dt>Player Agency <span class="term-en">プレイヤー・エージェンシー（主体性）</span></dt>
+    <dd>意味：プレイヤーが「自分で選んで行動している」と感じられる度合い。実際の選択肢の多さだけでなく、選択の結果が返ってくる感覚も含む。<br>
+    具体例：分岐ルートのどちらを選んでも進めるが、得られる報酬や難しさが変わるマップ。</dd>
+    <dt>Flow <span class="term-en">フロー</span></dt>
+    <dd>意味：挑戦と自分の能力がつり合い、没入して時間を忘れる心理状態。心理学者のチクセントミハイが提案した理論。難しすぎると不安、易しすぎると退屈になりやすい。<br>
+    具体例：少しずつ難しくなるステージで「あと1回」と繰り返してしまう状態。</dd>
+    <dt>Immersion <span class="term-en">没入感（イマージョン）</span></dt>
+    <dd>意味：ゲームの世界や活動に深く入り込み、周囲や時間の感覚が薄れる状態。フローが「挑戦と能力のバランス」に注目する概念であるのに対し、没入感は世界への入り込み全般を指す。<br>
+    具体例：静かな探索パートで環境音と景色に引き込まれ、気づけば30分経っていた状態。</dd>
+  </dl>
+
+  <h2>考えてみよう</h2>
+  <p>入力した内容は保存されません（ブラウザを閉じると消えます）。授業での話し合いのメモとして使ってください。</p>
+  <p><strong>質問1：</strong>自分が「あと1回だけ」と繰り返してしまったゲーム体験では、挑戦と自分のスキルの関係はどうなっていましたか？ フローの図のどこに当てはまりますか？</p>
+  <textarea aria-label="質問1の回答"></textarea>
+  <p><strong>質問2：</strong>選択肢は少ないのに「自分で選んだ」と強く感じた場面、またはその逆の場面を挙げて、主体性の3つの材料（違い・情報・結果）に当てはめてみましょう。</p>
+  <textarea aria-label="質問2の回答"></textarea>
+  <p><strong>質問3：</strong>報酬（外発的動機）だけで引っ張る設計にすると、長期的にはどんな問題が起きそうですか？ 内発的動機を支える工夫と合わせて考えてみましょう。</p>
+  <textarea aria-label="質問3の回答"></textarea>
+
+  <h2>実験で確かめる</h2>
+  <p>「隠すことと見つけられることのバランス」は、実験Cの視界の遮蔽シナリオで実際に試せます。</p>
+  <p>→ <a href="../../experiments/exp-c-guidance/">実験C「プレイヤー誘導実験」</a>（Unit 4 対応。特に S5「視界の遮蔽」は、下ルートの入口を隠すことで選ばれ方がどう変わるかを確認できます）</p>
+
+  <nav class="unitnav">
+    <p>← 前の Unit：<a href="../unit-01/">Unit 1「レベルデザインとは何か」</a></p>
+    <p>→ 次の Unit：Unit 3「空間構造とマップ設計」（準備中）― 体験の器である「空間」の構造そのものを見ていきます。</p>
+    <p><a href="../../">← 講座ハブへ戻る</a></p>
+  </nav>
+</main>
+<script>
+  var skillRange = document.getElementById("skillRange");
+  var challengeRange = document.getElementById("challengeRange");
+  var skillVal = document.getElementById("skillVal");
+  var challengeVal = document.getElementById("challengeVal");
+  var flowPoint = document.getElementById("flowPoint");
+  var zoneLabel = document.getElementById("zoneLabel");
+  var zoneDesc = document.getElementById("zoneDesc");
+  var DESCS = {
+    flow: "挑戦とスキルがつり合っています。集中しやすく、時間を忘れやすい状態です。",
+    anxiety: "挑戦がスキルを上回っています。手がかりや練習の機会を増やす、挑戦を分割する、といった調整が考えられます。",
+    boredom: "スキルが挑戦を上回っています。新しい要素の導入や、挑戦の段階的な引き上げが考えられます。"
+  };
+  function update() {
+    var skill = Number(skillRange.value);
+    var challenge = Number(challengeRange.value);
+    skillVal.textContent = String(skill);
+    challengeVal.textContent = String(challenge);
+    flowPoint.setAttribute("cx", String(30 + skill * 24));
+    flowPoint.setAttribute("cy", String(270 - challenge * 24));
+    var diff = challenge - skill;
+    var zone = Math.abs(diff) <= 2 ? "flow" : diff > 2 ? "anxiety" : "boredom";
+    var name = zone === "flow" ? "フロー" : zone === "anxiety" ? "不安" : "退屈";
+    zoneLabel.textContent = "現在地：" + name;
+    zoneDesc.textContent = DESCS[zone];
+  }
+  skillRange.addEventListener("input", update);
+  challengeRange.addEventListener("input", update);
+  update();
+</script>
+</body>
+</html>
