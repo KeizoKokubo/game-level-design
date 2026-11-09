@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>実験C：プレイヤー誘導実験 | ゲーム・レベルデザイン講座</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --paper:#ffffff; --accent:#0b5394; --accent2:#b45309;
+    --ok:#146c2e; --warn-bg:#fff4d6; --warn-border:#b45309; --line:#5a5a5a;
+    --upper:#0b5394; --lower:#b45309;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP",sans-serif;
+    color:var(--ink); background:#f2f2f2; margin:0; line-height:1.7;}
+  main{max-width:880px; margin:0 auto; padding:20px 16px 48px; background:var(--paper);}
+  h1{font-size:1.45rem; margin:0 0 4px;}
+  h2{font-size:1.1rem; border-left:6px solid var(--accent); padding-left:8px; margin:28px 0 8px;}
+  .sub{color:#333; margin:0 0 12px;}
+  .step{display:inline-block; background:var(--accent); color:#fff; border-radius:4px;
+    padding:0 8px; font-size:.85rem; margin-right:6px;}
+  fieldset{border:2px solid var(--line); border-radius:6px; margin:10px 0; padding:10px 14px;}
+  legend{font-weight:bold; padding:0 6px;}
+  label{display:block; margin:4px 0; cursor:pointer;}
+  button{font-size:1rem; padding:8px 16px; margin:4px 4px 4px 0; border:2px solid var(--accent);
+    background:var(--accent); color:#fff; border-radius:6px; cursor:pointer;}
+  button.secondary{background:#fff; color:var(--accent);}
+  button:disabled{background:#999; border-color:#999; color:#fff; cursor:not-allowed;}
+  button[aria-pressed="true"]{outline:4px solid #f2b01e; outline-offset:1px;}
+  canvas{display:block; width:100%; max-width:800px; height:auto; border:3px solid var(--ink);
+    background:#fafafa; margin:10px 0;}
+  canvas:focus{outline:4px solid #f2b01e; outline-offset:2px;}
+  .warn{background:var(--warn-bg); border:2px solid var(--warn-border); border-radius:6px;
+    padding:8px 12px; margin:10px 0;}
+  .note{background:#eef4fb; border:1px solid var(--accent); border-radius:6px; padding:8px 12px; margin:10px 0;}
+  table{border-collapse:collapse; width:100%; margin:8px 0; font-size:.92rem;}
+  th,td{border:1px solid var(--line); padding:4px 8px; text-align:left;}
+  th{background:#e8e8e8;}
+  .term{border-bottom:2px dotted var(--accent); cursor:help;}
+  textarea{width:100%; min-height:56px; font-size:1rem; padding:6px;}
+  .dpad{display:grid; grid-template-columns:56px 56px 56px; gap:4px; justify-content:center; margin:8px 0;}
+  .dpad button{padding:10px 0; font-size:1.2rem;}
+  .dpad .spacer{visibility:hidden;}
+  .bar{display:flex; height:28px; border:2px solid var(--ink); border-radius:4px; overflow:hidden; margin:6px 0;}
+  .bar .up{background:var(--upper); color:#fff; text-align:center; min-width:0; overflow:hidden; white-space:nowrap;}
+  .bar .lo{background:var(--lower); color:#fff; text-align:center; min-width:0; overflow:hidden; white-space:nowrap;}
+  details{border:2px solid var(--line); border-radius:6px; padding:8px 14px; margin:10px 0;}
+  summary{font-weight:bold; cursor:pointer;}
+  .glossary dt{font-weight:bold; margin-top:8px;}
+  .glossary dd{margin-left:0;}
+  .status{font-weight:bold;}
+  @media (prefers-color-scheme: dark){
+    body{background:#111;} main{background:#1d1d1d; color:#f0f0d8;}
+    .sub{color:#ddd;} th{background:#333;} .note{background:#16283c;}
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>実験C：プレイヤー誘導実験</h1>
+  <p class="sub">ゲーム・レベルデザイン講座 ／ Unit 4「プレイヤーの誘導と視線制御」対応（主軸：情報）<br>
+  テーマ：<strong>「誘導するが、操らない」</strong> ― 誘導要素を1つだけ変えて、進むルートがどう変わるかを比べます。</p>
+
+  <div class="note">
+    <strong>この実験の進め方（仮説と検証）</strong>：
+    ①シナリオを選ぶ → ②仮説を選ぶ → ③実行（自分で操作／自動エージェント）→ ④記録を見る → ⑤考察する → ⑥最後に設計意図を開く。
+  </div>
+
+  <h2><span class="step">①</span>シナリオを選ぶ（変数は1つだけ）</h2>
+  <p>マップは常に同じです。スタート（左端 S）からゴール（右端 G）まで、
+  <strong>▲ 上ルート</strong>と<strong>▼ 下ルート</strong>の2経路があり、<strong>どちらを通ってもゴールできます（正解は1つではありません）</strong>。
+  プリセットでは、ベースライン S0 に対して<strong>誘導要素が1種類だけ</strong>追加されます。</p>
+  <fieldset id="scenarioField">
+    <legend>シナリオ</legend>
+    <label><input type="radio" name="scenario" value="S0" checked> S0：ベースライン（誘導要素なし）</label>
+    <label><input type="radio" name="scenario" value="S1"> S1：光 ― 上ルート沿いに明るい光の帯を追加（S0との差はこれだけ）</label>
+    <label><input type="radio" name="scenario" value="S2"> S2：ランドマーク ― 下ルートの先に大きな塔を追加</label>
+    <label><input type="radio" name="scenario" value="S3"> S3：報酬 ― 下ルート沿いにコイン列を追加</label>
+    <label><input type="radio" name="scenario" value="S4"> S4：色とサインポスティング ― 上ルート入口に旗と矢印サインを追加</label>
+    <label><input type="radio" name="scenario" value="FREE"> 発展モード：要素を自由に ON/OFF する</label>
+  </fieldset>
+  <fieldset id="freeField" disabled>
+    <legend>発展モード：誘導要素の ON/OFF</legend>
+    <label><input type="checkbox" id="elLight"> 💡 光の帯（上ルート）</label>
+    <label><input type="checkbox" id="elSign"> 🚩 旗・矢印サイン（上ルート入口）</label>
+    <label><input type="checkbox" id="elLandmark"> 🗼 ランドマークの塔（下ルート）</label>
+    <label><input type="checkbox" id="elCoins"> 🪙 コイン列（下ルート）</label>
+  </fieldset>
+  <div class="warn" id="freeWarn" hidden>
+    ⚠ <strong>注意：</strong>複数の変数を同時に変えると、結果が変わっても<strong>「どの要素が効いたのか」を切り分けられません</strong>。
+    まずプリセット（1変数）で1つずつ確かめてから、組み合わせを試してください。
+  </div>
+
+  <h2><span class="step">②</span>仮説を選ぶ</h2>
+  <p>実行する前に、このシナリオではどちらのルートに流れやすいか、予測を選んでください（選ぶまで実行できません）。</p>
+  <div role="group" aria-label="仮説の選択">
+    <button type="button" class="secondary hyp" data-hyp="upper">▲ 上ルートに流れやすい</button>
+    <button type="button" class="secondary hyp" data-hyp="even">ほぼ半々になる</button>
+    <button type="button" class="secondary hyp" data-hyp="lower">▼ 下ルートに流れやすい</button>
+  </div>
+  <p class="status" id="hypStatus" aria-live="polite">仮説：未選択</p>
+
+  <h2><span class="step">③</span>実行する</h2>
+  <canvas id="map" width="800" height="350" tabindex="0"
+    aria-label="実験マップ。矢印キーまたはWASDで移動できます。"></canvas>
+  <p id="playStatus" class="status" aria-live="polite">「自分で操作をはじめる」を押すとスタート位置につきます。</p>
+  <div>
+    <button type="button" id="btnPlay">▶ 自分で操作をはじめる</button>
+    <button type="button" id="btnAgent" disabled>🤖 エージェントに10回走らせる（仮説を選ぶと有効になります）</button>
+  </div>
+  <p>自分で操作：矢印キー／WASD、または下のボタンで1マスずつ移動します。壁にはぶつかりません（進めない方向には動きません）。通った道には軌跡が残ります。</p>
+  <div class="dpad" aria-label="移動ボタン">
+    <span class="spacer"></span><button type="button" data-move="up" aria-label="上へ移動">↑</button><span class="spacer"></span>
+    <button type="button" data-move="left" aria-label="左へ移動">←</button>
+    <button type="button" data-move="down" aria-label="下へ移動">↓</button>
+    <button type="button" data-move="right" aria-label="右へ移動">→</button>
+  </div>
+  <fieldset>
+    <legend>自動エージェントの設定</legend>
+    <label>乱数シード（同じシードでは同じ結果が再現されます）：
+      <input type="number" id="seedInput" value="42" style="width:90px; font-size:1rem;">
+    </label>
+    <p style="margin:4px 0;">エージェントのルート選択は、各誘導要素に設定した「引力（重み）」で決まります。
+    基本の重みは上下とも <strong>1.0</strong>。光 <strong>+1.5</strong>（上）、旗・矢印サイン <strong>+1.0</strong>（上）、
+    ランドマークの塔 <strong>+1.2</strong>（下）、コイン列 <strong>+1.8</strong>（下）を加え、
+    上が選ばれる確率 ＝ 上の重み ÷（上の重み＋下の重み）として、乱数で1回ごとに選びます。</p>
+    <div class="warn">⚠ <strong>限界の注記：</strong>このエージェントは<strong>実際のプレイヤーではありません</strong>。
+    「誘導要素があると、そちらへ注意が向きやすい」という傾向を、重みという形で<strong>単純にモデル化したもの</strong>です。
+    実際のプレイヤーは、好み・経験・その時の目的によって、誘導に逆らうこともあります。</div>
+  </fieldset>
+  <div id="agentResult" aria-live="polite"></div>
+
+  <h2><span class="step">④</span>自動記録</h2>
+  <p>実行結果は自動で記録されます（選んだルート、所要時間、シナリオ、仮説との一致）。</p>
+  <table id="historyTable">
+    <thead><tr><th>#</th><th>方法</th><th>シナリオ</th><th>結果</th><th>所要時間</th><th>仮説との一致</th></tr></thead>
+    <tbody><tr><td colspan="6">まだ記録がありません。</td></tr></tbody>
+  </table>
+
+  <h2><span class="step">⑤</span>考察する</h2>
+  <p id="verdict" class="status" aria-live="polite">実行すると、仮説と結果の一致／不一致がここに表示されます。</p>
+  <p><strong>考察質問1：</strong>仮説と結果は一致しましたか？ 一致した／しなかった理由を、追加した誘導要素1つに絞って説明してみましょう。</p>
+  <textarea id="q1" aria-label="考察質問1の回答"></textarea>
+  <p><strong>考察質問2：</strong>この誘導は「誘導するが、操らない」になっていましたか？ プレイヤーが「自分で選んだ」と感じられる点と、強制的だと感じる点はどこですか？</p>
+  <textarea id="q2" aria-label="考察質問2の回答"></textarea>
+  <p><strong>考察質問3：</strong>ジャンルや対象プレイヤーが違えば（例：探索好きのベテラン／時間のないカジュアル層）、同じ誘導でも結果はどう変わりそうですか？</p>
+  <textarea id="q3" aria-label="考察質問3の回答"></textarea>
+
+  <h2><span class="step">⑥</span>設計意図と限界（考察のあとに開く）</h2>
+  <details id="intentBox">
+    <summary>設計意図と限界を開く（先に開くと観察が誘導されてしまうので、考察を書いてから）</summary>
+    <p><strong>設計意図：</strong>このマップでは、上下どちらのルートも長さ・難しさはほぼ同じにしてあります。
+    違いを作るのは地形ではなく「情報」だけです。光・ランドマーク・報酬・サインは、
+    プレイヤーの進路を禁止や壁で決めるのではなく、<strong>「なんとなくそちらが気になる」</strong>という形で注意を向けます。
+    それでも最終的に選ぶのはプレイヤーであり、誘導に逆らって進んでも損はしない設計です。これが「誘導するが、操らない」の狙いです。</p>
+    <p><strong>限界：</strong>エージェントの重み（光+1.5 など）は教材用に置いた仮の数値で、実測データに基づくものではありません。
+    また、この実験で分かるのは「このモデルではこう流れた」ということで、実際のプレイヤーでも同じ割合になるとは限りません。
+    相関（要素があるときに流れた）と因果（要素があったから流れた）を混同しないよう、1変数ずつ比べることが大切です。</p>
+  </details>
+
+  <h2>用語メモ（その場で確認）</h2>
+  <dl class="glossary">
+    <dt><span class="term" title="言葉で直接指示せず、光・色・配置などで進む方向をほのめかす情報設計">Signposting</span>（サインポスティング／道標となる情報）</dt>
+    <dd>言葉で直接指示せず、光・色・配置・音などで進む方向や注意点をほのめかす情報設計。例：出口の扉の上だけ明るい照明を置く。この実験の S4 の旗・矢印や、S1 の光も広い意味でこれにあたります。</dd>
+    <dt><span class="term" title="遠くからでも見え、位置や目的地を把握する助けになる目立つ構造物">Landmark</span>（ランドマーク／目印）</dt>
+    <dd>遠くからでも見え、自分の位置や目的地を把握する助けになる目立つ構造物や物体。例：マップ中央の大きな塔。この実験では S2 で下ルートの先に置きました。</dd>
+    <dt><span class="term" title="物や地形の見た目が「何ができるか」を示唆する性質">Affordance</span>（アフォーダンス）</dt>
+    <dd>物や地形の見た目が「何ができるか」を示唆する性質。「掴めそう」「乗れそう」といった読み取りやすさ。例：明るく照らされた通路は「こちらへ進めそう」に見え、暗い通路は「まだ行くな」と読まれることがあります。</dd>
+  </dl>
+  <p class="sub">用語の正本はプロジェクトの用語集（docs/glossary.md）です。この実験は試作であり、数値や見た目は今後の検証で変わることがあります。</p>
+</main>
+
+<script>
+"use strict";
+// === CORE LOGIC BEGIN ===
+// 自動エージェントの経路選択ロジック（純粋関数。node での単体テスト対象）
+function mulberry32(seed) {
+  var a = seed | 0;
+  return function () {
+    a = (a + 0x6D2B79F5) | 0;
+    var t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+var BASE_WEIGHT = 1.0;
+var ELEMENT_WEIGHTS = {
+  light:    { route: "upper", value: 1.5 },
+  sign:     { route: "upper", value: 1.0 },
+  landmark: { route: "lower", value: 1.2 },
+  coins:    { route: "lower", value: 1.8 }
+};
+var SCENARIO_ELEMENTS = {
+  S0:   { light: false, sign: false, landmark: false, coins: false },
+  S1:   { light: true,  sign: false, landmark: false, coins: false },
+  S2:   { light: false, sign: false, landmark: true,  coins: false },
+  S3:   { light: false, sign: false, landmark: false, coins: true },
+  S4:   { light: false, sign: true,  landmark: false, coins: false }
+};
+function computeWeights(elements) {
+  var w = { upper: BASE_WEIGHT, lower: BASE_WEIGHT };
+  for (var k in ELEMENT_WEIGHTS) {
+    if (elements[k]) { w[ELEMENT_WEIGHTS[k].route] += ELEMENT_WEIGHTS[k].value; }
+  }
+  return w;
+}
+function upperProbability(elements) {
+  var w = computeWeights(elements);
+  return w.upper / (w.upper + w.lower);
+}
+function chooseRoute(elements, rng) {
+  return rng() < upperProbability(elements) ? "upper" : "lower";
+}
+function runBatch(elements, n, seed) {
+  var rng = mulberry32(seed);
+  var counts = { upper: 0, lower: 0 };
+  for (var i = 0; i < n; i++) { counts[chooseRoute(elements, rng)]++; }
+  return counts;
+}
+// === CORE LOGIC END ===
+
+// ---- マップ定義（# = 壁、. = 床）16列 x 7行 ----
+var GRID = [
+  "################",
+  "###..........###",
+  "###.########.###",
+  "....########...#",
+  "###.########.###",
+  "###..........###",
+  "################"
+];
+var COLS = 16, ROWS = 7, CELL = 50;
+var START = { x: 0, y: 3 }, GOAL = { x: 14, y: 3 };
+var UPPER_PATH = [[0,3],[1,3],[2,3],[3,3],[3,2],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[12,2],[12,3],[13,3],[14,3]];
+var LOWER_PATH = [[0,3],[1,3],[2,3],[3,3],[3,4],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5],[9,5],[10,5],[11,5],[12,5],[12,4],[12,3],[13,3],[14,3]];
+function isFloor(x, y) {
+  return x >= 0 && x < COLS && y >= 0 && y < ROWS && GRID[y].charAt(x) === ".";
+}
+
+// ---- 状態 ----
+var state = {
+  scenario: "S0",
+  hypothesis: null,
+  player: { x: START.x, y: START.y },
+  trail: [],
+  playing: false,
+  startTime: null,
+  routeTaken: null,
+  agentTrail: null,
+  batchIndex: 0,
+  history: []
+};
+
+var canvas = document.getElementById("map");
+var ctx = canvas.getContext("2d");
+
+function currentElements() {
+  if (state.scenario === "FREE") {
+    return {
+      light: document.getElementById("elLight").checked,
+      sign: document.getElementById("elSign").checked,
+      landmark: document.getElementById("elLandmark").checked,
+      coins: document.getElementById("elCoins").checked
+    };
+  }
+  return SCENARIO_ELEMENTS[state.scenario];
+}
+function scenarioLabel() {
+  if (state.scenario === "FREE") {
+    var el = currentElements(), on = [];
+    if (el.light) on.push("光"); if (el.sign) on.push("サイン");
+    if (el.landmark) on.push("塔"); if (el.coins) on.push("コイン");
+    return "発展（" + (on.length ? on.join("＋") : "なし") + "）";
+  }
+  return state.scenario;
+}
+
+// ---- 描画 ----
+function draw() {
+  var el = currentElements();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // 床と壁
+  for (var y = 0; y < ROWS; y++) for (var x = 0; x < COLS; x++) {
+    ctx.fillStyle = isFloor(x, y) ? "#fafafa" : "#263238";
+    ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
+    if (isFloor(x, y)) { ctx.strokeStyle = "#cccccc"; ctx.strokeRect(x * CELL, y * CELL, CELL, CELL); }
+  }
+  // S1: 光の帯（上ルート）
+  if (el.light) {
+    ctx.fillStyle = "rgba(255, 213, 79, 0.55)";
+    for (var i = 0; i < UPPER_PATH.length; i++) ctx.fillRect(UPPER_PATH[i][0] * CELL, UPPER_PATH[i][1] * CELL, CELL, CELL);
+    ctx.fillStyle = "#6d4c00"; ctx.font = "20px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("💡", 7.5 * CELL, 1 * CELL + 33);
+  }
+  // S3: コイン列（下ルート）
+  if (el.coins) {
+    ctx.fillStyle = "#f2b01e"; ctx.strokeStyle = "#8a6100"; ctx.lineWidth = 2;
+    for (var cx = 5; cx <= 10; cx += 1) {
+      ctx.beginPath(); ctx.arc(cx * CELL + CELL / 2, 5 * CELL + CELL / 2, 13, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+    ctx.fillStyle = "#5f4300"; ctx.font = "bold 13px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("¥", 7.5 * CELL, 5 * CELL + 30);
+  }
+  // S2: ランドマークの塔（下ルートの先）
+  if (el.landmark) {
+    var tx = 11 * CELL, ty = 5 * CELL;
+    ctx.fillStyle = "#6a1b9a";
+    ctx.beginPath(); ctx.moveTo(tx + 6, ty + 48); ctx.lineTo(tx + 25, ty + 6); ctx.lineTo(tx + 44, ty + 48); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.font = "bold 12px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("塔", tx + 25, ty + 42);
+    ctx.strokeStyle = "#6a1b9a"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(tx + 25, ty + 6); ctx.lineTo(tx + 25, ty - 12); ctx.stroke();
+    ctx.fillStyle = "#c62828"; ctx.beginPath();
+    ctx.moveTo(tx + 25, ty - 12); ctx.lineTo(tx + 41, ty - 6); ctx.lineTo(tx + 25, ty); ctx.closePath(); ctx.fill();
+  }
+  // S4: 旗・矢印サイン（上ルート入口）
+  if (el.sign) {
+    ctx.strokeStyle = "#c62828"; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(3 * CELL + 12, 2 * CELL + 46); ctx.lineTo(3 * CELL + 12, 2 * CELL + 6); ctx.stroke();
+    ctx.fillStyle = "#c62828"; ctx.beginPath();
+    ctx.moveTo(3 * CELL + 12, 2 * CELL + 6); ctx.lineTo(3 * CELL + 34, 2 * CELL + 14); ctx.lineTo(3 * CELL + 12, 2 * CELL + 22); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#0b5394"; ctx.font = "bold 26px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("↑", 3 * CELL + 25, 1 * CELL + 36);
+  }
+  // ルート名ラベル（色だけに頼らない：文字＋記号）
+  ctx.font = "bold 14px sans-serif"; ctx.textAlign = "left";
+  ctx.fillStyle = "#0b5394"; ctx.fillText("▲ 上ルート", 4 * CELL + 4, 1 * CELL + 18);
+  ctx.fillStyle = "#b45309"; ctx.fillText("▼ 下ルート", 4 * CELL + 4, 6 * CELL - 8);
+  // 軌跡
+  function drawTrail(trail, color) {
+    if (!trail || trail.length < 2) return;
+    ctx.strokeStyle = color; ctx.lineWidth = 5; ctx.beginPath();
+    for (var j = 0; j < trail.length; j++) {
+      var px = trail[j][0] * CELL + CELL / 2, py = trail[j][1] * CELL + CELL / 2;
+      if (j === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+  drawTrail(state.trail, "rgba(20,108,46,0.65)");
+  drawTrail(state.agentTrail, "rgba(106,27,154,0.65)");
+  // スタート／ゴール
+  ctx.fillStyle = "#146c2e"; ctx.font = "bold 22px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("S", START.x * CELL + CELL / 2, START.y * CELL + 33);
+  ctx.fillStyle = "#146c2e"; ctx.fillRect(GOAL.x * CELL + 6, GOAL.y * CELL + 6, CELL - 12, CELL - 12);
+  ctx.fillStyle = "#fff"; ctx.fillText("G", GOAL.x * CELL + CELL / 2, GOAL.y * CELL + 33);
+  // プレイヤー
+  ctx.fillStyle = "#b71c1c"; ctx.strokeStyle = "#fff"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(state.player.x * CELL + CELL / 2, state.player.y * CELL + CELL / 2, 15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#fff"; ctx.font = "bold 13px sans-serif";
+  ctx.fillText("P", state.player.x * CELL + CELL / 2, state.player.y * CELL + 30);
+}
+
+// ---- 仮説 ----
+function updateGate() {
+  document.getElementById("btnAgent").disabled = !state.hypothesis;
+}
+document.querySelectorAll(".hyp").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    state.hypothesis = btn.getAttribute("data-hyp");
+    document.querySelectorAll(".hyp").forEach(function (b) { b.setAttribute("aria-pressed", b === btn ? "true" : "false"); });
+    var label = { upper: "▲ 上ルートに流れやすい", even: "ほぼ半々になる", lower: "▼ 下ルートに流れやすい" }[state.hypothesis];
+    document.getElementById("hypStatus").textContent = "仮説：" + label + "（シナリオ " + scenarioLabel() + "）";
+    updateGate();
+  });
+});
+
+// ---- シナリオ切替 ----
+document.querySelectorAll('input[name="scenario"]').forEach(function (r) {
+  r.addEventListener("change", function () {
+    state.scenario = r.value;
+    var free = state.scenario === "FREE";
+    document.getElementById("freeField").disabled = !free;
+    document.getElementById("freeWarn").hidden = !free;
+    resetPlay();
+    draw();
+  });
+});
+["elLight", "elSign", "elLandmark", "elCoins"].forEach(function (id) {
+  document.getElementById(id).addEventListener("change", draw);
+});
+
+// ---- 自分で操作 ----
+var playStatus = document.getElementById("playStatus");
+function resetPlay() {
+  state.player = { x: START.x, y: START.y };
+  state.trail = [[START.x, START.y]];
+  state.playing = false; state.routeTaken = null; state.agentTrail = null;
+}
+function judgeHypothesis(route) {
+  if (!state.hypothesis) return "仮説なし";
+  if (state.hypothesis === route) return "一致";
+  if (state.hypothesis === "even") return "―（半々予測）";
+  return "不一致";
+}
+function addHistory(method, resultText, timeText, judge) {
+  state.history.push({ method: method, scenario: scenarioLabel(), result: resultText, time: timeText, judge: judge });
+  var tbody = document.querySelector("#historyTable tbody");
+  tbody.innerHTML = "";
+  state.history.forEach(function (h, i) {
+    var tr = document.createElement("tr");
+    [String(i + 1), h.method, h.scenario, h.result, h.time, h.judge].forEach(function (v) {
+      var td = document.createElement("td"); td.textContent = v; tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+function setVerdict(text) { document.getElementById("verdict").textContent = text; }
+
+document.getElementById("btnPlay").addEventListener("click", function () {
+  resetPlay();
+  state.playing = true; state.startTime = null;
+  playStatus.textContent = "操作中：矢印キー／WASD／ボタンでゴール（G）を目指してください。";
+  canvas.focus(); draw();
+});
+function movePlayer(dx, dy) {
+  if (!state.playing) return;
+  var nx = state.player.x + dx, ny = state.player.y + dy;
+  if (!isFloor(nx, ny)) return;
+  if (state.startTime === null) state.startTime = Date.now();
+  state.player = { x: nx, y: ny };
+  state.trail.push([nx, ny]);
+  if (!state.routeTaken) {
+    if (ny <= 2 && nx === 3) state.routeTaken = "upper";
+    if (ny >= 4 && nx === 3) state.routeTaken = "lower";
+    if (ny === 1) state.routeTaken = "upper";
+    if (ny === 5) state.routeTaken = "lower";
+  }
+  draw();
+  if (nx === GOAL.x && ny === GOAL.y) {
+    state.playing = false;
+    var sec = state.startTime ? ((Date.now() - state.startTime) / 1000).toFixed(1) : "―";
+    var routeLabel = state.routeTaken === "upper" ? "▲ 上ルート" : state.routeTaken === "lower" ? "▼ 下ルート" : "（未判定）";
+    playStatus.textContent = "ゴール！ 通ったのは " + routeLabel + "、所要時間 " + sec + " 秒でした。記録を見て考察しましょう。";
+    addHistory("自分で操作", routeLabel, sec + "秒", state.routeTaken ? judgeHypothesis(state.routeTaken) : "―");
+    if (state.routeTaken) {
+      setVerdict("直近の結果：あなたの操作は " + routeLabel + " を通りました。仮説との判定は記録表の「仮説との一致」欄を見てください。" +
+        "1回の操作は「1人のプレイヤーの例」でしかありません。傾向を見るにはエージェントの集計と合わせて考えましょう。");
+    }
+  }
+}
+document.addEventListener("keydown", function (e) {
+  if (!state.playing) return;
+  var k = e.key.toLowerCase();
+  var handled = true;
+  if (e.key === "ArrowUp" || k === "w") movePlayer(0, -1);
+  else if (e.key === "ArrowDown" || k === "s") movePlayer(0, 1);
+  else if (e.key === "ArrowLeft" || k === "a") movePlayer(-1, 0);
+  else if (e.key === "ArrowRight" || k === "d") movePlayer(1, 0);
+  else handled = false;
+  if (handled) e.preventDefault();
+});
+document.querySelectorAll("[data-move]").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    var d = btn.getAttribute("data-move");
+    if (d === "up") movePlayer(0, -1); else if (d === "down") movePlayer(0, 1);
+    else if (d === "left") movePlayer(-1, 0); else movePlayer(1, 0);
+  });
+});
+
+// ---- 自動エージェント ----
+document.getElementById("btnAgent").addEventListener("click", function () {
+  var el = currentElements();
+  var seedBase = parseInt(document.getElementById("seedInput").value, 10) || 0;
+  var seed = seedBase + state.batchIndex;
+  state.batchIndex++;
+  var counts = runBatch(el, 10, seed);
+  var w = computeWeights(el);
+  var pctU = Math.round(counts.upper / 10 * 100), pctL = 100 - pctU;
+  var html = "<h3 style='margin:8px 0 4px;'>エージェント10回の結果（シナリオ " + scenarioLabel() + "、シード " + seed + "）</h3>" +
+    "<div class='bar'><div class='up' style='width:" + pctU + "%'>▲ 上 " + counts.upper + "回</div>" +
+    "<div class='lo' style='width:" + pctL + "%'>▼ 下 " + counts.lower + "回</div></div>" +
+    "<p style='margin:4px 0;'>モデルの重み：上 " + w.upper.toFixed(1) + " ／ 下 " + w.lower.toFixed(1) +
+    "（理論上の確率：上 " + Math.round(upperProbability(el) * 100) + "%）。10回ではばらつきが出ます。割合は目安として見てください。</p>";
+  document.getElementById("agentResult").innerHTML = html;
+  var majority = counts.upper > counts.lower ? "upper" : counts.lower > counts.upper ? "lower" : "even";
+  addHistory("エージェントx10", "▲上 " + counts.upper + "回 ／ ▼下 " + counts.lower + "回", "―",
+    state.hypothesis ? (state.hypothesis === majority ? "一致" : "不一致") : "仮説なし");
+  setVerdict("直近の結果：エージェント10回では " + (majority === "even" ? "上下半々" : majority === "upper" ? "▲ 上ルートが多数" : "▼ 下ルートが多数") +
+    " でした。あなたの仮説（" + document.getElementById("hypStatus").textContent.replace("仮説：", "") + "）と比べて、考察質問に答えてみましょう。");
+  // 代表1回分をアニメーション表示
+  var rng = mulberry32(seed);
+  var firstRoute = chooseRoute(el, rng);
+  var path = firstRoute === "upper" ? UPPER_PATH : LOWER_PATH;
+  state.agentTrail = [path[0]];
+  draw();
+  var idx = 0;
+  var timer = setInterval(function () {
+    idx++;
+    if (idx >= path.length) { clearInterval(timer); return; }
+    state.agentTrail.push(path[idx]);
+    draw();
+  }, 130);
+});
+
+resetPlay();
+draw();
+</script>
+</body>
+</html>

@@ -12,7 +12,12 @@
 
 教材サイト（GitHub Pages）: https://keizokokubo.github.io/game-level-design/
 
-現在は立ち上げ段階（Phase 0）で、公開サイトは講座のハブ（概要・全12 Unit 一覧）の雛形です。インタラクティブな実験教材は今後順次追加していきます。
+公開サイトは講座のハブ（概要・全12 Unit 一覧）です。インタラクティブな実験教材は順次追加していきます。
+
+## 公開中の実験
+
+- 実験C「プレイヤー誘導実験」（Unit 4 対応、試作公開中）: https://keizokokubo.github.io/game-level-design/experiments/exp-c-guidance/
+  - 光・ランドマーク・報酬などの誘導要素を1つずつ変えて、プレイヤーの経路がどう変わるかを試せる実験です。
 
 ## カリキュラム概要
 
