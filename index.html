@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ゲーム・レベルデザイン講座</title>
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --card: #ffffff;
+    --ink: #23272f;
+    --sub: #5b6472;
+    --accent: #2f6f4e;
+    --accent-soft: #e3efe7;
+    --line: #ddd8cc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.7;
+  }
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 3rem 1.5rem 2.5rem;
+    text-align: center;
+  }
+  header h1 { margin: 0 0 0.5rem; font-size: 2rem; }
+  header .definition { font-size: 1.15rem; font-weight: bold; margin: 1rem auto 0; max-width: 42rem; }
+  header .status {
+    display: inline-block; margin-top: 1.25rem; padding: 0.2rem 0.9rem;
+    border: 1px solid #fff; border-radius: 999px; font-size: 0.85rem;
+  }
+  main { max-width: 60rem; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+  section { margin-bottom: 2.5rem; }
+  h2 { border-bottom: 3px solid var(--accent); padding-bottom: 0.3rem; font-size: 1.3rem; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 0.6rem;
+    padding: 1rem 1.1rem;
+  }
+  .card h3 { margin: 0 0 0.4rem; font-size: 1rem; color: var(--accent); }
+  .card p { margin: 0; color: var(--sub); font-size: 0.92rem; }
+  ol.concepts { padding-left: 1.4rem; }
+  ol.concepts li { margin-bottom: 0.5rem; }
+  ol.concepts strong { color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; background: var(--card); }
+  th, td { border: 1px solid var(--line); padding: 0.5rem 0.7rem; text-align: left; font-size: 0.93rem; }
+  th { background: var(--accent-soft); }
+  td.prep { color: var(--sub); white-space: nowrap; }
+  footer { text-align: center; color: var(--sub); font-size: 0.85rem; padding: 1.5rem 1rem 2.5rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ゲーム・レベルデザイン講座</h1>
+  <p>ステージを作る方法ではなく、ゲームの仕組みを使ってプレイヤーの行動・判断・感情を設計する技術を学ぶ教材です。</p>
+  <p class="definition">「レベルデザインとは、プレイヤーの体験を設計することである」</p>
+  <span class="status">準備中 — 現在はプロジェクト立ち上げ段階（Phase 0）です。各 Unit・実験は順次公開予定です</span>
+</header>
+<main>
+  <section>
+    <h2>この講座で重視する5つの概念</h2>
+    <ol class="concepts">
+      <li><strong>教える → 試す → 応用する</strong>：レベルそのものをチュートリアルとして機能させる</li>
+      <li><strong>誘導するが、操らない</strong>：プレイヤーが自分で発見し、判断したと感じられる環境を設計する</li>
+      <li><strong>難易度は敵の強さだけではない</strong>：情報量、判断時間、操作精度、失敗時の損失も難易度を決める</li>
+      <li><strong>面白さにはリズムがある</strong>：挑戦だけでなく、休息、予兆、発見、達成を組み合わせる</li>
+      <li><strong>レベルデザインは仮説と検証である</strong>：意図通りにプレイヤーが行動するとは限らない。観察して改善する</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>分析フレームワーク（5軸）</h2>
+    <p>レベルデザインを以下の5軸から分析します。この5軸は本教材独自の整理フレームワークであり、業界標準の分類ではありません。</p>
+    <div class="cards">
+      <div class="card"><h3>空間</h3><p>地形、構造、経路、位置関係、視界</p></div>
+      <div class="card"><h3>時間</h3><p>テンポ、タイミング、プレイ時間、リトライ</p></div>
+      <div class="card"><h3>情報</h3><p>誘導、予兆、視認性、ルールの伝達</p></div>
+      <div class="card"><h3>挑戦</h3><p>難易度、敵、ギミック、リスクと報酬</p></div>
+      <div class="card"><h3>感情</h3><p>緊張、安心、驚き、達成感、好奇心</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>カリキュラム（全12 Unit）</h2>
+    <table>
+      <thead>
+        <tr><th>Unit</th><th>タイトル</th><th>Part</th><th>状態</th></tr>
+      </thead>
+      <tbody id="unit-list"></tbody>
+    </table>
+    <p>各 Unit には、パラメータを変えて結果を比べられるインタラクティブ実験を対応させる予定です（最初の試作は Unit 4 対応の「プレイヤー誘導実験」）。</p>
+  </section>
+</main>
+<footer>ゲーム・レベルデザイン講座 — 準備中</footer>
+<script>
+  var units = [
+    [1, "レベルデザインとは何か", "Part 1：基礎"],
+    [2, "プレイヤー体験の設計", "Part 1：基礎"],
+    [3, "空間構造とマップ設計", "Part 2：空間"],
+    [4, "プレイヤーの誘導と視線制御", "Part 2：空間"],
+    [5, "空間の意味と環境ストーリーテリング", "Part 2：空間"],
+    [6, "難易度曲線と学習設計", "Part 3：難易度"],
+    [7, "チャレンジと報酬", "Part 3：難易度"],
+    [8, "敵・障害物・ギミックの配置", "Part 3：難易度"],
+    [9, "ペーシング（緊張と緩和）", "Part 4：時間・感情"],
+    [10, "時間とプレイリズム", "Part 4：時間・感情"],
+    [11, "レベル制作のワークフロー", "Part 5：制作・検証"],
+    [12, "プレイテストと改善", "Part 5：制作・検証"]
+  ];
+  var tbody = document.getElementById("unit-list");
+  units.forEach(function (u) {
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td>Unit " + u[0] + "</td><td>" + u[1] + "</td><td>" + u[2] + "</td>";
+    var td = document.createElement("td");
+    td.className = "prep";
+    td.textContent = "準備中";
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  });
+</script>
+</body>
+</html>
