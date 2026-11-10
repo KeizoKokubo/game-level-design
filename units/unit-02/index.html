@@ -200,10 +200,10 @@
       <polygon points="30,222 222,30 270,30 270,78 78,270 30,270" fill="#a8d5a2"></polygon>
       <text x="52" y="58" font-size="15" fill="#1a1a1a" font-weight="bold">不安</text>
       <text x="216" y="252" font-size="15" fill="#1a1a1a" font-weight="bold">退屈</text>
-      <text x="138" y="146" font-size="15" fill="#1a1a1a" font-weight="bold" transform="rotate(-45 150 150)">フロー</text>
       <text x="30" y="292" font-size="12" fill="#1a1a1a">スキル →</text>
       <text x="6" y="40" font-size="12" fill="#1a1a1a">挑戦 ↑</text>
       <circle id="flowPoint" cx="150" cy="150" r="9" fill="#b3261e" stroke="#ffffff" stroke-width="2"></circle>
+      <text x="138" y="146" font-size="15" fill="#1a1a1a" font-weight="bold" transform="rotate(-45 150 150)" stroke="#ffffff" stroke-width="4" paint-order="stroke">フロー</text>
     </svg>
     <div class="slider-row">
       <label for="skillRange">あなたのスキル：<span id="skillVal">5</span> / 10</label>
@@ -274,8 +274,12 @@
     var challenge = Number(challengeRange.value);
     skillVal.textContent = String(skill);
     challengeVal.textContent = String(challenge);
-    flowPoint.setAttribute("cx", String(30 + skill * 24));
-    flowPoint.setAttribute("cy", String(270 - challenge * 24));
+    // マーカーの中心を描画範囲（30〜270）から半径＋枠線分だけ内側に収める。
+    // 端の値でもマーカーが図の枠をはみ出さないようにする。
+    var cx = Math.min(259, Math.max(41, 30 + skill * 24));
+    var cy = Math.min(259, Math.max(41, 270 - challenge * 24));
+    flowPoint.setAttribute("cx", String(cx));
+    flowPoint.setAttribute("cy", String(cy));
     var diff = challenge - skill;
     var zone = Math.abs(diff) <= 2 ? "flow" : diff > 2 ? "anxiety" : "boredom";
     var name = zone === "flow" ? "フロー" : zone === "anxiety" ? "不安" : "退屈";
