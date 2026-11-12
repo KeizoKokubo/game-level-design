@@ -6,249 +6,323 @@
 <title>Unit 2：プレイヤー体験の設計 | ゲーム・レベルデザイン講座</title>
 <style>
   :root{
-    --bg:#f7f5f0; --card:#ffffff; --ink:#23272f; --sub:#5b6472;
-    --accent:#2f6f4e; --accent-soft:#e3efe7; --line:#cfc9ba;
+    --bg:#fff9f0; --card:#ffffff; --ink:#3d4451; --sub:#5a6274; --line:#efddcb;
+    --coral:#ffe0d1; --mint:#dcf2e3; --sky:#ddeefb; --lav:#eae3fb; --lemon:#fdf0bd; --peach:#ffedd6; --pink:#fbe3ee;
+    --link:#b23a1d; --btn:#c2502a;
+    --shadow:0 6px 20px rgba(146,90,32,.10);
   }
   *{box-sizing:border-box;}
-  body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP",sans-serif;
-    color:var(--ink); background:var(--bg); margin:0; line-height:1.8;}
-  main{max-width:880px; margin:0 auto; padding:24px 16px 48px; background:var(--card);}
-  h1{font-size:1.5rem; margin:0 0 4px;}
-  h2{font-size:1.15rem; border-left:6px solid var(--accent); padding-left:8px; margin:30px 0 8px;}
-  .sub{color:var(--sub); margin:0 0 12px;}
-  .meta{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px;}
-  .meta span{border:2px solid var(--accent); border-radius:999px; padding:0 12px; font-size:.88rem; font-weight:bold;}
-  .goals{background:var(--accent-soft); border-radius:6px; padding:10px 16px 10px 32px; margin:12px 0;}
-  .goals p{margin:4px 0 4px -16px; font-weight:bold;}
-  .note{background:#e8f0e9; color:#1c2a20; border:1px solid #2f6f4e; border-radius:6px; padding:8px 12px; margin:10px 0;}
-  .warn{background:#fff4d6; color:#1a1a1a; border:2px solid #b45309; border-radius:6px; padding:8px 12px; margin:10px 0;}
-  table{border-collapse:collapse; width:100%; margin:8px 0; font-size:.93rem;}
-  th,td{border:1px solid var(--line); padding:5px 9px; text-align:left; color:var(--ink);}
-  th{background:var(--accent-soft);}
-  textarea{width:100%; min-height:56px; font-size:1rem; padding:6px; background:#ffffff; color:#1a1a1a;
-    border:2px solid #8a8f98; border-radius:4px;}
-  .diagram{background:#f7f5f0; border:2px solid #5a5a5a; border-radius:6px; padding:10px; margin:10px 0;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic","Noto Sans JP",sans-serif;
+    font-size:17px; color:var(--ink); background:var(--bg); margin:0; line-height:1.9;}
+  main{max-width:880px; margin:0 auto; padding:28px 16px 56px;}
+  section.card{background:var(--card); border-radius:20px; box-shadow:var(--shadow); padding:24px 28px 14px; margin:0 0 30px;}
+  .f-coral{--fill:var(--coral);} .f-mint{--fill:var(--mint);} .f-sky{--fill:var(--sky);}
+  .f-lav{--fill:var(--lav);} .f-lemon{--fill:var(--lemon);} .f-peach{--fill:var(--peach);} .f-pink{--fill:var(--pink);}
+  h1{font-size:1.65rem; margin:2px 0 6px; display:inline-block; padding:0 .2em;
+    background:linear-gradient(transparent 68%, var(--lemon) 68%);}
+  h2{font-size:1.22rem; margin:0 0 14px; padding:.28em .9em; border-radius:999px; background:var(--fill,var(--peach));}
+  p{margin:.6em 0;}
+  ul{margin:.4em 0; padding-left:1.3em;}
+  li{margin:.25em 0;}
+  .sub{color:var(--sub); margin:0 0 10px; font-size:.95rem;}
+  .meta{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 6px;}
+  .meta span{border:2px solid var(--link); border-radius:999px; padding:0 14px; font-size:.88rem; font-weight:bold;}
+  .goals{background:var(--peach); border-radius:16px; padding:12px 18px 12px 34px; margin:14px 0 8px;}
+  .goals p{margin:2px 0 2px -18px; font-weight:bold;}
+  .note{background:var(--mint); border-radius:16px; padding:10px 16px; margin:12px 0;}
+  .warn{background:#fff3c4; color:#5b4300; border:2px solid #e0aa00; border-radius:16px; padding:10px 16px; margin:12px 0;}
+  .tbl{border:1px solid var(--line); border-radius:16px; overflow:hidden; margin:12px 0;}
+  table{border-collapse:collapse; width:100%; font-size:.94rem;}
+  th,td{border-bottom:1px solid var(--line); padding:7px 11px; text-align:left; color:var(--ink);}
+  tr:last-child td,tr:last-child th{border-bottom:none;}
+  th{background:var(--peach);}
+  button{font-family:inherit; font-size:1rem; font-weight:bold; padding:9px 22px; margin:4px 4px 4px 0;
+    border:2px solid var(--btn); background:var(--btn); color:#fff; border-radius:999px; cursor:pointer;}
+  textarea{width:100%; min-height:60px; font-family:inherit; font-size:1rem; padding:8px 10px; background:#fff; color:var(--ink);
+    border:2px solid #c9b18c; border-radius:14px;}
+  .diagram{background:#fffaf2; border:2px solid #ead9c2; border-radius:18px; padding:14px; margin:14px 0;}
   .diagram svg{display:block; width:100%; max-width:420px; height:auto; margin:0 auto;}
   .diagram.wide svg{max-width:100%;}
-  figure.diagram{margin:10px 0;}
-  figcaption{font-size:.9rem; color:#1a1a1a; margin-top:6px;}
+  figure.diagram{margin:14px 0;}
+  figcaption{font-size:.9rem; color:#5a6274; margin-top:8px;}
   .slider-row{margin:8px 0;}
   .slider-row label{font-weight:bold; display:block;}
   input[type="range"]{width:100%; max-width:420px; height:32px;}
   .zone-label{font-size:1.15rem; font-weight:bold;}
-  .glossary dt{font-weight:bold; margin-top:10px;}
+  .glossary dt{font-weight:bold; margin-top:12px;}
   .glossary dd{margin-left:0;}
   .term-en{color:var(--sub); font-size:.88rem;}
-  nav.unitnav{border-top:2px solid var(--line); margin-top:36px; padding-top:14px;}
+  nav.unitnav{padding:0 6px;}
   nav.unitnav p{margin:4px 0;}
-  a{color:var(--accent); font-weight:bold;}
+  a{color:var(--link); font-weight:bold;}
   @media (prefers-color-scheme: dark){
-    :root{--bg:#141518; --card:#1e2126; --ink:#ece9e0; --sub:#b7bcc4; --line:#4a5058; --accent-soft:#24382c;}
-    a{color:#7fc79b;}
-    .meta span{border-color:#7fc79b;}
-    h2{border-left-color:#7fc79b;}
+    :root{--bg:#251f1b; --card:#322b26; --ink:#f5ede1; --sub:#d8c9b8; --line:#57493c; --link:#ffb59d;
+      --coral:#4a3428; --mint:#2e4034; --sky:#2c3a48; --lav:#3a3350; --lemon:#4a3d1e; --peach:#453527; --pink:#472f3a;
+      --shadow:0 6px 20px rgba(0,0,0,.45);}
+    .warn{background:#4a3d1e; color:#ffe9a8; border-color:#a97e12;}
+    textarea{background:#2b2521; color:#f5ede1; border-color:#8a7967;}
   }
 </style>
 </head>
 <body>
 <main>
-  <p class="sub"><a href="../../">ゲーム・レベルデザイン講座</a> ／ Part 1：レベルデザインの基礎</p>
-  <h1>Unit 2：プレイヤー体験の設計</h1>
-  <div class="meta">
-    <span>主軸：感情</span>
-    <span>担当変数：目標の提示方法（目的・短期目標の見せ方）</span>
-  </div>
-  <div class="goals">
-    <p>この Unit の学習目標</p>
+  <section class="card f-peach">
+    <p class="sub"><a href="../../">ゲーム・レベルデザイン講座</a> ／ Part 1：レベルデザインの基礎</p>
+    <h1>Unit 2：プレイヤー体験の設計</h1>
+    <div class="meta">
+      <span>主軸：感情</span>
+      <span>担当変数：目標の提示方法（目的・短期目標の見せ方）</span>
+    </div>
+    <div class="goals">
+      <p>この Unit の学習目標</p>
+      <ul>
+        <li>外発的／内発的動機を区別し、目標の提示方法が行動を変えることを説明できる</li>
+        <li>達成感・主体性・フローなど、感情の生まれ方を具体例で説明できる</li>
+        <li>本 Unit（感情の生まれ方）と Unit 9・10（時間配分とリズム）の違いを説明できる</li>
+      </ul>
+    </div>
+    <p>Unit 1 の「体験」の中身を分解していく Unit です。動機、達成感、発見、ストレス、主体性、フロー——感情が「どう生まれるか」を見ていきます。</p>
+    <div class="note"><strong>この Unit の担当は「感情の生まれ方」</strong>、担当変数は目標の提示方法。
+    Unit 9・10 も感情に触れますが、あちらの担当は<strong>時間配分とリズム</strong>です。
+    「なぜ生まれるか」が本 Unit、「時間軸のどこに置くか」が Unit 9・10。</div>
+  </section>
+
+  <section class="card f-peach">
+    <h2>1. プレイヤーの目的と動機</h2>
+    <p>プレイヤーは<strong>目的</strong>を持って動きます（ゴール到達、収集、謎解き）。「なぜしたいのか」——目的へ向かわせる力が<strong>動機</strong>。大きく2種類あります。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 236" role="img" aria-label="外発的動機と内発的動機の対比図">
+        <rect x="0" y="0" width="640" height="236" rx="18" fill="#fffaf2"></rect>
+        <rect x="16" y="16" width="296" height="140" rx="16" fill="#fdf0bd" stroke="#6e5200" stroke-width="2"></rect>
+        <text x="164" y="48" font-size="16" fill="#3d4451" text-anchor="middle" font-weight="bold">外発的動機</text>
+        <circle cx="104" cy="76" r="13" fill="#f2b01e" stroke="#8a6100" stroke-width="2"></circle>
+        <text x="104" y="81" font-size="13" fill="#5f4300" text-anchor="middle" font-weight="bold">¥</text>
+        <circle cx="164" cy="76" r="13" fill="#f2b01e" stroke="#8a6100" stroke-width="2"></circle>
+        <text x="164" y="81" font-size="13" fill="#5f4300" text-anchor="middle" font-weight="bold">¥</text>
+        <circle cx="224" cy="76" r="13" fill="#f2b01e" stroke="#8a6100" stroke-width="2"></circle>
+        <text x="224" y="81" font-size="13" fill="#5f4300" text-anchor="middle" font-weight="bold">¥</text>
+        <text x="164" y="118" font-size="14" fill="#3d4451" text-anchor="middle">報酬や評価のため</text>
+        <text x="164" y="140" font-size="12.5" fill="#3d4451" text-anchor="middle">スコア・コイン・実績</text>
+        <rect x="328" y="16" width="296" height="140" rx="16" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="476" y="48" font-size="16" fill="#3d4451" text-anchor="middle" font-weight="bold">内発的動機</text>
+        <rect x="440" y="60" width="34" height="48" rx="5" fill="#c98d4b" stroke="#6e4f1d" stroke-width="2"></rect>
+        <circle cx="468" cy="85" r="2.6" fill="#3d4451"></circle>
+        <path d="M512 58 L517 70 L530 72 L520 80 L523 93 L512 86 L501 93 L504 80 L494 72 L507 70 Z" fill="#e0aa00"></path>
+        <text x="476" y="118" font-size="14" fill="#3d4451" text-anchor="middle">活動そのものが面白い</text>
+        <text x="476" y="140" font-size="12.5" fill="#3d4451" text-anchor="middle">「あの扉の先が気になる」</text>
+        <rect x="16" y="172" width="608" height="48" rx="14" fill="#ffedd6"></rect>
+        <text x="320" y="202" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">組み合わせて使うのが一般的</text>
+      </svg>
+      <figcaption>図：動機の2種類。</figcaption>
+    </figure>
+    <p>報酬は短期の行動を強く促すけれど、尽きると動機も尽きがち。好奇心や上達の手応えは続きやすいけれど、立ち上がりは弱め。</p>
+    <p>カギは、本 Unit の担当変数「<strong>目標の提示方法</strong>」。最終目標だけ見せるか、短期目標を少しずつ見せるかで、「あと少しやってみよう」の生まれ方が変わります。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 196" role="img" aria-label="短期目標の階段の図">
+        <rect x="0" y="0" width="640" height="196" rx="18" fill="#fffaf2"></rect>
+        <rect x="30" y="140" width="120" height="38" rx="8" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <rect x="160" y="108" width="120" height="70" rx="8" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <rect x="290" y="76" width="120" height="102" rx="8" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <rect x="420" y="44" width="120" height="134" rx="8" fill="#fdf0bd" stroke="#6e5200" stroke-width="2"></rect>
+        <text x="90" y="128" font-size="12.5" fill="#3d4451" text-anchor="middle">短期目標</text>
+        <text x="220" y="96" font-size="12.5" fill="#3d4451" text-anchor="middle">短期目標</text>
+        <text x="350" y="64" font-size="12.5" fill="#3d4451" text-anchor="middle">短期目標</text>
+        <text x="480" y="32" font-size="13" fill="#3d4451" text-anchor="middle" font-weight="bold">最終目標</text>
+        <line x1="480" y1="44" x2="480" y2="62" stroke="#3d4451" stroke-width="2"></line>
+        <polygon points="480,44 480,60 498,52" fill="#c2502a"></polygon>
+        <circle cx="90" cy="118" r="13" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <circle cx="86" cy="115" r="1.8" fill="#3d4451"></circle>
+        <circle cx="94" cy="115" r="1.8" fill="#3d4451"></circle>
+        <path d="M85 121 Q90 125 95 121" stroke="#3d4451" stroke-width="1.8" fill="none" stroke-linecap="round"></path>
+      </svg>
+      <figcaption>図：短期目標の階段。「あと少し」の積み重ね。</figcaption>
+    </figure>
+  </section>
+
+  <section class="card f-coral">
+    <h2>2. 挑戦と達成感</h2>
+    <p>達成感は、挑戦の大きさだけでは決まりません。次の3つがそろうと生まれやすくなります。</p>
     <ul>
-      <li>目的と動機（外発的／内発的）を区別し、目標の提示方法が行動を変えることを説明できる</li>
-      <li>達成感・主体性・フローなど、感情の生まれ方を具体例で説明できる</li>
-      <li>「感情の種類と生まれ方」を扱う本 Unit と、「時間配分とリズム」を扱う Unit 9・10 の違いを説明できる</li>
+      <li><strong>乗り越えた実感のある挑戦</strong>：偶然では解けないが、不可能でもない課題</li>
+      <li><strong>分かりやすいフィードバック</strong>：成功とその理由が伝わる（音・演出・結果表示）</li>
+      <li><strong>「自分の力でできた」という感覚</strong>：自分の判断と操作が結果につながった感覚</li>
     </ul>
-  </div>
-  <p>Unit 1 に続き、この Unit では「感情」に注目し、目的と動機、達成感、発見、ストレス、主体性、フローを1つずつ分解していきます。</p>
-  <div class="note"><strong>この Unit の担当変数について：</strong>
-  本 Unit の手がかりは<strong>感情の設計</strong>です。担当変数は「目標の提示方法（目的・短期目標の見せ方）」。
-  Unit 9・10 も感情に触れますが、あちらの担当は<strong>時間配分とリズム</strong>です。
-  本 Unit は「どんな感情が、なぜ生まれるか」、Unit 9・10 は「それを時間軸のどこに置くか」を扱います。</div>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 228" role="img" aria-label="達成感の3要素の関係図">
+        <rect x="0" y="0" width="640" height="228" rx="18" fill="#fffaf2"></rect>
+        <rect x="16" y="20" width="184" height="58" rx="14" fill="#ffedd6" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="108" y="56" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">挑戦</text>
+        <rect x="228" y="20" width="184" height="58" rx="14" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="320" y="56" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">フィードバック</text>
+        <rect x="440" y="20" width="184" height="58" rx="14" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="532" y="56" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">主体感</text>
+        <path d="M108 78 L300 138 M320 78 L320 132 M532 78 L340 138" stroke="#3d4451" stroke-width="2" fill="none"></path>
+        <rect x="220" y="140" width="200" height="58" rx="14" fill="#fff3c4" stroke="#6e5200" stroke-width="3"></rect>
+        <text x="320" y="176" font-size="18" fill="#3d4451" text-anchor="middle" font-weight="bold">達成感</text>
+      </svg>
+      <figcaption>図：達成感は3要素がそろったときに生まれやすい。</figcaption>
+    </figure>
+    <p>敵を強くしても達成感は増えません。理不尽な挑戦は主体感を壊し、フィードバックのない成功は実感が薄いから。挑戦の設計は Unit 6〜8 で。</p>
+  </section>
 
-  <h2>1. プレイヤーの目的と動機</h2>
-  <p>プレイヤーは<strong>目的</strong>を持って行動します（ゴール到達、アイテム収集、謎解き）。
-  「なぜそれをしたいのか」という、目的へ向かわせる力が<strong>動機</strong>です。動機は大きく2種類です。</p>
-  <table>
-    <thead><tr><th>動機の種類</th><th>意味</th><th>例</th></tr></thead>
-    <tbody>
-      <tr><th>外発的動機</th><td>報酬や評価など、活動の外側にあるもの</td><td>スコア、コイン、実績などのため繰り返し遊ぶ</td></tr>
-      <tr><th>内発的動機</th><td>活動そのものの面白さや好奇心</td><td>「あの扉の先が気になる」「操作が気持ちいい」から進み続ける</td></tr>
-    </tbody>
-  </table>
-  <p>どちらが優れているわけではありません。報酬は短期的な行動を強く促しますが、報酬だけに頼ると、尽きた途端に動機も尽きがちです。
-  好奇心や上達の手応えは持続しやすい一方、立ち上がりは弱めです（両者の併用が一般的）。</p>
-  <p>重要なのは、<strong>目標の提示方法</strong>が動機の働き方を変えることです。
-  遠くの最終目標だけを見せるか、届きそうな短期目標を段階的に見せるかで、「あと少しやってみよう」という気持ちの生まれ方が変わります。</p>
+  <section class="card f-sky">
+    <h2>3. 探索、発見、驚き</h2>
+    <p>「見つけた！」の喜びは、探索の中心。発見が成り立つには、2つの条件のバランスが要ります。</p>
+    <ul>
+      <li><strong>隠されていること</strong>：全部見えていたら発見ではなく確認になる</li>
+      <li><strong>見つけられること</strong>：手がかりがなければ偶然頼み。見つけられなければ「存在しない」のと同じ</li>
+    </ul>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 216" role="img" aria-label="発見が成り立つバランスの図">
+        <rect x="0" y="0" width="640" height="216" rx="18" fill="#fffaf2"></rect>
+        <rect x="16" y="16" width="282" height="130" rx="16" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="157" y="46" font-size="15.5" fill="#3d4451" text-anchor="middle" font-weight="bold">隠されている</text>
+        <circle cx="157" cy="84" r="21" fill="#ffffff" stroke="#17557f" stroke-width="2"></circle>
+        <text x="157" y="92" font-size="22" fill="#17557f" text-anchor="middle" font-weight="bold">？</text>
+        <text x="157" y="126" font-size="12.5" fill="#3d4451" text-anchor="middle">全部見えたら「確認」</text>
+        <text x="320" y="90" font-size="22" fill="#3d4451" text-anchor="middle" font-weight="bold">×</text>
+        <rect x="342" y="16" width="282" height="130" rx="16" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="483" y="46" font-size="15.5" fill="#3d4451" text-anchor="middle" font-weight="bold">見つけられる</text>
+        <circle cx="468" cy="80" r="17" fill="#ffffff" stroke="#17663f" stroke-width="3"></circle>
+        <line x1="481" y1="93" x2="497" y2="107" stroke="#17663f" stroke-width="5" stroke-linecap="round"></line>
+        <text x="483" y="126" font-size="12.5" fill="#3d4451" text-anchor="middle">手がかりで偶然頼みにしない</text>
+        <rect x="16" y="160" width="608" height="42" rx="12" fill="#fdf0bd"></rect>
+        <text x="320" y="187" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">このバランスが「見つけた！」を生む</text>
+      </svg>
+      <figcaption>図：発見は「隠されている」と「見つけられる」のバランスで成り立つ。</figcaption>
+    </figure>
+    <p>調整する道具が情報の設計です。実験Cの S5 では遮蔽壁で入口を隠しました。隠すことは仕掛けにもなりますが、手がかりがなければ、ただの迷子の原因に。</p>
+    <p>驚きも同じ構造。まず「こうなるだろう」という予想があり、それが裏切られたときに生まれます。</p>
+  </section>
 
-  <h2>2. 挑戦と達成感</h2>
-  <p>達成感は挑戦の大きさだけで決まりません。次の3つがそろうと生まれやすくなります。</p>
-  <ul>
-    <li><strong>乗り越えた実感のある挑戦</strong>：偶然では解けないが、不可能でもない課題</li>
-    <li><strong>分かりやすいフィードバック</strong>：成功とその理由が伝わること（音・演出・結果表示）</li>
-    <li><strong>「自分の力でできた」という感覚</strong>：自分の判断と操作が結果につながった感覚</li>
-  </ul>
-  <figure class="diagram wide">
-    <svg viewBox="0 0 640 228" role="img" aria-label="達成感の3要素の関係図">
-    <rect x="0" y="0" width="100%" height="100%" rx="8" fill="#f7f9fc"/>
-      <rect x="0" y="0" width="640" height="228" fill="#ffffff"></rect>
-      <rect x="16" y="20" width="184" height="58" fill="#fdeeda" stroke="#b45309" stroke-width="2"></rect>
-      <text x="108" y="46" font-size="15" fill="#1a1a1a" text-anchor="middle" font-weight="bold">挑戦</text>
-      <rect x="228" y="20" width="184" height="58" fill="#eef4fb" stroke="#0b5394" stroke-width="2"></rect>
-      <text x="320" y="46" font-size="15" fill="#1a1a1a" text-anchor="middle" font-weight="bold">フィードバック</text>
-      <rect x="440" y="20" width="184" height="58" fill="#e3efe7" stroke="#2f6f4e" stroke-width="2"></rect>
-      <text x="532" y="46" font-size="15" fill="#1a1a1a" text-anchor="middle" font-weight="bold">主体感</text>
-      <path d="M108 78 L300 138 M320 78 L320 132 M532 78 L340 138" stroke="#1a1a1a" stroke-width="2" fill="none"></path>
-      <rect x="220" y="140" width="200" height="58" fill="#fff4d6" stroke="#b45309" stroke-width="3"></rect>
-      <text x="320" y="176" font-size="18" fill="#1a1a1a" text-anchor="middle" font-weight="bold">達成感</text>
-    </svg>
-    <figcaption>図：達成感は3要素がそろったときに生まれやすい。</figcaption>
-  </figure>
-  <p>敵を強くしただけでは達成感は増えません。理不尽な挑戦は主体感を壊し、フィードバックのない成功は実感が薄くなるためです。
-  挑戦の設計は Unit 6〜8 で扱います。</p>
-
-  <h2>3. 探索、発見、驚き</h2>
-  <p>「見つけた！」という発見の喜びは、探索型体験の中心です。発見が成立するには、2つの条件のバランスが必要です。</p>
-  <ul>
-    <li><strong>隠されていること</strong>：全部見えていたら発見ではなく確認になる</li>
-    <li><strong>見つけられること</strong>：手がかりがなければ偶然頼みになり、見つけられなかった人には存在しないのと同じ</li>
-  </ul>
-  <p>このバランスを調整する道具が情報の設計です。
-  実験Cの S5 では、遮蔽壁で入口を隠しました。隠すことは誘導であると同時に発見の仕掛けにもなります。
-  ただし「見つける価値」と「手がかり」がなければ、単なる迷子の原因になります。</p>
-  <p>驚きも同じ構造で、予想を裏切る出来事があって初めて生まれます。まず「こうなるだろう」という予想が必要です。</p>
-
-  <h2>4. ストレスと快感</h2>
-  <p>ストレスは単純に「悪いもの」ではありません。緊張した場面を抜けた直後の解放感のように、適度なストレスは快感の前提になります。
-  ホラーや高難度ゲームのように、意図的に強いストレスが有効な演出になる場合もあります。</p>
-  <p>一方、離脱につながるストレスもあります。分かれ目は<strong>種類</strong>です。</p>
-  <table>
-    <thead><tr><th>ストレスの種類</th><th>特徴</th><th>例</th></tr></thead>
-    <tbody>
-      <tr><th>挑戦としてのストレス</th><td>原因が分かり、工夫で対処できる。乗り越えれば達成感につながる</td><td>強い敵がいるが、弱点や回避ルートが見えている</td></tr>
-      <tr><th>不当なストレス</th><td>原因不明で対処できず、失敗のコストだけが大きい</td><td>予兆なく即死する仕掛け、長すぎるリトライ</td></tr>
-    </tbody>
-  </table>
-  <figure class="diagram wide">
-    <svg viewBox="0 0 640 280" role="img" aria-label="ストレス量と体験の質の関係を示す模式図（山型の曲線）">
-    <rect x="0" y="0" width="100%" height="100%" rx="8" fill="#f7f9fc"/>
-      <rect x="0" y="0" width="640" height="280" fill="#ffffff"></rect>
-      <rect x="248" y="36" width="150" height="188" fill="#fdf3d8"></rect>
-      <line x1="70" y1="224" x2="600" y2="224" stroke="#1a1a1a" stroke-width="2"></line>
-      <line x1="70" y1="224" x2="70" y2="30" stroke="#1a1a1a" stroke-width="2"></line>
-      <polygon points="600,224 588,218 588,230" fill="#1a1a1a"></polygon>
-      <polygon points="70,30 64,42 76,42" fill="#1a1a1a"></polygon>
-      <path d="M78 208 C 200 200, 250 84, 323 70 C 396 84, 450 190, 592 214" stroke="#b3261e" stroke-width="3" fill="none"></path>
-      <text x="600" y="248" font-size="14" fill="#1a1a1a" text-anchor="end">ストレス量 →</text>
-      <text x="52" y="44" font-size="14" fill="#1a1a1a">体験の質 ↑</text>
-      <text x="150" y="196" font-size="14" fill="#1a1a1a" text-anchor="middle">少なすぎる</text>
-      <text x="150" y="216" font-size="13" fill="#1a1a1a" text-anchor="middle">物足りなさ</text>
-      <text x="323" y="52" font-size="15" fill="#1a1a1a" text-anchor="middle" font-weight="bold">適度な範囲</text>
-      <text x="323" y="120" font-size="13" fill="#1a1a1a" text-anchor="middle">集中・快感</text>
-      <text x="510" y="196" font-size="14" fill="#1a1a1a" text-anchor="middle">過剰</text>
-      <text x="510" y="216" font-size="13" fill="#1a1a1a" text-anchor="middle">離脱につながる</text>
-    </svg>
-    <figcaption>図（模式図）：ストレスと体験の質は山型の関係。「適度」の範囲は人によって異なる。</figcaption>
-  </figure>
-  <p>設計の目安は「ストレスをなくすこと」ではなく、「対象プレイヤーにとって挑戦として受け取れる形か」を確かめることです。
-  緊張と緩和の並べ方は Unit 9 で扱います。</p>
-
-  <h2>5. Player Agency（主体性）</h2>
-  <p><span class="term-en">Player Agency</span>（主体性）とは、「自分で選んで行動している」と感じられる度合いのことです。
-  本質は<strong>選択肢の数ではない</strong>点が大切です。</p>
-  <p>たとえば分岐が10個あっても、どれを選んでも結果が同じなら主体性は感じにくいものです。
-  逆に2つでも、「危険だが近道」「安全だが遠回り」の違いが分かり、自分の判断で選んで結果が返ってくれば、「自分で選んだ」感覚は強くなります。</p>
-  <div class="note"><strong>主体性の材料：</strong>①違いが分かる選択肢、②選ぶための情報、③結果が自分に返ってくること。
-  「誘導するが、操らない」は、この主体性を守りながら導く考え方です。</div>
-  <figure class="diagram wide">
-    <svg viewBox="0 0 640 224" role="img" aria-label="Player Agency の循環図">
-    <rect x="0" y="0" width="100%" height="100%" rx="8" fill="#f7f9fc"/>
-      <rect x="0" y="0" width="640" height="224" fill="#ffffff"></rect>
-      <rect x="16" y="34" width="176" height="62" fill="#eef4fb" stroke="#0b5394" stroke-width="2"></rect>
-      <text x="104" y="62" font-size="15" fill="#1a1a1a" text-anchor="middle" font-weight="bold">違いが分かる選択</text>
-      <text x="104" y="84" font-size="12" fill="#1a1a1a" text-anchor="middle">＋選ぶための情報</text>
-      <polygon points="204,58 222,65 204,72" fill="#1a1a1a"></polygon>
-      <rect x="232" y="34" width="176" height="62" fill="#fdeeda" stroke="#b45309" stroke-width="2"></rect>
-      <text x="320" y="62" font-size="15" fill="#1a1a1a" text-anchor="middle" font-weight="bold">結果が返ってくる</text>
-      <text x="320" y="84" font-size="12" fill="#1a1a1a" text-anchor="middle">近道できた／安全に着けた</text>
-      <polygon points="420,58 438,65 420,72" fill="#1a1a1a"></polygon>
-      <rect x="448" y="34" width="176" height="62" fill="#e3efe7" stroke="#2f6f4e" stroke-width="2"></rect>
-      <text x="536" y="62" font-size="15" fill="#1a1a1a" text-anchor="middle" font-weight="bold">「自分が影響した」</text>
-      <path d="M536 96 L536 150 L104 150 L104 96" stroke="#1a1a1a" stroke-width="2" fill="none"></path>
-      <polygon points="104,96 97,110 111,110" fill="#1a1a1a"></polygon>
-    </svg>
-    <figcaption>図：主体性は、選択→結果→「自分が影響した」感覚の循環から生まれる。</figcaption>
-  </figure>
-  <p>なお主体性は強ければ常に良いわけではありません。選択が多すぎると判断の負担になり、休みたい場面では一本道のほうが滑らかなこともあります。</p>
-
-  <h2>6. フロー状態と没入感</h2>
-  <p><strong>フロー（Flow）</strong>は、心理学者のミハイ・チクセントミハイが提案した理論で、挑戦とスキルがつり合ったときに生じる、
-  没入して時間を忘れるような心理状態を指します。物差しとして参照されますが、「常にこの状態を作ればよい」という法則ではありません。</p>
-  <p>挑戦がスキルを大きく上回れば<strong>不安</strong>に、つり合えば<strong>フロー</strong>に、スキルが大きく上回れば<strong>退屈</strong>になります。</p>
-  <p>下の図は2つのスライダーだけで操作できます。</p>
-  <div class="diagram">
-    <svg viewBox="0 0 300 300" role="img" aria-label="挑戦とスキルのバランス図（フロー理論の模式図）">
-      <rect x="0" y="0" width="300" height="300" fill="#f7f5f0"></rect>
-      <polygon points="30,30 222,30 30,222" fill="#f3b8b0"></polygon>
-      <polygon points="78,270 270,270 270,78" fill="#b9cfe8"></polygon>
-      <polygon points="30,222 222,30 270,30 270,78 78,270 30,270" fill="#a8d5a2"></polygon>
-      <text x="52" y="58" font-size="15" fill="#1a1a1a" font-weight="bold">不安</text>
-      <text x="216" y="252" font-size="15" fill="#1a1a1a" font-weight="bold">退屈</text>
-      <text x="30" y="292" font-size="12" fill="#1a1a1a">スキル →</text>
-      <text x="6" y="40" font-size="12" fill="#1a1a1a">挑戦 ↑</text>
-      <circle id="flowPoint" cx="150" cy="150" r="9" fill="#b3261e" stroke="#ffffff" stroke-width="2"></circle>
-      <text x="138" y="146" font-size="15" fill="#1a1a1a" font-weight="bold" transform="rotate(-45 150 150)" stroke="#ffffff" stroke-width="4" paint-order="stroke">フロー</text>
-    </svg>
-    <div class="slider-row">
-      <label for="skillRange">あなたのスキル：<span id="skillVal">5</span> / 10</label>
-      <input type="range" id="skillRange" min="0" max="10" step="1" value="5">
+  <section class="card f-pink">
+    <h2>4. ストレスと快感</h2>
+    <p>ストレスは悪者とは限りません。緊張を抜けた後の解放感のように、適度なストレスは快感の前提。強いストレス自体が演出になることもあります。</p>
+    <p>問題は<strong>種類</strong>です。</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>ストレスの種類</th><th>特徴</th><th>例</th></tr></thead>
+        <tbody>
+          <tr><th>挑戦としてのストレス</th><td>原因が分かり、工夫で対処できる</td><td>強い敵がいるが、弱点や回避ルートが見えている</td></tr>
+          <tr><th>不当なストレス</th><td>原因不明で対処できず、失敗のコストだけが大きい</td><td>予兆なく即死する仕掛け、長すぎるリトライ</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="slider-row">
-      <label for="challengeRange">課題の挑戦レベル：<span id="challengeVal">5</span> / 10</label>
-      <input type="range" id="challengeRange" min="0" max="10" step="1" value="5">
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 280" role="img" aria-label="ストレス量と体験の質の関係を示す模式図（山型の曲線）">
+        <rect x="0" y="0" width="640" height="280" rx="18" fill="#fffaf2"></rect>
+        <rect x="248" y="36" width="150" height="188" rx="10" fill="#fdf0bd"></rect>
+        <line x1="70" y1="224" x2="600" y2="224" stroke="#3d4451" stroke-width="2"></line>
+        <line x1="70" y1="224" x2="70" y2="30" stroke="#3d4451" stroke-width="2"></line>
+        <polygon points="600,224 588,218 588,230" fill="#3d4451"></polygon>
+        <polygon points="70,30 64,42 76,42" fill="#3d4451"></polygon>
+        <path d="M78 208 C 200 200, 250 84, 323 70 C 396 84, 450 190, 592 214" stroke="#c03a2b" stroke-width="3" fill="none"></path>
+        <text x="600" y="248" font-size="14" fill="#3d4451" text-anchor="end">ストレス量 →</text>
+        <text x="52" y="44" font-size="14" fill="#3d4451">体験の質 ↑</text>
+        <text x="150" y="196" font-size="14" fill="#3d4451" text-anchor="middle">少なすぎる</text>
+        <text x="150" y="216" font-size="13" fill="#3d4451" text-anchor="middle">物足りなさ</text>
+        <text x="323" y="52" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">適度な範囲</text>
+        <text x="323" y="120" font-size="13" fill="#3d4451" text-anchor="middle">集中・快感</text>
+        <text x="510" y="196" font-size="14" fill="#3d4451" text-anchor="middle">過剰</text>
+        <text x="510" y="216" font-size="13" fill="#3d4451" text-anchor="middle">離脱につながる</text>
+      </svg>
+      <figcaption>図（模式図）：ストレスと体験の質は山型の関係。「適度」の範囲は人によって異なる。</figcaption>
+    </figure>
+    <p>目安は「なくす」ことではなく「挑戦として受け取れる形か」を確かめること。緊張と緩和の並べ方は Unit 9 で。</p>
+  </section>
+
+  <section class="card f-lav">
+    <h2>5. Player Agency（主体性）</h2>
+    <p><span class="term-en">Player Agency</span>（主体性）は、「自分で選んで行動している」と感じられる度合い。本質は<strong>選択肢の数じゃありません</strong>。</p>
+    <p>分岐が10個あっても結果が同じなら主体性は感じにくい。逆に2つでも、違いが分かり、自分で選んで結果が返ってくれば「自分で選んだ」感覚は強くなります。</p>
+    <div class="note"><strong>主体性の材料：</strong>違いが分かる選択肢、選ぶための情報、結果が返ってくること。
+    「誘導するが、操らない」は、この主体性を守りながら導く考え方です。</div>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 224" role="img" aria-label="Player Agency の循環図">
+        <rect x="0" y="0" width="640" height="224" rx="18" fill="#fffaf2"></rect>
+        <rect x="16" y="34" width="176" height="62" rx="14" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="104" y="62" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">違いが分かる選択</text>
+        <text x="104" y="84" font-size="12" fill="#3d4451" text-anchor="middle">＋選ぶための情報</text>
+        <polygon points="204,58 222,65 204,72" fill="#3d4451"></polygon>
+        <rect x="232" y="34" width="176" height="62" rx="14" fill="#ffedd6" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="320" y="62" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">結果が返ってくる</text>
+        <text x="320" y="84" font-size="12" fill="#3d4451" text-anchor="middle">近道できた／安全に着けた</text>
+        <polygon points="420,58 438,65 420,72" fill="#3d4451"></polygon>
+        <rect x="448" y="34" width="176" height="62" rx="14" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="536" y="62" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">「自分が影響した」</text>
+        <path d="M536 96 L536 150 L104 150 L104 96" stroke="#3d4451" stroke-width="2" fill="none"></path>
+        <polygon points="104,96 97,110 111,110" fill="#3d4451"></polygon>
+      </svg>
+      <figcaption>図：主体性は、選択→結果→「自分が影響した」感覚の循環から生まれる。</figcaption>
+    </figure>
+    <p>ただし、強ければ良いわけでもありません。多すぎる選択は負担になり、一本道が滑らかな場面もあります。</p>
+  </section>
+
+  <section class="card f-mint">
+    <h2>6. フロー状態と没入感</h2>
+    <p><strong>フロー（Flow）</strong>は、心理学者チクセントミハイが提案した理論で、挑戦とスキルがつり合ったときに生じる、没入して時間を忘れる状態。「常にこの状態が正解」という法則ではありません。</p>
+    <p>挑戦が上回れば<strong>不安</strong>、つり合えば<strong>フロー</strong>、スキルが上回れば<strong>退屈</strong>。スライダーで確かめてみましょう。</p>
+    <div class="diagram">
+      <svg viewBox="0 0 300 300" role="img" aria-label="挑戦とスキルのバランス図（フロー理論の模式図）">
+        <rect x="0" y="0" width="300" height="300" fill="#fffaf2"></rect>
+        <polygon points="30,30 222,30 30,222" fill="#f6c6bd"></polygon>
+        <polygon points="78,270 270,270 270,78" fill="#bcd7f0"></polygon>
+        <polygon points="30,222 222,30 270,30 270,78 78,270 30,270" fill="#bfe3c0"></polygon>
+        <text x="52" y="58" font-size="15" fill="#3d4451" font-weight="bold">不安</text>
+        <text x="216" y="252" font-size="15" fill="#3d4451" font-weight="bold">退屈</text>
+        <text x="30" y="292" font-size="12" fill="#3d4451">スキル →</text>
+        <text x="6" y="40" font-size="12" fill="#3d4451">挑戦 ↑</text>
+        <circle id="flowPoint" cx="150" cy="150" r="9" fill="#c03a2b" stroke="#ffffff" stroke-width="2"></circle>
+        <text x="138" y="146" font-size="15" fill="#3d4451" font-weight="bold" transform="rotate(-45 150 150)" stroke="#ffffff" stroke-width="4" paint-order="stroke">フロー</text>
+      </svg>
+      <div class="slider-row">
+        <label for="skillRange">あなたのスキル：<span id="skillVal">5</span> / 10</label>
+        <input type="range" id="skillRange" min="0" max="10" step="1" value="5">
+      </div>
+      <div class="slider-row">
+        <label for="challengeRange">課題の挑戦レベル：<span id="challengeVal">5</span> / 10</label>
+        <input type="range" id="challengeRange" min="0" max="10" step="1" value="5">
+      </div>
+      <p class="zone-label" id="zoneLabel" aria-live="polite">現在地：フロー</p>
+      <p id="zoneDesc" aria-live="polite">挑戦とスキルがつり合っています。集中しやすい状態です。</p>
     </div>
-    <p class="zone-label" id="zoneLabel" aria-live="polite">現在地：フロー</p>
-    <p id="zoneDesc" aria-live="polite">挑戦とスキルがつり合っています。集中しやすい状態です。</p>
-  </div>
-  <p><strong>没入感（Immersion）</strong>は、世界や活動に深く入り込み、周囲や時間の感覚が薄れる状態です。
-  フローが挑戦と能力のバランスに注目する概念なのに対し、没入感は物語や世界への入り込みも含む広い言葉です。
-  静かな探索で景色と環境音に引き込まれる体験は、高い挑戦なしでも生まれます。</p>
-  <div class="warn">⚠ <strong>注意：</strong>フローを常時維持すべき正解と考えないでください。
-  釣り合いが続く体験はかえって疲労を招くため、休息や探索を挟む<strong>緩急</strong>が必要です（Unit 9）。</div>
+    <p><strong>没入感（Immersion）</strong>は、世界や活動に深く入り込み、周囲や時間の感覚が薄れる状態。フローが「挑戦と能力のバランス」に注目するのに対し、没入感は物語や世界への入り込みも含む広い言葉です。静かな探索で景色に引き込まれる体験は、高い挑戦なしでも生まれます。</p>
+    <div class="warn">⚠ <strong>注意：</strong>フローを維持し続けるのが正解ではありません。つり合いが続くと疲れてしまう。休息や探索を挟む<strong>緩急</strong>が必要です（Unit 9）。</div>
+  </section>
 
-  <h2>用語メモ</h2>
-  <dl class="glossary">
-    <dt>Player Agency <span class="term-en">プレイヤー・エージェンシー（主体性）</span></dt>
-    <dd>意味：「自分で選んで行動している」と感じられる度合い。<br>
-    具体例：どちらの分岐でも進めるが、報酬や難しさが変わるマップ。</dd>
-    <dt>Flow <span class="term-en">フロー</span></dt>
-    <dd>意味：挑戦と自分の能力がつり合い、没入して時間を忘れる心理状態。チクセントミハイが提案した心理学の理論。<br>
-    具体例：少しずつ難しくなるステージで「あと1回」と繰り返す状態。</dd>
-    <dt>Immersion <span class="term-en">没入感（イマージョン）</span></dt>
-    <dd>意味：世界や活動に深く入り込み、周囲や時間の感覚が薄れる状態。フローより広い概念。<br>
-    具体例：静かな探索で景色に引き込まれ、気づけば30分経っていた状態。</dd>
-  </dl>
+  <section class="card f-mint">
+    <h2>用語メモ</h2>
+    <dl class="glossary">
+      <dt>Player Agency <span class="term-en">プレイヤー・エージェンシー（主体性）</span></dt>
+      <dd>意味：「自分で選んで行動している」と感じられる度合い。<br>
+      具体例：どちらの分岐でも進めるが、報酬や難しさが変わるマップ。</dd>
+      <dt>Flow <span class="term-en">フロー</span></dt>
+      <dd>意味：挑戦と能力がつり合い、没入して時間を忘れる心理状態。チクセントミハイが提案した心理学の理論。<br>
+      具体例：少しずつ難しくなるステージで「あと1回」と繰り返す状態。</dd>
+      <dt>Immersion <span class="term-en">没入感（イマージョン）</span></dt>
+      <dd>意味：世界や活動に深く入り込み、周囲や時間の感覚が薄れる状態。フローより広い概念。<br>
+      具体例：静かな探索で景色に引き込まれ、気づけば30分経っていた。</dd>
+    </dl>
+  </section>
 
-  <h2>考えてみよう</h2>
-  <p>入力内容はこのブラウザの中にだけ保存され、外部に送信されません。ページを開き直すと自動で復元されます。</p>
-  <p><button type="button" id="saveBtn">保存する</button>
-  <span id="saveStatus" aria-live="polite"></span></p>
-  <p><strong>質問1：</strong>「あと1回だけ」と繰り返した体験では、挑戦とスキルの関係はどうでしたか？ 図のどこに当てはまりますか？</p>
-  <textarea id="q1" aria-label="質問1の回答"></textarea>
-  <p><strong>質問2：</strong>選択肢は少ないのに「自分で選んだ」と感じた場面（またはその逆）を、主体性の3つの材料に当てはめてみましょう。</p>
-  <textarea id="q2" aria-label="質問2の回答"></textarea>
-  <p><strong>質問3：</strong>報酬（外発的動機）だけで引っ張る設計では、長期的にどんな問題が起きそうですか？ 内発的動機を支える工夫も考えてみましょう。</p>
-  <textarea id="q3" aria-label="質問3の回答"></textarea>
+  <section class="card f-lemon">
+    <h2>考えてみよう</h2>
+    <p>入力内容はこのブラウザの中にだけ保存され、外部に送信されません。ページを開き直すと自動で復元されます。</p>
+    <p><button type="button" id="saveBtn">保存する</button>
+    <span id="saveStatus" aria-live="polite"></span></p>
+    <p><strong>質問1：</strong>「あと1回だけ」と繰り返した体験では、挑戦とスキルの関係はどうでしたか？ 図のどこに当てはまりますか？</p>
+    <textarea id="q1" aria-label="質問1の回答"></textarea>
+    <p><strong>質問2：</strong>選択肢は少ないのに「自分で選んだ」と感じた場面（またはその逆）を、主体性の材料に当てはめてみましょう。</p>
+    <textarea id="q2" aria-label="質問2の回答"></textarea>
+    <p><strong>質問3：</strong>報酬だけで引っ張る設計では、長期的にどんな問題が起きそうですか？ 内発的動機を支える工夫も考えてみましょう。</p>
+    <textarea id="q3" aria-label="質問3の回答"></textarea>
+  </section>
 
-  <h2>実験で確かめる</h2>
-  <p>このバランスは、実験Cの遮蔽シナリオで試せます。</p>
-  <p>→ <a href="../../experiments/exp-c-guidance/">実験C「プレイヤー誘導実験」</a>（Unit 4 対応。S5 で入口を隠し、選ばれ方を確認できます）</p>
+  <section class="card f-sky">
+    <h2>実験で確かめる</h2>
+    <p>隠すことと見つけられることのバランスは、実験Cの遮蔽シナリオで試せます。</p>
+    <p>→ <a href="../../experiments/exp-c-guidance/">実験C「プレイヤー誘導実験」</a>（Unit 4 対応）</p>
+  </section>
 
   <nav class="unitnav">
     <p>← 前の Unit：<a href="../unit-01/">Unit 1「レベルデザインとは何か」</a></p>
