@@ -138,7 +138,9 @@
     <tbody><tr><td colspan="6">まだ記録がありません。</td></tr></tbody>
   </table>
   <p style="margin:4px 0;"><button type="button" id="btnClearHistory" class="secondary" disabled>記録をクリア</button>
+  <button type="button" id="btnExportHistory" class="secondary" disabled>記録を書き出す (CSV)</button>
   <span id="historyStatus" class="status" aria-live="polite"></span></p>
+  <p style="margin:4px 0;">CSV 書き出しの対象は、このページを開いてからの記録（現在のセッション分）のみです。再読み込みすると記録は消えます（考察の入力内容はブラウザに保存され、残ります）。</p>
 
   <h2><span class="step">⑤</span>考察する</h2>
   <p id="verdict" class="status" aria-live="polite">実行すると、仮説と結果の一致／不一致がここに表示されます。</p>
@@ -467,6 +469,7 @@ function renderHistory() {
     });
   }
   document.getElementById("btnClearHistory").disabled = state.history.length === 0;
+  document.getElementById("btnExportHistory").disabled = state.history.length === 0;
 }
 function addHistory(method, resultText, timeText, judge) {
   state.history.push({ method: method, scenario: scenarioLabel(), result: resultText, time: timeText, judge: judge });
@@ -481,6 +484,39 @@ document.getElementById("btnClearHistory").addEventListener("click", function ()
   renderHistory();
   setVerdict(VERDICT_INITIAL);
   document.getElementById("historyStatus").textContent = "記録をクリアしました。";
+});
+
+// ---- 記録の CSV 書き出し（現在のセッション分のみ。サーバー送信はしない） ----
+function csvEscape(v) {
+  v = String(v);
+  if (/[",\r\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+  return v;
+}
+function buildHistoryCsv() {
+  // 画面の履歴テーブルと同じ6列・同じ表示値で組み立てる
+  var rows = [["#", "方法", "シナリオ", "結果", "所要時間", "仮説との一致"]];
+  state.history.forEach(function (h, i) {
+    rows.push([String(i + 1), h.method, h.scenario, h.result, h.time, h.judge]);
+  });
+  return "\uFEFF" + rows.map(function (r) { return r.map(csvEscape).join(","); }).join("\r\n") + "\r\n";
+}
+function historyCsvFilename() {
+  var d = new Date();
+  function pad(n) { return ("0" + n).slice(-2); }
+  return "exp-c-history-" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) +
+    "-" + pad(d.getHours()) + pad(d.getMinutes()) + ".csv";
+}
+document.getElementById("btnExportHistory").addEventListener("click", function () {
+  if (state.history.length === 0) return;
+  var blob = new Blob([buildHistoryCsv()], { type: "text/csv;charset=utf-8" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = historyCsvFilename();
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 });
 
 document.getElementById("btnPlay").addEventListener("click", function () {
