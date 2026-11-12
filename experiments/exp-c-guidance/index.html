@@ -6,52 +6,62 @@
 <title>実験C：プレイヤー誘導実験 | ゲーム・レベルデザイン講座</title>
 <style>
   :root{
-    --ink:#1a1a1a; --paper:#ffffff; --accent:#0b5394; --accent2:#b45309;
-    --ok:#146c2e; --warn-bg:#fff4d6; --warn-border:#b45309; --line:#5a5a5a;
-    --upper:#0b5394; --lower:#b45309;
+    --ink:#3d4451; --paper:#ffffff; --accent:#1f6fb2; --accent-d:#17557f; --accent2:#b95d14;
+    --ok:#1e7d46; --warn-bg:#fff3c4; --warn-text:#5b4300; --warn-border:#e0aa00; --line:#d9c6ae;
+    --upper:#2b6cb0; --lower:#b95d14; --peach:#ffedd6; --sky-soft:#ddeefb;
+    --shadow:0 6px 20px rgba(146,90,32,.10);
   }
   *{box-sizing:border-box;}
-  body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP",sans-serif;
-    color:var(--ink); background:#f2f2f2; margin:0; line-height:1.7;}
-  main{max-width:880px; margin:0 auto; padding:20px 16px 48px; background:var(--paper);}
-  h1{font-size:1.45rem; margin:0 0 4px;}
-  h2{font-size:1.1rem; border-left:6px solid var(--accent); padding-left:8px; margin:28px 0 8px;}
-  .sub{color:#333; margin:0 0 12px;}
-  .step{display:inline-block; background:var(--accent); color:#fff; border-radius:4px;
-    padding:0 8px; font-size:.85rem; margin-right:6px;}
-  fieldset{border:2px solid var(--line); border-radius:6px; margin:10px 0; padding:10px 14px;}
-  legend{font-weight:bold; padding:0 6px;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic","Noto Sans JP",sans-serif;
+    color:var(--ink); background:#fff9f0; margin:0; font-size:17px; line-height:1.85;}
+  main{max-width:880px; margin:24px auto 48px; padding:24px 22px 48px; background:var(--paper);
+    border-radius:24px; box-shadow:var(--shadow);}
+  h1{font-size:1.55rem; margin:0 0 6px; display:inline-block; padding:0 .2em;
+    background:linear-gradient(transparent 68%, #fdf0bd 68%);}
+  h2{font-size:1.15rem; background:var(--peach); border-radius:999px; padding:.25em .9em; margin:30px 0 10px;}
+  .sub{color:#5a6274; margin:0 0 12px;}
+  .step{display:inline-block; background:#c2502a; color:#fff; border-radius:999px;
+    padding:.05em .6em; font-size:.85rem; margin-right:6px;}
+  fieldset{border:2px solid var(--line); border-radius:18px; margin:12px 0; padding:12px 16px;}
+  legend{font-weight:bold; padding:0 8px;}
   label{display:block; margin:4px 0; cursor:pointer;}
-  button{font-size:1rem; padding:8px 16px; margin:4px 4px 4px 0; border:2px solid var(--accent);
-    background:var(--accent); color:#fff; border-radius:6px; cursor:pointer;}
-  button.secondary{background:#fff; color:var(--accent);}
-  button:disabled{background:#999; border-color:#999; color:#fff; cursor:not-allowed;}
+  button{font-family:inherit; font-weight:bold; font-size:1rem; padding:9px 20px; margin:4px 4px 4px 0; border:2px solid var(--accent);
+    background:var(--accent); color:#fff; border-radius:999px; cursor:pointer;}
+  button.secondary{background:#fff; color:var(--accent-d);}
+  button:disabled{background:#b3a48f; border-color:#b3a48f; color:#fff; cursor:not-allowed;}
   button[aria-pressed="true"]{outline:4px solid #f2b01e; outline-offset:1px;}
-  canvas{display:block; width:100%; max-width:800px; height:auto; border:3px solid var(--ink);
-    background:#fafafa; margin:10px 0;}
+  canvas{display:block; width:100%; max-width:800px; height:auto; border:3px solid #6b5d4f;
+    border-radius:18px; background:#fffdf7; margin:10px 0;}
   canvas:focus{outline:4px solid #f2b01e; outline-offset:2px;}
-  .warn{background:var(--warn-bg); border:2px solid var(--warn-border); border-radius:6px;
-    padding:8px 12px; margin:10px 0; color:#1a1a1a;}
-  .note{background:#eef4fb; border:1px solid var(--accent); border-radius:6px; padding:8px 12px; margin:10px 0;}
+  .warn{background:var(--warn-bg); border:2px solid var(--warn-border); border-radius:16px;
+    padding:10px 14px; margin:12px 0; color:var(--warn-text);}
+  .note{background:var(--sky-soft); border:1px solid var(--accent); border-radius:16px; padding:10px 14px; margin:12px 0;}
   table{border-collapse:collapse; width:100%; margin:8px 0; font-size:.92rem;}
-  th,td{border:1px solid var(--line); padding:4px 8px; text-align:left;}
-  th{background:#e8e8e8;}
-  .term{border-bottom:2px dotted var(--accent); cursor:help;}
-  textarea{width:100%; min-height:56px; font-size:1rem; padding:6px; background:#fff; color:var(--ink);}
-  .dpad{display:grid; grid-template-columns:56px 56px 56px; gap:4px; justify-content:center; margin:8px 0;}
-  .dpad button{padding:10px 0; font-size:1.2rem;}
+  th,td{border:1px solid var(--line); padding:5px 9px; text-align:left;}
+  th{background:var(--peach);}
+  .term{border-bottom:2px dotted var(--accent-d); cursor:help;}
+  textarea{width:100%; min-height:60px; font-family:inherit; font-size:1rem; padding:8px 10px; background:#fff; color:var(--ink);
+    border:2px solid #c9b18c; border-radius:14px;}
+  .dpad{display:grid; grid-template-columns:56px 56px 56px; gap:6px; justify-content:center; margin:8px 0;}
+  .dpad button{padding:10px 0; font-size:1.2rem; border-radius:16px;}
   .dpad .spacer{visibility:hidden;}
-  .bar{display:flex; height:28px; border:2px solid var(--ink); border-radius:4px; overflow:hidden; margin:6px 0;}
+  .bar{display:flex; height:28px; border:2px solid #6b5d4f; border-radius:999px; overflow:hidden; margin:6px 0;}
   .bar .up{background:var(--upper); color:#fff; text-align:center; min-width:0; overflow:hidden; white-space:nowrap;}
   .bar .lo{background:var(--lower); color:#fff; text-align:center; min-width:0; overflow:hidden; white-space:nowrap;}
-  details{border:2px solid var(--line); border-radius:6px; padding:8px 14px; margin:10px 0;}
+  details{border:2px solid var(--line); border-radius:18px; padding:10px 16px; margin:12px 0;}
   summary{font-weight:bold; cursor:pointer;}
-  .glossary dt{font-weight:bold; margin-top:8px;}
+  .glossary dt{font-weight:bold; margin-top:10px;}
   .glossary dd{margin-left:0;}
   .status{font-weight:bold;}
   @media (prefers-color-scheme: dark){
-    body{background:#111;} main{background:#1d1d1d; color:#f0f0d8;}
-    .sub{color:#ddd;} th{background:#333;} .note{background:#16283c;}
+    :root{--line:#57493c; --peach:#453527;}
+    body{background:#251f1b;} main{background:#2b2521; color:#f5ede1; box-shadow:0 6px 20px rgba(0,0,0,.45);}
+    h1{background:linear-gradient(transparent 68%, #4a3d1e 68%);}
+    .sub{color:#ddd0bf;} th{background:#453527;} .note{background:#2c3a48; color:#f5ede1;}
+    .warn{background:#4a3d1e; color:#ffe9a8;}
+    button.secondary{background:transparent; color:#a9cdf0; border-color:#a9cdf0;}
+    textarea{background:#241f1b; color:#f5ede1; border-color:#8a7967;}
+    canvas{border-color:#8a7967;}
   }
 </style>
 </head>
@@ -305,9 +315,9 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // 床と壁
   for (var y = 0; y < ROWS; y++) for (var x = 0; x < COLS; x++) {
-    ctx.fillStyle = isFloor(x, y) ? "#fafafa" : "#263238";
+    ctx.fillStyle = isFloor(x, y) ? "#fffdf7" : "#4a4038";
     ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
-    if (isFloor(x, y)) { ctx.strokeStyle = "#cccccc"; ctx.strokeRect(x * CELL, y * CELL, CELL, CELL); }
+    if (isFloor(x, y)) { ctx.strokeStyle = "#e9dcc8"; ctx.strokeRect(x * CELL, y * CELL, CELL, CELL); }
   }
   // S5: 視界の遮蔽（下ルート入口の手前に背の高い遮蔽壁）
   if (el.occlusion) {
@@ -324,7 +334,7 @@ function draw() {
     ctx.fillText("視線", START.x * CELL + 2, START.y * CELL + 14);
     // 壁本体：通常の壁より濃くし、上面（天面）を描いて「背の高さ」を出す
     ctx.fillStyle = "#546e7a"; ctx.fillRect(ox, oy - 9, CELL, 11);
-    ctx.fillStyle = "#0d1117"; ctx.fillRect(ox, oy, CELL, CELL);
+    ctx.fillStyle = "#38312b"; ctx.fillRect(ox, oy, CELL, CELL);
     // 斜線パターン（色だけに頼らず模様でも区別する）
     ctx.save();
     ctx.beginPath(); ctx.rect(ox, oy, CELL, CELL); ctx.clip();
@@ -378,12 +388,12 @@ function draw() {
     ctx.beginPath(); ctx.moveTo(3 * CELL + 12, 2 * CELL + 46); ctx.lineTo(3 * CELL + 12, 2 * CELL + 6); ctx.stroke();
     ctx.fillStyle = "#c62828"; ctx.beginPath();
     ctx.moveTo(3 * CELL + 12, 2 * CELL + 6); ctx.lineTo(3 * CELL + 34, 2 * CELL + 14); ctx.lineTo(3 * CELL + 12, 2 * CELL + 22); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = "#0b5394"; ctx.font = "bold 26px sans-serif"; ctx.textAlign = "center";
+    ctx.fillStyle = "#17557f"; ctx.font = "bold 26px sans-serif"; ctx.textAlign = "center";
     ctx.fillText("↑", 3 * CELL + 25, 1 * CELL + 36);
   }
   // ルート名ラベル（色だけに頼らない：文字＋記号）
   ctx.font = "bold 14px sans-serif"; ctx.textAlign = "left";
-  ctx.fillStyle = "#0b5394"; ctx.fillText("▲ 上ルート", 4 * CELL + 4, 1 * CELL + 18);
+  ctx.fillStyle = "#17557f"; ctx.fillText("▲ 上ルート", 4 * CELL + 4, 1 * CELL + 18);
   ctx.fillStyle = "#b45309"; ctx.fillText("▼ 下ルート", 4 * CELL + 4, 6 * CELL - 8);
   // 軌跡
   function drawTrail(trail, color) {
@@ -395,15 +405,15 @@ function draw() {
     }
     ctx.stroke();
   }
-  drawTrail(state.trail, "rgba(20,108,46,0.65)");
+  drawTrail(state.trail, "rgba(30,125,70,0.65)");
   drawTrail(state.agentTrail, "rgba(106,27,154,0.65)");
   // スタート／ゴール
-  ctx.fillStyle = "#146c2e"; ctx.font = "bold 22px sans-serif"; ctx.textAlign = "center";
+  ctx.fillStyle = "#1e7d46"; ctx.font = "bold 22px sans-serif"; ctx.textAlign = "center";
   ctx.fillText("S", START.x * CELL + CELL / 2, START.y * CELL + 33);
-  ctx.fillStyle = "#146c2e"; ctx.fillRect(GOAL.x * CELL + 6, GOAL.y * CELL + 6, CELL - 12, CELL - 12);
+  ctx.fillStyle = "#1e7d46"; ctx.fillRect(GOAL.x * CELL + 6, GOAL.y * CELL + 6, CELL - 12, CELL - 12);
   ctx.fillStyle = "#fff"; ctx.fillText("G", GOAL.x * CELL + CELL / 2, GOAL.y * CELL + 33);
   // プレイヤー
-  ctx.fillStyle = "#b71c1c"; ctx.strokeStyle = "#fff"; ctx.lineWidth = 3;
+  ctx.fillStyle = "#c03a2b"; ctx.strokeStyle = "#fff"; ctx.lineWidth = 3;
   ctx.beginPath(); ctx.arc(state.player.x * CELL + CELL / 2, state.player.y * CELL + CELL / 2, 15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   ctx.fillStyle = "#fff"; ctx.font = "bold 13px sans-serif";
   ctx.fillText("P", state.player.x * CELL + CELL / 2, state.player.y * CELL + 30);

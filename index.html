@@ -6,57 +6,80 @@
 <title>ゲーム・レベルデザイン講座</title>
 <style>
   :root {
-    --bg: #f7f5f0;
+    --bg: #fff9f0;
     --card: #ffffff;
-    --ink: #23272f;
-    --sub: #5b6472;
-    --accent: #2f6f4e;
-    --accent-soft: #e3efe7;
-    --line: #ddd8cc;
+    --ink: #3d4451;
+    --sub: #5a6274;
+    --link: #b23a1d;
+    --line: #efddcb;
+    --coral: #ffe0d1; --mint: #dcf2e3; --sky: #ddeefb; --lav: #eae3fb; --lemon: #fdf0bd; --peach: #ffedd6;
+    --coral-d: #a83c17; --mint-d: #17663f; --sky-d: #17557f; --lav-d: #51389e; --lemon-d: #6e5200;
+    --shadow: 0 6px 20px rgba(146,90,32,.10);
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+    font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", "Noto Sans JP", sans-serif;
+    font-size: 17px;
     background: var(--bg);
     color: var(--ink);
-    line-height: 1.7;
+    line-height: 1.85;
   }
   header {
-    background: var(--accent);
-    color: #fff;
+    background: linear-gradient(135deg, #ffe9d6, #ffd9c2);
+    color: #43302a;
     padding: 3rem 1.5rem 2.5rem;
     text-align: center;
+    border-radius: 0 0 28px 28px;
   }
-  header h1 { margin: 0 0 0.5rem; font-size: 2rem; }
+  header h1 { margin: 0 0 0.5rem; font-size: 2.1rem; }
   header .definition { font-size: 1.15rem; font-weight: bold; margin: 1rem auto 0; max-width: 42rem; }
   header .status {
-    display: inline-block; margin-top: 1.25rem; padding: 0.2rem 0.9rem;
-    border: 1px solid #fff; border-radius: 999px; font-size: 0.85rem;
+    display: inline-block; margin-top: 1.25rem; padding: 0.25rem 1rem;
+    border: 2px solid #43302a; border-radius: 999px; font-size: 0.85rem; font-weight: bold;
+    background: rgba(255,255,255,.55);
   }
-  main { max-width: 60rem; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
-  section { margin-bottom: 2.5rem; }
-  h2 { border-bottom: 3px solid var(--accent); padding-bottom: 0.3rem; font-size: 1.3rem; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
-  .card {
-    background: var(--card); border: 1px solid var(--line); border-radius: 0.6rem;
-    padding: 1rem 1.1rem;
+  main { max-width: 60rem; margin: 0 auto; padding: 2.2rem 1.25rem 3rem; }
+  section {
+    background: var(--card); border-radius: 20px; box-shadow: var(--shadow);
+    padding: 1.4rem 1.6rem 1.6rem; margin-bottom: 2rem;
   }
-  .card h3 { margin: 0 0 0.4rem; font-size: 1rem; color: var(--accent); }
-  .card p { margin: 0; color: var(--sub); font-size: 0.92rem; }
-  ol.concepts { padding-left: 1.4rem; }
-  ol.concepts li { margin-bottom: 0.5rem; }
-  ol.concepts strong { color: var(--accent); }
+  h2 { font-size: 1.3rem; margin: 0 0 0.9rem; padding: .25em .8em; border-radius: 999px; background: var(--peach); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); gap: 1rem; }
+  .card { border-radius: 18px; padding: 1rem 1.1rem; }
+  .card h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+  .card p { margin: 0; font-size: 0.92rem; }
+  .c-coral { background: var(--coral); } .c-coral h3 { color: var(--coral-d); }
+  .c-mint { background: var(--mint); } .c-mint h3 { color: var(--mint-d); }
+  .c-sky { background: var(--sky); } .c-sky h3 { color: var(--sky-d); }
+  .c-lav { background: var(--lav); } .c-lav h3 { color: var(--lav-d); }
+  .c-lemon { background: var(--lemon); } .c-lemon h3 { color: var(--lemon-d); }
+  ol.concepts { padding-left: 1.4rem; margin: 0.4rem 0; }
+  ol.concepts li { margin-bottom: 0.6rem; }
+  ol.concepts strong { color: var(--coral-d); }
+  .tbl { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
   table { width: 100%; border-collapse: collapse; background: var(--card); }
-  th, td { border: 1px solid var(--line); padding: 0.5rem 0.7rem; text-align: left; font-size: 0.93rem; }
-  th { background: var(--accent-soft); }
+  th, td { border-bottom: 1px solid var(--line); padding: 0.55rem 0.7rem; text-align: left; font-size: 0.93rem; }
+  tr:last-child td { border-bottom: none; }
+  th { background: var(--peach); }
   td.prep { color: var(--sub); white-space: nowrap; }
-  footer { text-align: center; color: var(--sub); font-size: 0.85rem; padding: 1.5rem 1rem 2.5rem; }
+  a { color: var(--link); font-weight: bold; }
+  footer { text-align: center; color: var(--sub); font-size: 0.85rem; padding: 0.5rem 1rem 2.5rem; }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #251f1b; --card: #322b26; --ink: #f5ede1; --sub: #d8c9b8; --link: #ffb59d; --line: #57493c;
+      --coral: #4a3428; --mint: #2e4034; --sky: #2c3a48; --lav: #3a3350; --lemon: #4a3d1e; --peach: #453527;
+      --coral-d: #ffb59d; --mint-d: #a8d8b9; --sky-d: #a9cdf0; --lav-d: #c9bdf2; --lemon-d: #f2dd9a;
+      --shadow: 0 6px 20px rgba(0,0,0,.45);
+    }
+    header { background: #3a2d24; color: #f5ede1; }
+    header .status { border-color: #f5ede1; background: transparent; }
+  }
 </style>
 </head>
 <body>
 <header>
-  <h1>ゲーム・レベルデザイン講座</h1>
+  <h1>🎮 ゲーム・レベルデザイン講座</h1>
   <p>ステージを作る方法ではなく、ゲームの仕組みを使ってプレイヤーの行動・判断・感情を設計する技術を学ぶ教材です。</p>
   <p class="definition">「レベルデザインとは、プレイヤーの体験を設計することである」</p>
   <span class="status">公開中 — Unit 1・2 本文と実験Cを公開中</span>
@@ -77,22 +100,24 @@
     <h2>分析フレームワーク（5軸）</h2>
     <p>レベルデザインを以下の5軸から分析します。この5軸は本教材独自の整理フレームワークであり、業界標準の分類ではありません。</p>
     <div class="cards">
-      <div class="card"><h3>空間</h3><p>地形、構造、経路、位置関係、視界</p></div>
-      <div class="card"><h3>時間</h3><p>テンポ、タイミング、プレイ時間、リトライ</p></div>
-      <div class="card"><h3>情報</h3><p>誘導、予兆、視認性、ルールの伝達</p></div>
-      <div class="card"><h3>挑戦</h3><p>難易度、敵、ギミック、リスクと報酬</p></div>
-      <div class="card"><h3>感情</h3><p>緊張、安心、驚き、達成感、好奇心</p></div>
+      <div class="card c-sky"><h3>🗺️ 空間</h3><p>地形、構造、経路、位置関係、視界</p></div>
+      <div class="card c-lemon"><h3>⏱️ 時間</h3><p>テンポ、タイミング、プレイ時間、リトライ</p></div>
+      <div class="card c-coral"><h3>💡 情報</h3><p>誘導、予兆、視認性、ルールの伝達</p></div>
+      <div class="card c-lav"><h3>🎯 挑戦</h3><p>難易度、敵、ギミック、リスクと報酬</p></div>
+      <div class="card c-mint"><h3>💗 感情</h3><p>緊張、安心、驚き、達成感、好奇心</p></div>
     </div>
   </section>
 
   <section>
     <h2>カリキュラム（全12 Unit）</h2>
-    <table>
-      <thead>
-        <tr><th>Unit</th><th>タイトル</th><th>Part</th><th>状態</th></tr>
-      </thead>
-      <tbody id="unit-list"></tbody>
-    </table>
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr><th>Unit</th><th>タイトル</th><th>Part</th><th>状態</th></tr>
+        </thead>
+        <tbody id="unit-list"></tbody>
+      </table>
+    </div>
     <p>各 Unit には、パラメータを変えて結果を比べられるインタラクティブ実験を対応させる予定です。最初の試作として、Unit 4 対応の実験C「<a href="experiments/exp-c-guidance/">プレイヤー誘導実験</a>」を公開中です。</p>
   </section>
 </main>
