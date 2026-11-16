@@ -60,6 +60,10 @@
       --coral:#4a3428; --mint:#2e4034; --sky:#2c3a48; --lav:#3a3350; --lemon:#4a3d1e; --peach:#453527; --pink:#472f3a;
       --shadow:0 6px 20px rgba(0,0,0,.45);}
     .warn{background:#4a3d1e; color:#ffe9a8; border-color:#a97e12;}
+    /* .diagram の地色（#fffaf2）と中の SVG は両モード固定色。地の上に直接乗る HTML テキスト
+       （スライダーのラベル・現在地表示など）もライト側の文字色に固定し、
+       --ink の反転で「白い文字×白い地」になって読めなくなるのを防ぐ。 */
+    .diagram{color:#3d4451;}
     textarea{background:#2b2521; color:#f5ede1; border-color:#8a7967;}
   }
   .spot{display:block; width:100%; max-width:520px; height:auto; margin:14px auto; border-radius:20px;}
