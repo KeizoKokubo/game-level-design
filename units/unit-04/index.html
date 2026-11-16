@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 4：プレイヤーの誘導と視線制御 | ゲーム・レベルデザイン講座</title>
+<style>
+  :root{
+    --bg:#fff9f0; --card:#ffffff; --ink:#3d4451; --sub:#5a6274; --line:#efddcb;
+    --coral:#ffe0d1; --mint:#dcf2e3; --sky:#ddeefb; --lav:#eae3fb; --lemon:#fdf0bd; --peach:#ffedd6; --pink:#fbe3ee;
+    --link:#b23a1d; --btn:#c2502a;
+    --shadow:0 6px 20px rgba(146,90,32,.10);
+  }
+  *{box-sizing:border-box;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic","Noto Sans JP",sans-serif;
+    font-size:17px; color:var(--ink); background:var(--bg); margin:0; line-height:1.9;}
+  main{max-width:880px; margin:0 auto; padding:28px 16px 56px;}
+  section.card{background:var(--card); border-radius:20px; box-shadow:var(--shadow); padding:24px 28px 14px; margin:0 0 30px;}
+  .f-coral{--fill:var(--coral);} .f-mint{--fill:var(--mint);} .f-sky{--fill:var(--sky);}
+  .f-lav{--fill:var(--lav);} .f-lemon{--fill:var(--lemon);} .f-peach{--fill:var(--peach);} .f-pink{--fill:var(--pink);}
+  h1{font-size:1.65rem; margin:2px 0 6px; display:inline-block; padding:0 .2em;
+    background:linear-gradient(transparent 68%, var(--lemon) 68%);}
+  h2{font-size:1.22rem; margin:0 0 14px; padding:.28em .9em; border-radius:999px; background:var(--fill,var(--peach));}
+  p{margin:.6em 0;}
+  ul{margin:.4em 0; padding-left:1.3em;}
+  li{margin:.25em 0;}
+  .sub{color:var(--sub); margin:0 0 10px; font-size:.95rem;}
+  .meta{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 6px;}
+  .meta span{border:2px solid var(--link); border-radius:999px; padding:0 14px; font-size:.88rem; font-weight:bold;}
+  .goals{background:var(--peach); border-radius:16px; padding:12px 18px 12px 34px; margin:14px 0 8px;}
+  .goals p{margin:2px 0 2px -18px; font-weight:bold;}
+  .note{background:var(--mint); border-radius:16px; padding:10px 16px; margin:12px 0;}
+  .warn{background:#fff3c4; color:#5b4300; border:2px solid #e0aa00; border-radius:16px; padding:10px 16px; margin:12px 0;}
+  .tbl{border:1px solid var(--line); border-radius:16px; overflow:hidden; margin:12px 0;}
+  table{border-collapse:collapse; width:100%; font-size:.94rem;}
+  th,td{border-bottom:1px solid var(--line); padding:7px 11px; text-align:left; color:var(--ink);}
+  tr:last-child td,tr:last-child th{border-bottom:none;}
+  th{background:var(--peach);}
+  button{font-family:inherit; font-size:1rem; font-weight:bold; padding:9px 22px; margin:4px 4px 4px 0;
+    border:2px solid var(--btn); background:var(--btn); color:#fff; border-radius:999px; cursor:pointer;}
+  button.secondary{background:#fff; color:var(--link);}
+  button[aria-pressed="true"]{outline:4px solid #f2b01e; outline-offset:1px;}
+  textarea{width:100%; min-height:60px; font-family:inherit; font-size:1rem; padding:8px 10px; background:#fff; color:var(--ink);
+    border:2px solid #c9b18c; border-radius:14px;}
+  .diagram{background:#fffaf2; border:2px solid #ead9c2; border-radius:18px; padding:14px; margin:14px 0;}
+  .diagram svg{display:block; width:100%; max-width:420px; height:auto; margin:0 auto;}
+  .diagram.wide svg{max-width:100%;}
+  figure.diagram{margin:14px 0;}
+  figcaption{font-size:.9rem; color:#5a6274; margin-top:8px;}
+  .glossary dt{font-weight:bold; margin-top:12px;}
+  .glossary dd{margin-left:0;}
+  .term-en{color:var(--sub); font-size:.88rem;}
+  nav.unitnav{padding:0 6px;}
+  nav.unitnav p{margin:4px 0;}
+  a{color:var(--link); font-weight:bold;}
+  @media (prefers-color-scheme: dark){
+    :root{--bg:#251f1b; --card:#322b26; --ink:#f5ede1; --sub:#d8c9b8; --line:#57493c; --link:#ffb59d;
+      --coral:#4a3428; --mint:#2e4034; --sky:#2c3a48; --lav:#3a3350; --lemon:#4a3d1e; --peach:#453527; --pink:#472f3a;
+      --shadow:0 6px 20px rgba(0,0,0,.45);}
+    .warn{background:#4a3d1e; color:#ffe9a8; border-color:#a97e12;}
+    /* .diagram の地色（#fffaf2）と中の SVG は両モード固定色。地の上に直接乗る HTML テキストも
+       ライト側の文字色に固定し、--ink の反転で読めなくなるのを防ぐ（Unit 2 §6 の教訓）。 */
+    .diagram{color:#3d4451;}
+    button.secondary{background:transparent;}
+    textarea{background:#2b2521; color:#f5ede1; border-color:#8a7967;}
+  }
+  .spot{display:block; width:100%; max-width:520px; height:auto; margin:14px auto; border-radius:20px;}
+</style>
+</head>
+<body>
+<main>
+  <section class="card f-peach">
+    <p class="sub"><a href="../../">ゲーム・レベルデザイン講座</a> ／ Part 2：ゲーム空間の設計</p>
+    <h1>Unit 4：プレイヤーの誘導と視線制御</h1>
+    <div class="meta">
+      <span>主軸：情報</span>
+      <span>担当変数：誘導手がかりの有無と種類（光・色・ランドマーク・アイテム・サイン・遮蔽から1種のみ）</span>
+    </div>
+    <div class="goals">
+      <p>この Unit の学習目標</p>
+      <ul>
+        <li>「強制」と「誘導」の違いを、プレイヤーの感じ方の面から説明できる</li>
+        <li>手がかりの種類（光・色・ランドマーク・アイテム・サイン・遮蔽）ごとに、目の引き方と注意点を説明できる</li>
+        <li>誘導の強さのトレードオフを、ゲームの目的や対象プレイヤーと結びつけて考えられる</li>
+      </ul>
+    </div>
+    <p>Unit 3 では、マップの骨格——「構造」を決めました。でも、構造が決まっても、プレイヤーが思った方向へ進むとは限りません。分かれ道でどちらを選ぶかはプレイヤー次第。この Unit のテーマは、構造の中でプレイヤーの注意と視線をどう扱うか。つまり「情報」の設計です。</p>
+    <div class="note"><strong>この Unit の担当は「手がかりの置き方」</strong>（構造の中で、どこに何を見せるか）。
+    構造そのものは Unit 3、空間にどう意味を持たせるか（密度や環境の物語）は Unit 5 で扱います。</div>
+  </section>
+
+  <section class="card f-coral">
+    <h2>1. 誘導とは：「行かせたい」ではなく「行きたくなる」</h2>
+    <p>分かれ道で「こっちに来てほしい」と思う場面は、よくあります。そのとき使える方法は、大きく2種類あります。</p>
+    <ul>
+      <li><strong>強制</strong>：壁や鍵で、もう一方を通れなくする。確実に進ませられる</li>
+      <li><strong>誘導</strong>：行き先を魅力的に見せて、「そっちへ行きたくなる」ようにする。選ぶのはプレイヤーのまま</li>
+    </ul>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 240" role="img" aria-label="強制と誘導の比較図">
+        <rect x="0" y="0" width="640" height="240" rx="18" fill="#fffaf2"></rect>
+        <text x="160" y="32" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">強制：通れなくする</text>
+        <text x="480" y="32" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">誘導：行きたくさせる</text>
+        <path d="M58 130 L168 92 M58 130 L168 168" stroke="#d9c6ae" stroke-width="22" fill="none"></path>
+        <path d="M58 130 L168 92 M58 130 L168 168" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="103" y="127" width="20" height="44" fill="#3a3f4a"></rect>
+        <path d="M105 141 L121 157 M121 141 L105 157" stroke="#c0392b" stroke-width="3"></path>
+        <circle cx="48" cy="130" r="10" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <rect x="168" y="70" width="112" height="44" rx="10" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="224" y="97" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋A</text>
+        <rect x="168" y="146" width="112" height="44" rx="10" fill="#dcf2e3" stroke="#17663f" stroke-width="2" opacity="0.45"></rect>
+        <text x="224" y="173" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold" opacity="0.6">部屋B</text>
+        <text x="160" y="224" font-size="13" fill="#3d4451" text-anchor="middle">確実に進ませられるが、選ぶ楽しさは消える</text>
+        <path d="M378 130 L488 92 M378 130 L488 168" stroke="#d9c6ae" stroke-width="22" fill="none"></path>
+        <path d="M378 130 L488 92 M378 130 L488 168" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <path d="M378 130 L488 92" stroke="#ffd34d" stroke-width="30" fill="none" opacity="0.45"></path>
+        <path d="M378 130 L488 92" stroke="#ffd34d" stroke-width="15" fill="none" opacity="0.95"></path>
+        <path d="M378 130 L488 92" stroke="#ffedb3" stroke-width="6" fill="none" opacity="0.9"></path>
+        <circle cx="368" cy="130" r="10" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <rect x="488" y="70" width="112" height="44" rx="10" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="544" y="97" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋A</text>
+        <rect x="488" y="146" width="112" height="44" rx="10" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="544" y="173" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋B</text>
+        <text x="480" y="224" font-size="13" fill="#3d4451" text-anchor="middle">不確実だが、「自分で選んだ」感覚が残る</text>
+      </svg>
+      <figcaption>図：強制と誘導。誘導の道具は、壁ではなく「情報」。</figcaption>
+    </figure>
+    <p>この教材の横断概念の2つ目が、まさにこれです——<strong>「誘導するが、操らない」</strong>。プレイヤーが「自分で発見して、自分で選んだ」と感じられる誘導は、強制にはない発見の感覚を残します。</p>
+    <p>ただし、誘導が常によいわけではありません。全員に必ず通ってほしい手順（操作を覚える場面など）では、確実な方法と組み合わせることもあります。大事なのは、どちらを使うかを自覚して選ぶことです。</p>
+  </section>
+
+  <section class="card f-sky">
+    <h2>2. 目はどこへ向くか：視線の傾向と「視界」</h2>
+    <p>誘導の前提は、「プレイヤーの目がどこへ向くか」です。一般に、人の目は次のようなものに向きやすいと言われます。</p>
+    <ul>
+      <li><strong>明るいところ</strong>（暗い場所の中の光）</li>
+      <li><strong>周りと違う色</strong>（色の差が大きいもの）</li>
+      <li><strong>動いているもの</strong>（動きは注意を引きやすい）</li>
+      <li><strong>大きなもの</strong>（遠くからでも見える目立つ形）</li>
+    </ul>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 260" role="img" aria-label="目が向きやすいものの例">
+        <rect x="0" y="0" width="640" height="260" rx="18" fill="#fffaf2"></rect>
+        <rect x="0" y="196" width="640" height="64" fill="#dcf2e3"></rect>
+        <path d="M80 164 L282 100 M80 160 L450 84 M80 156 L546 80" stroke="#6b5844" stroke-width="2" fill="none" stroke-dasharray="6 5"></path>
+        <circle cx="66" cy="168" r="13" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <rect x="56" y="181" width="20" height="26" rx="8" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="66" y="232" font-size="12.5" fill="#3d4451" text-anchor="middle">プレイヤー</text>
+        <rect x="272" y="52" width="72" height="104" rx="10" fill="#ffd34d" opacity="0.35"></rect>
+        <rect x="284" y="64" width="48" height="92" fill="#ffedb3" stroke="#6e5200" stroke-width="2"></rect>
+        <circle cx="322" cy="112" r="3.5" fill="#6e5200"></circle>
+        <path d="M268 60 L252 48 M352 60 L368 48 M276 110 L256 110 M348 110 L368 110" stroke="#e0aa00" stroke-width="3"></path>
+        <text x="308" y="178" font-size="13" fill="#3d4451" text-anchor="middle" font-weight="bold">明るい場所</text>
+        <path d="M452 70 V160" stroke="#8a5a2a" stroke-width="3"></path>
+        <polygon points="452,70 488,80 452,90" fill="#c0392b"></polygon>
+        <text x="470" y="178" font-size="13" fill="#3d4451" text-anchor="middle" font-weight="bold">周りと違う色</text>
+        <rect x="548" y="58" width="40" height="102" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <polygon points="540,58 596,58 568,30" fill="#c2502a"></polygon>
+        <circle cx="568" cy="92" r="5" fill="#17557f"></circle>
+        <text x="568" y="178" font-size="13" fill="#3d4451" text-anchor="middle" font-weight="bold">大きなもの</text>
+      </svg>
+      <figcaption>図：目が向きやすいものの例。破線は視線のイメージ。</figcaption>
+    </figure>
+    <p>ただし、これは「傾向」であって法則ではありません。急いでいるとき、戦闘に集中しているとき、プレイヤーの経験によっても、目が向く先は変わります。「置けば必ず見てもらえる」とは考えないことが大切です。</p>
+    <p>もう1つの道具が、<strong>視界そのもの</strong>です。カーブの先を見通せなくしたり、丘の上から全体を見渡せるようにしたりすると、「今、見えている情報」の量が変わります。見せる量の調整も情報の設計です（「見せない」側は §3 の遮蔽で扱います）。</p>
+  </section>
+
+  <section class="card f-mint">
+    <h2>3. 手がかりの種類</h2>
+    <img class="spot" src="data:image/webp;base64,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" alt="光とコインの列が続く道をたどって、丘の上のお城へ向かう芽生えのキャラクター" width="900" height="600" loading="lazy">
+    <p>代表的な手がかりを6つ紹介します。ポイントは2つ。<strong>どの手がかりも「目の引き方」と「注意点」をセットで覚えること</strong>。そして、効果を比べたいときは<strong>一度に1種だけ足す</strong>こと——同時に変えると、どれが効いたのか分からなくなります。</p>
+
+    <p><strong>① 光</strong>——暗い場所の中の明かりは、「安全そう」「何かありそう」に感じられ、目が向きやすくなります。</p>
+    <ul>
+      <li><strong>向く場面</strong>：進路の先や目標の場所を、そっと照らす</li>
+      <li><strong>注意点</strong>：全部を明るくすると差が消えて、どれも目立たなくなる。暗さ自体が演出になる場面もある</li>
+    </ul>
+    <p><strong>② 色</strong>——周囲と違う色は、それだけで目立ちます。</p>
+    <ul>
+      <li><strong>向く場面</strong>：出口の扉だけ色を変える、押せるスイッチだけ色を変える</li>
+      <li><strong>注意点</strong>：色の受け取り方には個人差（色覚の違いを含む）がある。色だけに頼らず、形や明暗の差でも区別できるようにする</li>
+    </ul>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 240" role="img" aria-label="光と色による手がかりの例">
+        <rect x="0" y="0" width="640" height="240" rx="18" fill="#fffaf2"></rect>
+        <rect x="60" y="46" width="520" height="134" rx="10" fill="#f3e7d3" stroke="#c9b18c" stroke-width="2"></rect>
+        <rect x="140" y="66" width="104" height="124" rx="8" fill="#ffd34d" opacity="0.35"></rect>
+        <rect x="152" y="78" width="80" height="102" fill="#ffedb3" stroke="#6e5200" stroke-width="2"></rect>
+        <circle cx="222" cy="132" r="3.5" fill="#6e5200"></circle>
+        <path d="M140 72 L124 60 M244 72 L260 60 M146 128 L126 128 M238 128 L258 128" stroke="#e0aa00" stroke-width="3"></path>
+        <rect x="408" y="78" width="80" height="102" fill="#ddeefb" stroke="#c0392b" stroke-width="6"></rect>
+        <text x="192" y="208" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">明るい扉</text>
+        <text x="448" y="208" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">色の違う扉</text>
+      </svg>
+      <figcaption>図：光と色。明るさの差と色の差は、言葉なしで目を引く。</figcaption>
+    </figure>
+
+    <p><strong>③ ランドマーク</strong>——遠くから見える大きな目印（塔・山・建物など）。</p>
+    <ul>
+      <li><strong>どう働くか</strong>：「あそこへ行ってみたい」という目標になると同時に、自分の位置と方角を確かめる基準にもなる</li>
+      <li><strong>注意点</strong>：目印が多すぎると、どれも目印にならない。目立たせたいのは1つに絞る</li>
+    </ul>
+    <p><strong>④ アイテム</strong>——コイン列のような報酬の並び。</p>
+    <ul>
+      <li><strong>どう働くか</strong>：点の並びが線になり、視線と足取りをその方向へ引っ張る。「ついでに次も」と進ませる力がある</li>
+      <li><strong>注意点</strong>：報酬が目的になると、寄り道ではなく「回収作業」に感じられることもある。報酬とリスクの設計そのものは Unit 7 で扱う</li>
+    </ul>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 260" role="img" aria-label="ランドマークとアイテム列の例">
+        <rect x="0" y="0" width="640" height="260" rx="18" fill="#fffaf2"></rect>
+        <path d="M0 210 Q 160 160 340 190 T 640 180 V260 H0 Z" fill="#dcf2e3"></path>
+        <path d="M36 240 C 170 214, 300 176, 462 158" stroke="#d9c6ae" stroke-width="24" fill="none"></path>
+        <path d="M36 240 C 170 214, 300 176, 462 158" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <g fill="#ffd34d" stroke="#6e5200" stroke-width="2">
+          <circle cx="120" cy="222" r="9"></circle>
+          <circle cx="195" cy="202" r="9"></circle>
+          <circle cx="268" cy="184" r="9"></circle>
+          <circle cx="338" cy="168" r="9"></circle>
+          <circle cx="405" cy="158" r="9"></circle>
+        </g>
+        <g fill="none" stroke="#6e5200" stroke-width="1.5">
+          <circle cx="120" cy="222" r="4"></circle>
+          <circle cx="195" cy="202" r="4"></circle>
+          <circle cx="268" cy="184" r="4"></circle>
+          <circle cx="338" cy="168" r="4"></circle>
+          <circle cx="405" cy="158" r="4"></circle>
+        </g>
+        <rect x="486" y="84" width="38" height="80" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <polygon points="478,84 532,84 505,54" fill="#c2502a"></polygon>
+        <path d="M505 54 V38" stroke="#17557f" stroke-width="2"></path>
+        <polygon points="505,38 523,42 505,46" fill="#c0392b"></polygon>
+        <circle cx="505" cy="116" r="5" fill="#17557f"></circle>
+        <text x="200" y="246" font-size="13" fill="#3d4451" text-anchor="middle" font-weight="bold">コインの並び</text>
+        <text x="505" y="192" font-size="13" fill="#3d4451" text-anchor="middle" font-weight="bold">ランドマーク（塔）</text>
+      </svg>
+      <figcaption>図：ランドマークとアイテム。塔は「目標」、コイン列は「線」で引っ張る。</figcaption>
+    </figure>
+
+    <p><strong>⑤ サイン</strong>——旗・矢印・看板など、意味が直接伝わる記号。</p>
+    <ul>
+      <li><strong>どう働くか</strong>：読み取れれば確実に伝わる。迷わせたくない場所で頼りになる</li>
+      <li><strong>注意点</strong>：記号の意味が文化や経験で通じないこともある。また、矢印だらけだと「ゲーム側の都合」が見えて、世界に没入する感覚が薄れる場合もある</li>
+    </ul>
+    <p><strong>⑥ 遮蔽（見せない）</strong>——壁や地形で視線を遮り、入口や場所を見えなくすること。目立つものへ引き寄せる手がかりとは、逆向きの手がかりです。</p>
+    <ul>
+      <li><strong>どう働くか</strong>：見えていないものは、選ばれにくくなる。隠し通路や、驚きの演出にも使える</li>
+      <li><strong>注意点</strong>：必須の進路を隠すと、単なる迷子の原因になる。「意図して隠した」のか「見落とされた」のかは、結果が大きく違う</li>
+    </ul>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 240" role="img" aria-label="サインと遮蔽の例">
+        <rect x="0" y="0" width="640" height="240" rx="18" fill="#fffaf2"></rect>
+        <text x="160" y="32" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">サイン：意味が直接伝わる</text>
+        <text x="480" y="32" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">遮蔽：見せないことで導く</text>
+        <path d="M40 190 H280" stroke="#d9c6ae" stroke-width="16" fill="none"></path>
+        <path d="M40 190 H280" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <path d="M150 58 V190" stroke="#8a5a2a" stroke-width="4"></path>
+        <polygon points="150,58 180,65 150,72" fill="#c0392b"></polygon>
+        <rect x="150" y="96" width="96" height="34" rx="6" fill="#c2502a" stroke="#7e2f16" stroke-width="2"></rect>
+        <text x="198" y="121" font-size="22" fill="#ffffff" text-anchor="middle" font-weight="bold">→</text>
+        <path d="M350 190 H610" stroke="#d9c6ae" stroke-width="16" fill="none"></path>
+        <path d="M350 190 H610" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="486" y="102" width="58" height="88" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <rect x="470" y="84" width="26" height="106" fill="#3a3f4a"></rect>
+        <path d="M472 186 L494 96 M472 118 L488 84 M480 190 L496 152" stroke="#fffaf2" stroke-width="2" opacity="0.5"></path>
+        <path d="M372 140 H466" stroke="#c0392b" stroke-width="2" stroke-dasharray="5 4"></path>
+        <path d="M462 132 L478 148 M478 132 L462 148" stroke="#c0392b" stroke-width="3"></path>
+        <text x="515" y="216" font-size="12.5" fill="#3d4451" text-anchor="middle">扉が隠れている</text>
+      </svg>
+      <figcaption>図：サインと遮蔽。示す手がかりと、隠す手がかり。</figcaption>
+    </figure>
+  </section>
+
+  <section class="card f-lav">
+    <h2>4. 比べてみよう：同じ分かれ道、手がかりだけを変える</h2>
+    <p>同じ分かれ道の場面に、手がかりを1つずつ足してみます。地形もルートの長さも同じ。違うのは手がかりだけです。このあとの実験Cのシナリオと、ちょうど対応しています。</p>
+    <div>
+      <button type="button" id="tabNone" aria-pressed="true">なし</button>
+      <button type="button" id="tabLight" class="secondary" aria-pressed="false">光</button>
+      <button type="button" id="tabLandmark" class="secondary" aria-pressed="false">ランドマーク</button>
+      <button type="button" id="tabCoins" class="secondary" aria-pressed="false">アイテム列</button>
+      <button type="button" id="tabSign" class="secondary" aria-pressed="false">サイン</button>
+      <button type="button" id="tabOcclusion" class="secondary" aria-pressed="false">遮蔽</button>
+    </div>
+    <div class="diagram wide" id="panelNone">
+      <svg viewBox="0 0 640 300" role="img" aria-label="手がかりなしの分かれ道">
+        <rect x="0" y="0" width="640" height="300" rx="18" fill="#fffaf2"></rect>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#d9c6ae" stroke-width="26" fill="none"></path>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="20" y="123" width="90" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="65" y="155" font-size="12.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="530" y="123" width="90" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="575" y="155" font-size="12.5" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <circle cx="200" cy="150" r="6" fill="#8a7967" stroke="#fffaf2" stroke-width="2"></circle>
+        <text x="320" y="286" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">手がかりなし：選ぶ理由はプレイヤー次第</text>
+      </svg>
+    </div>
+    <div class="diagram wide" id="panelLight" hidden>
+      <svg viewBox="0 0 640 300" role="img" aria-label="上ルートに光の帯を足した分かれ道">
+        <rect x="0" y="0" width="640" height="300" rx="18" fill="#fffaf2"></rect>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#d9c6ae" stroke-width="26" fill="none"></path>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <path d="M200 150 V72 H438 V150" stroke="#ffd34d" stroke-width="36" fill="none" opacity="0.45"></path>
+        <path d="M200 150 V72 H438 V150" stroke="#ffd34d" stroke-width="18" fill="none" opacity="0.95"></path>
+        <path d="M200 150 V72 H438 V150" stroke="#ffedb3" stroke-width="8" fill="none" opacity="0.9"></path>
+        <polygon points="260,39 262,44 267,46 262,48 260,53 258,48 253,46 258,44" fill="#d97706"></polygon>
+        <polygon points="330,39 332,44 337,46 332,48 330,53 328,48 323,46 328,44" fill="#d97706"></polygon>
+        <polygon points="400,39 402,44 407,46 402,48 400,53 398,48 393,46 398,44" fill="#d97706"></polygon>
+        <rect x="20" y="123" width="90" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="65" y="155" font-size="12.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="530" y="123" width="90" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="575" y="155" font-size="12.5" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <circle cx="200" cy="150" r="6" fill="#8a7967" stroke="#fffaf2" stroke-width="2"></circle>
+        <text x="320" y="286" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">光：上ルートに光の帯。明るい方へ目が向きやすい</text>
+      </svg>
+    </div>
+    <div class="diagram wide" id="panelLandmark" hidden>
+      <svg viewBox="0 0 640 300" role="img" aria-label="下ルートの先に塔を足した分かれ道">
+        <rect x="0" y="0" width="640" height="300" rx="18" fill="#fffaf2"></rect>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#d9c6ae" stroke-width="26" fill="none"></path>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="388" y="170" width="26" height="58" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <polygon points="382,170 420,170 401,148" fill="#c2502a"></polygon>
+        <path d="M401 148 V134" stroke="#17557f" stroke-width="2"></path>
+        <polygon points="401,134 417,138 401,142" fill="#c0392b"></polygon>
+        <circle cx="401" cy="196" r="4" fill="#17557f"></circle>
+        <rect x="20" y="123" width="90" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="65" y="155" font-size="12.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="530" y="123" width="90" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="575" y="155" font-size="12.5" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <circle cx="200" cy="150" r="6" fill="#8a7967" stroke="#fffaf2" stroke-width="2"></circle>
+        <text x="320" y="286" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">ランドマーク：下ルートの先に塔。「あそこへ行ってみたい」</text>
+      </svg>
+    </div>
+    <div class="diagram wide" id="panelCoins" hidden>
+      <svg viewBox="0 0 640 300" role="img" aria-label="下ルートにコイン列を足した分かれ道">
+        <rect x="0" y="0" width="640" height="300" rx="18" fill="#fffaf2"></rect>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#d9c6ae" stroke-width="26" fill="none"></path>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <g fill="#ffd34d" stroke="#6e5200" stroke-width="2">
+          <circle cx="248" cy="228" r="10"></circle>
+          <circle cx="298" cy="228" r="10"></circle>
+          <circle cx="348" cy="228" r="10"></circle>
+          <circle cx="398" cy="228" r="10"></circle>
+        </g>
+        <g fill="none" stroke="#6e5200" stroke-width="1.5">
+          <circle cx="248" cy="228" r="4.5"></circle>
+          <circle cx="298" cy="228" r="4.5"></circle>
+          <circle cx="348" cy="228" r="4.5"></circle>
+          <circle cx="398" cy="228" r="4.5"></circle>
+        </g>
+        <rect x="20" y="123" width="90" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="65" y="155" font-size="12.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="530" y="123" width="90" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="575" y="155" font-size="12.5" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <circle cx="200" cy="150" r="6" fill="#8a7967" stroke="#fffaf2" stroke-width="2"></circle>
+        <text x="320" y="286" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">アイテム列：下ルートにコイン列。視線と足取りを引っ張る</text>
+      </svg>
+    </div>
+    <div class="diagram wide" id="panelSign" hidden>
+      <svg viewBox="0 0 640 300" role="img" aria-label="上ルート入口に旗と矢印サインを足した分かれ道">
+        <rect x="0" y="0" width="640" height="300" rx="18" fill="#fffaf2"></rect>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#d9c6ae" stroke-width="26" fill="none"></path>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <path d="M170 104 V150" stroke="#8a5a2a" stroke-width="3"></path>
+        <polygon points="170,104 196,111 170,118" fill="#c0392b"></polygon>
+        <path d="M234 100 V150" stroke="#8a5a2a" stroke-width="3"></path>
+        <rect x="234" y="94" width="62" height="30" rx="6" fill="#c2502a" stroke="#7e2f16" stroke-width="2"></rect>
+        <text x="265" y="117" font-size="19" fill="#ffffff" text-anchor="middle" font-weight="bold">↑</text>
+        <rect x="20" y="123" width="90" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="65" y="155" font-size="12.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="530" y="123" width="90" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="575" y="155" font-size="12.5" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <circle cx="200" cy="150" r="6" fill="#8a7967" stroke="#fffaf2" stroke-width="2"></circle>
+        <text x="320" y="286" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">サイン：上ルート入口に旗と矢印。意味が直接伝わる</text>
+      </svg>
+    </div>
+    <div class="diagram wide" id="panelOcclusion" hidden>
+      <svg viewBox="0 0 640 300" role="img" aria-label="下ルート入口の手前に遮蔽壁を足した分かれ道">
+        <rect x="0" y="0" width="640" height="300" rx="18" fill="#fffaf2"></rect>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#d9c6ae" stroke-width="26" fill="none"></path>
+        <path d="M110 150 H200 M200 150 V72 H438 V150 M438 150 H530 M200 150 V228 H438 V150" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <path d="M110 160 L156 190" stroke="#c0392b" stroke-width="2" stroke-dasharray="5 4"></path>
+        <rect x="158" y="178" width="22" height="64" fill="#3a3f4a"></rect>
+        <path d="M160 240 L180 190 M160 205 L174 180 M168 242 L180 224" stroke="#fffaf2" stroke-width="2" opacity="0.5"></path>
+        <path d="M153 187 L167 201 M167 187 L153 201" stroke="#c0392b" stroke-width="3"></path>
+        <text x="169" y="262" font-size="12.5" fill="#3d4451" text-anchor="middle">遮蔽壁</text>
+        <rect x="20" y="123" width="90" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="65" y="155" font-size="12.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="530" y="123" width="90" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="575" y="155" font-size="12.5" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <circle cx="200" cy="150" r="6" fill="#8a7967" stroke="#fffaf2" stroke-width="2"></circle>
+        <text x="320" y="286" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">遮蔽：下ルート入口の前に壁。見えない方は選ばれにくい</text>
+      </svg>
+    </div>
+    <p>どの手がかりも、地形は変えていません。変えたのは「情報」だけ。それでも選ばれるルートの傾向は変わっていきます。どのくらい変わるかは、実験で確かめられます。</p>
+  </section>
+
+  <section class="card f-lemon">
+    <h2>5. 誘導の強さ：ちょうどよさは目的しだい</h2>
+    <p>手がかりには「強さ」があります。強すぎても、弱すぎても、うまくいきません。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 210" role="img" aria-label="誘導の強さの両極を示す図">
+        <rect x="0" y="0" width="640" height="210" rx="18" fill="#fffaf2"></rect>
+        <rect x="60" y="76" width="173" height="36" fill="#ddeefb"></rect>
+        <rect x="233" y="76" width="174" height="36" fill="#fdf0bd"></rect>
+        <rect x="407" y="76" width="173" height="36" fill="#ffe0d1"></rect>
+        <rect x="60" y="76" width="520" height="36" rx="18" fill="none" stroke="#8a7967" stroke-width="2"></rect>
+        <path d="M233 76 V112 M407 76 V112" stroke="#8a7967" stroke-width="1.5"></path>
+        <text x="146" y="58" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">弱すぎる</text>
+        <text x="320" y="58" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">ちょうどよさ</text>
+        <text x="493" y="58" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">強すぎる</text>
+        <text x="146" y="140" font-size="13" fill="#3d4451" text-anchor="middle">迷子になりやすい</text>
+        <text x="320" y="140" font-size="13" fill="#3d4451" text-anchor="middle">目的と相手で変わる</text>
+        <text x="493" y="140" font-size="13" fill="#3d4451" text-anchor="middle">操られている感じ</text>
+        <text x="320" y="182" font-size="13" fill="#3d4451" text-anchor="middle">「ちょうどよい強さ」に、すべてのゲームに共通する正解はない</text>
+      </svg>
+      <figcaption>図：誘導の強さの両極。弱すぎれば迷子、強すぎれば「操られている」感覚になる。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>弱すぎる</strong>：迷子になる、「何をすればいいか分からない」というストレスがたまる</li>
+      <li><strong>強すぎる</strong>：言われた通りに進むだけになり、探索や発見の楽しさが消える。矢印に沿って歩くだけの「作業」になりやすい</li>
+    </ul>
+    <p>では「ちょうどよさ」はどこか。それは、ゲームの目的と対象プレイヤーで変わります。初めての人向けの序盤は強めに、探索そのものが売りのマップでは弱めに——といった具合です。</p>
+    <p>例外もあります。あえて手がかりを置かず、迷うこと自体を体験にしている作品（探索や不安がテーマのものなど）では、「弱い誘導」が意図した設計である場合もあります。問題なのは強さそのものではなく、<strong>意図せずに迷わせてしまうこと</strong>です。</p>
+    <p>そして、誘導が効いているかどうかは、作った人の感覚では分かりません。実際のプレイを観察して確かめる——横断概念の5つ目「レベルデザインは仮説と検証である」の出番です。次の「実験で確かめる」で試してみましょう。</p>
+  </section>
+
+  <section class="card f-mint">
+    <h2>用語メモ</h2>
+    <dl class="glossary">
+      <dt>Guidance <span class="term-en">誘導</span></dt>
+      <dd>意味：壁や鍵で強制するのではなく、情報によって「そちらへ行きたくなる」ように導く設計。<br>
+      具体例：分かれ道の片方の先にコイン列を置き、「あっちが気になる」状態を作る。</dd>
+      <dt>Visual Guidance <span class="term-en">視線誘導</span></dt>
+      <dd>意味：明るさ・色・動き・大きさの差を使い、見てほしい場所へプレイヤーの視線を運ぶ設計。<br>
+      具体例：暗い部屋で扉の隙間から光を漏らし、最初に見る場所を扉に定める。</dd>
+      <dt>Signage <span class="term-en">サイン（標識）</span></dt>
+      <dd>意味：旗・矢印・看板など、意味が直接伝わる記号による案内。<br>
+      具体例：分かれ道に矢印の看板を立て、右が宝物庫・左が出口と示す。</dd>
+      <dt>Occlusion <span class="term-en">オクルージョン（視界の遮蔽）</span></dt>
+      <dd>意味：壁や地形で視線を遮り、場所や入口を見えなくすること。「見せない」ことで選択に影響を与える逆向きの手がかり。<br>
+      具体例：入口の手前に背の高い壁を置き、スタート地点から入口が見えないようにする。</dd>
+      <dt>Signposting <span class="term-en">サインポスティング（道標となる情報）</span></dt>
+      <dd>意味：言葉で直接指示せず、光・色・配置・音などで進む方向や注意点をほのめかす情報設計。<br>
+      具体例：出口の扉の上だけ明るい照明を置き、視線を自然に集める。</dd>
+      <dt>Landmark <span class="term-en">ランドマーク（目印）</span></dt>
+      <dd>意味：遠くからでも見え、自分の位置や方角を把握する助けになる目立つ構造物。<br>
+      具体例：マップ中央の大きな塔。迷っても塔を見れば方角が分かる。</dd>
+    </dl>
+  </section>
+
+  <section class="card f-lemon">
+    <h2>考えてみよう</h2>
+    <p>入力内容はこのブラウザの中にだけ保存され、外部に送信されません。ページを開き直すと自動で復元されます。</p>
+    <p><button type="button" id="saveBtn">保存する</button>
+    <span id="saveStatus" aria-live="polite"></span></p>
+    <p><strong>質問1：</strong>最近遊んだゲームで、「気づいたらそっちへ進んでいた」場面を思い出してみましょう。どんな手がかりがありましたか？</p>
+    <textarea id="q1" aria-label="質問1の回答"></textarea>
+    <p><strong>質問2：</strong>§4 の切替図で「遮蔽」を選ぶと何が起きますか。「見せない」誘導が向く場面と、向かない場面を考えてみましょう。</p>
+    <textarea id="q2" aria-label="質問2の回答"></textarea>
+    <p><strong>質問3：</strong>初めて遊ぶ人向けの分かれ道を作るなら、手がかりを1つだけ足せるとして、どれを選びますか？ 理由と、その手がかりの注意点への対策も考えてみましょう。</p>
+    <textarea id="q3" aria-label="質問3の回答"></textarea>
+  </section>
+
+  <section class="card f-sky">
+    <h2>実験で確かめる</h2>
+    <p>この Unit に対応する実験C「プレイヤー誘導実験」が公開中です。本文で見た手がかりが、そのまま実験のシナリオになっています。</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>シナリオ</th><th>実験での内容</th><th>本文の手がかり</th></tr></thead>
+        <tbody>
+          <tr><th>S0</th><td>ベースライン（誘導要素なし）</td><td>なし（§4「なし」）</td></tr>
+          <tr><th>S1</th><td>光 ― 上ルート沿いに明るい光の帯</td><td>光</td></tr>
+          <tr><th>S2</th><td>ランドマーク ― 下ルートの先に大きな塔</td><td>ランドマーク</td></tr>
+          <tr><th>S3</th><td>報酬 ― 下ルート沿いにコイン列</td><td>アイテム</td></tr>
+          <tr><th>S4</th><td>色とサインポスティング ― 上ルート入口に旗と矢印サイン</td><td>色とサイン</td></tr>
+          <tr><th>S5</th><td>視界の遮蔽 ― 下ルート入口の手前に背の高い遮蔽壁</td><td>遮蔽</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>進め方は「仮説 → 実行 → 記録 → 考察」。シナリオは S0 との差が手がかり1つだけになるよう作られているので、「どの手がかりが、どちらのルートをどのくらい増やしたか」を比べられます。自動エージェントは実際のプレイヤーではなく「注意が向きやすい傾向」を単純化したモデルなので、結果は傾向として読みましょう。</p>
+    <p>→ <a href="../../experiments/exp-c-guidance/">実験C「プレイヤー誘導実験」を開く</a></p>
+  </section>
+
+  <nav class="unitnav">
+    <p>← 前の Unit：<a href="../unit-03/">Unit 3「空間構造とマップ設計」</a></p>
+    <p>→ 次の Unit：Unit 5「空間の意味と環境ストーリーテリング」（準備中）</p>
+    <p><a href="../../">← 講座ハブへ戻る</a></p>
+  </nav>
+</main>
+<script>
+  var KEYS = ["None", "Light", "Landmark", "Coins", "Sign", "Occlusion"];
+  var tabs = {}, panels = {};
+  KEYS.forEach(function (k) {
+    tabs[k] = document.getElementById("tab" + k);
+    panels[k] = document.getElementById("panel" + k);
+  });
+  function show(key) {
+    KEYS.forEach(function (k) {
+      var on = k === key;
+      panels[k].hidden = !on;
+      tabs[k].setAttribute("aria-pressed", String(on));
+      tabs[k].className = on ? "" : "secondary";
+    });
+  }
+  KEYS.forEach(function (k) {
+    tabs[k].addEventListener("click", function () { show(k); });
+  });
+</script>
+
+<script>
+(function () {
+  var PREFIX = "gld:unit04:";
+  var status = document.getElementById("saveStatus");
+  var fields = ["q1", "q2", "q3"].map(function (id) { return document.getElementById(id); }).filter(Boolean);
+  function setStatus(t) { if (status) status.textContent = t; }
+  function storageOK() {
+    try { var k = PREFIX + "__test"; localStorage.setItem(k, "1"); localStorage.removeItem(k); return true; }
+    catch (e) { return false; }
+  }
+  var ok = storageOK();
+  if (!ok) {
+    setStatus("このブラウザでは保存できません（保存機能が無効です）。");
+  } else {
+    var restored = false;
+    fields.forEach(function (el) {
+      try {
+        var v = localStorage.getItem(PREFIX + el.id);
+        if (v !== null && v !== "") { el.value = v; restored = true; }
+      } catch (e) {}
+    });
+    if (restored) setStatus("前回の入力を復元しました。");
+  }
+  function saveAll(manual) {
+    if (!ok) { setStatus("このブラウザでは保存できません（保存機能が無効です）。"); return; }
+    try { fields.forEach(function (el) { localStorage.setItem(PREFIX + el.id, el.value); }); }
+    catch (e) { setStatus("保存できませんでした。"); return; }
+    if (manual) {
+      var d = new Date();
+      var hh = ("0" + d.getHours()).slice(-2), mm = ("0" + d.getMinutes()).slice(-2);
+      setStatus("保存しました（" + hh + ":" + mm + "）");
+    } else {
+      setStatus("自動保存しました");
+    }
+  }
+  var timer = null;
+  fields.forEach(function (el) {
+    el.addEventListener("input", function () {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () { saveAll(false); }, 500);
+    });
+  });
+  var btn = document.getElementById("saveBtn");
+  if (btn) btn.addEventListener("click", function () { saveAll(true); });
+})();
+</script>
+</body>
+</html>
