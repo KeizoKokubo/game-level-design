@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 3：空間構造とマップ設計 | ゲーム・レベルデザイン講座</title>
+<style>
+  :root{
+    --bg:#fff9f0; --card:#ffffff; --ink:#3d4451; --sub:#5a6274; --line:#efddcb;
+    --coral:#ffe0d1; --mint:#dcf2e3; --sky:#ddeefb; --lav:#eae3fb; --lemon:#fdf0bd; --peach:#ffedd6; --pink:#fbe3ee;
+    --link:#b23a1d; --btn:#c2502a;
+    --shadow:0 6px 20px rgba(146,90,32,.10);
+  }
+  *{box-sizing:border-box;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic","Noto Sans JP",sans-serif;
+    font-size:17px; color:var(--ink); background:var(--bg); margin:0; line-height:1.9;}
+  main{max-width:880px; margin:0 auto; padding:28px 16px 56px;}
+  section.card{background:var(--card); border-radius:20px; box-shadow:var(--shadow); padding:24px 28px 14px; margin:0 0 30px;}
+  .f-coral{--fill:var(--coral);} .f-mint{--fill:var(--mint);} .f-sky{--fill:var(--sky);}
+  .f-lav{--fill:var(--lav);} .f-lemon{--fill:var(--lemon);} .f-peach{--fill:var(--peach);} .f-pink{--fill:var(--pink);}
+  h1{font-size:1.65rem; margin:2px 0 6px; display:inline-block; padding:0 .2em;
+    background:linear-gradient(transparent 68%, var(--lemon) 68%);}
+  h2{font-size:1.22rem; margin:0 0 14px; padding:.28em .9em; border-radius:999px; background:var(--fill,var(--peach));}
+  p{margin:.6em 0;}
+  ul{margin:.4em 0; padding-left:1.3em;}
+  li{margin:.25em 0;}
+  .sub{color:var(--sub); margin:0 0 10px; font-size:.95rem;}
+  .meta{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 6px;}
+  .meta span{border:2px solid var(--link); border-radius:999px; padding:0 14px; font-size:.88rem; font-weight:bold;}
+  .goals{background:var(--peach); border-radius:16px; padding:12px 18px 12px 34px; margin:14px 0 8px;}
+  .goals p{margin:2px 0 2px -18px; font-weight:bold;}
+  .note{background:var(--mint); border-radius:16px; padding:10px 16px; margin:12px 0;}
+  .warn{background:#fff3c4; color:#5b4300; border:2px solid #e0aa00; border-radius:16px; padding:10px 16px; margin:12px 0;}
+  .tbl{border:1px solid var(--line); border-radius:16px; overflow:hidden; margin:12px 0;}
+  table{border-collapse:collapse; width:100%; font-size:.94rem;}
+  th,td{border-bottom:1px solid var(--line); padding:7px 11px; text-align:left; color:var(--ink);}
+  tr:last-child td,tr:last-child th{border-bottom:none;}
+  th{background:var(--peach);}
+  button{font-family:inherit; font-size:1rem; font-weight:bold; padding:9px 22px; margin:4px 4px 4px 0;
+    border:2px solid var(--btn); background:var(--btn); color:#fff; border-radius:999px; cursor:pointer;}
+  button.secondary{background:#fff; color:var(--link);}
+  button[aria-pressed="true"]{outline:4px solid #f2b01e; outline-offset:1px;}
+  textarea{width:100%; min-height:60px; font-family:inherit; font-size:1rem; padding:8px 10px; background:#fff; color:var(--ink);
+    border:2px solid #c9b18c; border-radius:14px;}
+  .diagram{background:#fffaf2; border:2px solid #ead9c2; border-radius:18px; padding:14px; margin:14px 0;}
+  .diagram svg{display:block; width:100%; max-width:420px; height:auto; margin:0 auto;}
+  .diagram.wide svg{max-width:100%;}
+  figure.diagram{margin:14px 0;}
+  figcaption{font-size:.9rem; color:#5a6274; margin-top:8px;}
+  .glossary dt{font-weight:bold; margin-top:12px;}
+  .glossary dd{margin-left:0;}
+  .term-en{color:var(--sub); font-size:.88rem;}
+  nav.unitnav{padding:0 6px;}
+  nav.unitnav p{margin:4px 0;}
+  a{color:var(--link); font-weight:bold;}
+  @media (prefers-color-scheme: dark){
+    :root{--bg:#251f1b; --card:#322b26; --ink:#f5ede1; --sub:#d8c9b8; --line:#57493c; --link:#ffb59d;
+      --coral:#4a3428; --mint:#2e4034; --sky:#2c3a48; --lav:#3a3350; --lemon:#4a3d1e; --peach:#453527; --pink:#472f3a;
+      --shadow:0 6px 20px rgba(0,0,0,.45);}
+    .warn{background:#4a3d1e; color:#ffe9a8; border-color:#a97e12;}
+    /* .diagram の地色（#fffaf2）と中の SVG は両モード固定色。地の上に直接乗る HTML テキストも
+       ライト側の文字色に固定し、--ink の反転で読めなくなるのを防ぐ（Unit 2 §6 の教訓）。 */
+    .diagram{color:#3d4451;}
+    button.secondary{background:transparent;}
+    textarea{background:#2b2521; color:#f5ede1; border-color:#8a7967;}
+  }
+  .spot{display:block; width:100%; max-width:520px; height:auto; margin:14px auto; border-radius:20px;}
+</style>
+</head>
+<body>
+<main>
+  <section class="card f-peach">
+    <p class="sub"><a href="../../">ゲーム・レベルデザイン講座</a> ／ Part 2：ゲーム空間の設計</p>
+    <h1>Unit 3：空間構造とマップ設計</h1>
+    <div class="meta">
+      <span>主軸：空間</span>
+      <span>担当変数：空間構造の型（直線型／分岐型／ハブ型／ループ型の接続方式）</span>
+    </div>
+    <div class="goals">
+      <p>この Unit の学習目標</p>
+      <ul>
+        <li>空間構造の4つの型（直線型／分岐型／ハブ型／ループ型）を、模式図で見分けて説明できる</li>
+        <li>同じ広さ・同じ部屋数でも、接続方式で体験が変わることを具体例で説明できる</li>
+        <li>させたい体験から逆算して、構造を選ぶ考え方を説明できる</li>
+      </ul>
+    </div>
+    <p>Unit 1・2 では「体験」そのものを分解してきました。では、その体験はどこで起きるのでしょう。答えは「空間の中」。Part 2 では空間の設計に入ります。最初のテーマは、マップの一番大きな骨格——「構造」です。</p>
+    <div class="note"><strong>この Unit の担当は「構造そのもの」</strong>（場所どうしのつながり方）。
+    構造の中でどう誘導するか（光・視線・手がかり）は Unit 4、空間にどう意味を持たせるか（密度や環境の物語）は Unit 5 で扱います。</div>
+  </section>
+
+  <section class="card f-sky">
+    <h2>1. 体験は「空間」の中で起きる</h2>
+    <p>プレイヤーは、場所にいて、場所から場所へ移動しながら遊びます。判断も感情も、空間の上での出来事です。だから空間の作り方は、そのまま体験の作り方になります。</p>
+    <p>この Unit で見るのは、その中でも一番大きな決め方——マップ全体の「構造」です。キーワードは1つだけ。<strong>同じ広さ・同じ部屋数でも、つなぎ方で体験は変わる</strong>。</p>
+    <p>たとえば部屋が4つあるマップ。一本道につなぐか、輪につなぐかで、迷い方も、選ぶ楽しさも、安心感も違ってきます。部屋の中身は同じなのに、です。</p>
+  </section>
+
+  <section class="card f-mint">
+    <h2>2. マップは「場所」と「つながり」でできている</h2>
+    <p>マップを思いきり単純化すると、「場所」と「つながり」の2つに分解できます。部屋の形や広さはいったん脇に置いて、「どこが、どこにつながっているか」だけを見る見方です。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 230" role="img" aria-label="マップを場所とつながりに単純化した基本モデル図">
+        <rect x="0" y="0" width="640" height="230" rx="18" fill="#fffaf2"></rect>
+        <path d="M120 105 H520" stroke="#d9c6ae" stroke-width="30" fill="none"></path>
+        <path d="M120 105 H520" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="60" y="78" width="120" height="54" rx="12" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="120" y="110" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">場所A</text>
+        <rect x="260" y="78" width="120" height="54" rx="12" fill="#fdf0bd" stroke="#6e5200" stroke-width="2"></rect>
+        <text x="320" y="110" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">場所B</text>
+        <rect x="460" y="78" width="120" height="54" rx="12" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="520" y="110" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">場所C</text>
+        <text x="40" y="182" font-size="14" fill="#3d4451">四角 ＝ 場所（部屋・広場など、何かがある・起きる地点）</text>
+        <text x="40" y="208" font-size="14" fill="#3d4451">太い線 ＝ つながり（通路・扉など、移動できる関係）</text>
+      </svg>
+      <figcaption>図：マップの基本モデル。構造を考えるときは、場所とつながりだけに単純化する。</figcaption>
+    </figure>
+    <p>この Unit で変えるのは「つながり方」だけです。部屋の中の敵や報酬の配置は Unit 7・8、誘導の手がかりは Unit 4 の担当。変数を1つに絞ることで、構造そのものの効果を見ます。</p>
+    <p>代表的なつながり方は4つ。直線型・分岐型・ハブ型・ループ型——順に見ていきましょう。なお、この4分類は本教材での整理のしかたで、実際のゲームでは組み合わせて使われることも多いものです。</p>
+  </section>
+
+  <section class="card f-coral">
+    <h2>3. 直線型：一列につなぐ</h2>
+    <p>場所が一列につながり、決まった順番に進む構造です。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 190" role="img" aria-label="直線型の模式図">
+        <rect x="0" y="0" width="640" height="190" rx="18" fill="#fffaf2"></rect>
+        <path d="M80 100 H570" stroke="#d9c6ae" stroke-width="30" fill="none"></path>
+        <path d="M80 100 H570" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="30" y="73" width="100" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="80" y="105" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="200" y="73" width="100" height="54" rx="12" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="250" y="105" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋A</text>
+        <rect x="370" y="73" width="100" height="54" rx="12" fill="#eae3fb" stroke="#5b4a9e" stroke-width="2"></rect>
+        <text x="420" y="105" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋B</text>
+        <rect x="520" y="73" width="100" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="570" y="105" font-size="14" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <text x="320" y="168" font-size="14" fill="#3d4451" text-anchor="middle">一本道。順番は固定で、迷うことはない</text>
+      </svg>
+      <figcaption>図：直線型。スタートからゴールまで、順番に進む。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>体験</strong>：迷わない。物語や操作を、設計した順番どおりに見せられる（「教える→試す→応用する」と相性が良い）</li>
+      <li><strong>向く場面</strong>：ストーリーを順に追わせたいとき、新しい操作を段階的に覚えさせたいとき</li>
+      <li><strong>注意点</strong>：寄り道や発見の余地は小さい。一本道が長く続くと、「自分で進んでいる」より「運ばれている」感覚になりやすい</li>
+    </ul>
+  </section>
+
+  <section class="card f-lav">
+    <h2>4. 分岐型：分かれて、合流する</h2>
+    <p>途中で経路が分かれ、選んだ先で再び合流する構造です。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 280" role="img" aria-label="分岐型の模式図">
+        <rect x="0" y="0" width="640" height="280" rx="18" fill="#fffaf2"></rect>
+        <path d="M85 140 H250 M250 140 V70 H388 M250 140 V210 H388 M500 70 V210 M500 140 H523" stroke="#d9c6ae" stroke-width="30" fill="none"></path>
+        <path d="M85 140 H250 M250 140 V70 H388 M250 140 V210 H388 M500 70 V210 M500 140 H523" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="30" y="113" width="100" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="80" y="145" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="390" y="43" width="110" height="54" rx="12" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="445" y="75" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋A</text>
+        <rect x="390" y="183" width="110" height="54" rx="12" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="445" y="215" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋B</text>
+        <rect x="525" y="113" width="95" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="572" y="145" font-size="14" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <circle cx="250" cy="140" r="7" fill="#8a7967" stroke="#fffaf2" stroke-width="2"></circle>
+        <text x="320" y="264" font-size="14" fill="#3d4451" text-anchor="middle">途中でAかBかを選ぶ。もう一方は見ないまま進むことも</text>
+      </svg>
+      <figcaption>図：分岐型。分かれ道で選び、ゴール側で合流する。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>体験</strong>：途中で「どちらに行くか」を選べる。選ぶ楽しさと主体感が生まれ、選ばなかった側への好奇心が残る</li>
+      <li><strong>向く場面</strong>：安全な遠回りと危険な近道など、リスクの違う道を選ばせたいとき</li>
+      <li><strong>注意点</strong>：両方の道を作る手間がかかる。片方しか通らないプレイヤーもいるので、大事な情報は合流した後に置くなどの配慮が要る</li>
+    </ul>
+  </section>
+
+  <section class="card f-lemon">
+    <h2>5. ハブ型：中心に戻ってくる</h2>
+    <img class="spot" src="data:image/webp;base64,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" alt="中央の広場から森・塔・水辺・洞窟へ道が放射状にのびるハブ型のマップと、芽生えのキャラクター" width="900" height="600" loading="lazy">
+    <p>中心の場所（ハブ）から放射状につながり、行き来のたびに中心へ戻る構造です。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 310" role="img" aria-label="ハブ型の模式図">
+        <rect x="0" y="0" width="640" height="310" rx="18" fill="#fffaf2"></rect>
+        <path d="M125 150 H252 M388 150 H515 M320 72 V112 M320 188 V228" stroke="#d9c6ae" stroke-width="30" fill="none"></path>
+        <path d="M125 150 H252 M388 150 H515 M320 72 V112 M320 188 V228" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="25" y="123" width="100" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="75" y="155" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="265" y="18" width="110" height="54" rx="12" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="320" y="50" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋A</text>
+        <rect x="515" y="123" width="100" height="54" rx="12" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="565" y="155" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋B</text>
+        <rect x="265" y="228" width="110" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="320" y="260" font-size="14" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <rect x="252" y="112" width="136" height="76" rx="14" fill="#fdf0bd" stroke="#6e5200" stroke-width="2"></rect>
+        <text x="320" y="155" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">広場（ハブ）</text>
+        <text x="320" y="300" font-size="14" fill="#3d4451" text-anchor="middle">どの部屋へ行くにも、いったん広場に戻ってくる</text>
+      </svg>
+      <figcaption>図：ハブ型。中心の広場が全ての場所の交差点になる。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>体験</strong>：中心が拠点になり、「帰ってこられる」安心感と、現在地の分かりやすさが生まれる。行き先は自分で選べる</li>
+      <li><strong>向く場面</strong>：拠点で準備をして各地へ出かけるRPGのワールドなど、同じ場所に何度も戻る設計</li>
+      <li><strong>注意点</strong>：中心への往復が「作業」になりやすい。中心の場所自体に変化や情報がないと、移動の時間が退屈になりがち</li>
+    </ul>
+  </section>
+
+  <section class="card f-pink">
+    <h2>6. ループ型：輪につなぐ</h2>
+    <p>場所が輪のようにつながり、一周したり逆回りしたりできる構造です。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 270" role="img" aria-label="ループ型の模式図">
+        <rect x="0" y="0" width="640" height="270" rx="18" fill="#fffaf2"></rect>
+        <path d="M120 62 H520 V198 H120 Z" stroke="#d9c6ae" stroke-width="30" fill="none" stroke-linejoin="round"></path>
+        <path d="M120 62 H520 V198 H120 Z" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6" stroke-linejoin="round"></path>
+        <polygon points="310,53 330,62 310,71" fill="#c2502a"></polygon>
+        <polygon points="511,120 529,120 520,140" fill="#c2502a"></polygon>
+        <polygon points="330,189 310,198 330,207" fill="#c2502a"></polygon>
+        <polygon points="111,140 129,140 120,120" fill="#c2502a"></polygon>
+        <rect x="60" y="35" width="120" height="54" rx="12" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="120" y="67" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋A</text>
+        <rect x="460" y="35" width="120" height="54" rx="12" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="520" y="67" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋B</text>
+        <rect x="460" y="171" width="120" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="520" y="203" font-size="14" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <rect x="60" y="171" width="120" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="120" y="203" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <text x="320" y="254" font-size="14" fill="#3d4451" text-anchor="middle">一周できる。行き止まりがなく、逆回りもできる</text>
+      </svg>
+      <figcaption>図：ループ型。輪をどちら向きにも進める。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>体験</strong>：行き止まりがないので探索が止まらない。一周すると全体像がつかめ、「近道」の発見も生まれる</li>
+      <li><strong>向く場面</strong>：探索が中心のマップ、ぐるぐる回るうちに道を覚えさせたいマップ</li>
+      <li><strong>注意点</strong>：目的地への最短の道が分かりにくいと、ただ回らされている感覚にもなる。目印などの誘導（Unit 4）とセットで考えたい構造</li>
+    </ul>
+  </section>
+
+  <section class="card f-sky">
+    <h2>7. 比べてみよう：同じ部屋、4つのつなぎ方</h2>
+    <p>同じ5つの場所（スタート・部屋A・広場・部屋B・ゴール）を、4つの構造でつなぎ替えてみます。場所の位置も数も同じ。違うのはつながりだけです。</p>
+    <div>
+      <button type="button" id="tabLinear" aria-pressed="true">直線型</button>
+      <button type="button" id="tabBranch" class="secondary" aria-pressed="false">分岐型</button>
+      <button type="button" id="tabHub" class="secondary" aria-pressed="false">ハブ型</button>
+      <button type="button" id="tabLoop" class="secondary" aria-pressed="false">ループ型</button>
+    </div>
+    <div class="diagram wide" id="panelLinear">
+      <svg viewBox="0 0 640 320" role="img" aria-label="同じ場所を直線型につないだ模式図">
+        <rect x="0" y="0" width="640" height="320" rx="18" fill="#fffaf2"></rect>
+        <path d="M108 138 L188 52 M282 48 L302 116 M302 184 L282 246 M282 259 L528 168" stroke="#d9c6ae" stroke-width="26" fill="none"></path>
+        <path d="M108 138 L188 52 M282 48 L302 116 M302 184 L282 246 M282 259 L528 168" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="20" y="123" width="90" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="65" y="155" font-size="12.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="185" y="16" width="100" height="50" rx="12" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="235" y="46" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋A</text>
+        <rect x="270" y="118" width="100" height="64" rx="12" fill="#fdf0bd" stroke="#6e5200" stroke-width="2"></rect>
+        <text x="320" y="155" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">広場</text>
+        <rect x="185" y="234" width="100" height="50" rx="12" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="235" y="264" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋B</text>
+        <rect x="530" y="123" width="90" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="575" y="155" font-size="12.5" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <text x="320" y="308" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">直線型：スタート→部屋A→広場→部屋B→ゴール。順番は固定</text>
+      </svg>
+    </div>
+    <div class="diagram wide" id="panelBranch" hidden>
+      <svg viewBox="0 0 640 320" role="img" aria-label="同じ場所を分岐型につないだ模式図">
+        <rect x="0" y="0" width="640" height="320" rx="18" fill="#fffaf2"></rect>
+        <path d="M110 150 H270 M296 120 L252 68 M296 180 L252 232 M282 36 L528 136 M282 264 L528 164" stroke="#d9c6ae" stroke-width="26" fill="none"></path>
+        <path d="M110 150 H270 M296 120 L252 68 M296 180 L252 232 M282 36 L528 136 M282 264 L528 164" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="20" y="123" width="90" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="65" y="155" font-size="12.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="185" y="16" width="100" height="50" rx="12" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="235" y="46" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋A</text>
+        <rect x="270" y="118" width="100" height="64" rx="12" fill="#fdf0bd" stroke="#6e5200" stroke-width="2"></rect>
+        <text x="320" y="155" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">広場</text>
+        <rect x="185" y="234" width="100" height="50" rx="12" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="235" y="264" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋B</text>
+        <rect x="530" y="123" width="90" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="575" y="155" font-size="12.5" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <text x="320" y="308" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">分岐型：広場で部屋Aか部屋Bかを選び、どちらからもゴールへ合流</text>
+      </svg>
+    </div>
+    <div class="diagram wide" id="panelHub" hidden>
+      <svg viewBox="0 0 640 320" role="img" aria-label="同じ場所をハブ型につないだ模式図">
+        <rect x="0" y="0" width="640" height="320" rx="18" fill="#fffaf2"></rect>
+        <path d="M110 150 H270 M370 150 H530 M300 118 L258 68 M300 182 L258 232" stroke="#d9c6ae" stroke-width="26" fill="none"></path>
+        <path d="M110 150 H270 M370 150 H530 M300 118 L258 68 M300 182 L258 232" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="20" y="123" width="90" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="65" y="155" font-size="12.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="185" y="16" width="100" height="50" rx="12" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="235" y="46" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋A</text>
+        <rect x="270" y="118" width="100" height="64" rx="12" fill="#fdf0bd" stroke="#6e5200" stroke-width="2"></rect>
+        <text x="320" y="155" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">広場</text>
+        <rect x="185" y="234" width="100" height="50" rx="12" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="235" y="264" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋B</text>
+        <rect x="530" y="123" width="90" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="575" y="155" font-size="12.5" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <text x="320" y="308" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">ハブ型：全部の場所は広場とだけつながる。部屋A・Bは行き止まり</text>
+      </svg>
+    </div>
+    <div class="diagram wide" id="panelLoop" hidden>
+      <svg viewBox="0 0 640 320" role="img" aria-label="同じ場所をループ型につないだ模式図">
+        <rect x="0" y="0" width="640" height="320" rx="18" fill="#fffaf2"></rect>
+        <path d="M92 124 L192 62 M282 34 L532 134 M548 176 L288 250 M188 252 L274 184 M270 150 H110" stroke="#d9c6ae" stroke-width="26" fill="none"></path>
+        <path d="M92 124 L192 62 M282 34 L532 134 M548 176 L288 250 M188 252 L274 184 M270 150 H110" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="8 6"></path>
+        <rect x="20" y="123" width="90" height="54" rx="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="65" y="155" font-size="12.5" fill="#3d4451" text-anchor="middle" font-weight="bold">スタート</text>
+        <rect x="185" y="16" width="100" height="50" rx="12" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="235" y="46" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋A</text>
+        <rect x="270" y="118" width="100" height="64" rx="12" fill="#fdf0bd" stroke="#6e5200" stroke-width="2"></rect>
+        <text x="320" y="155" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">広場</text>
+        <rect x="185" y="234" width="100" height="50" rx="12" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="235" y="264" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">部屋B</text>
+        <rect x="530" y="123" width="90" height="54" rx="12" fill="#1e7d46" stroke="#14532d" stroke-width="2"></rect>
+        <text x="575" y="155" font-size="12.5" fill="#ffffff" text-anchor="middle" font-weight="bold">ゴール</text>
+        <text x="320" y="308" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">ループ型：輪になっている。逆回りでもゴールへ行ける</text>
+      </svg>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>構造</th><th>進み方</th><th>迷いやすさ</th><th>得意な体験</th></tr></thead>
+        <tbody>
+          <tr><th>直線型</th><td>順番どおりに一本道</td><td>低い</td><td>物語・学習を順に見せる</td></tr>
+          <tr><th>分岐型</th><td>選んで進み、合流する</td><td>中くらい</td><td>選択と主体感</td></tr>
+          <tr><th>ハブ型</th><td>中心に戻りながら放射状</td><td>中くらい（中心が目印になる）</td><td>拠点の安心感</td></tr>
+          <tr><th>ループ型</th><td>一周できる・逆回り可</td><td>低〜中くらい</td><td>探索と近道の発見</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>表はあくまで傾向です。実際の迷いやすさは、目印や手がかりの置き方（Unit 4）でも大きく変わります。</p>
+  </section>
+
+  <section class="card f-peach">
+    <h2>8. 構造選びは、体験選び</h2>
+    <p>4つの型に、優劣はありません。あるのは「何を得て、何を手放すか」のトレードオフです。</p>
+    <p>だから選ぶときは、形からではなく「プレイヤーにどう感じてほしいか」から逆算します。順番に見せたいなら直線型、選ばせたいなら分岐型、拠点の安心感ならハブ型、探索させたいならループ型——体験が先、構造は後です。</p>
+    <p>実際のゲームでは組み合わせも普通です（町はハブ型、その先のダンジョンは分岐型、など）。型は「全体を1つに決めるもの」ではなく、場所ごとに使い分ける道具でもあります。</p>
+    <p>次の Unit 4 では、決めた構造の中でプレイヤーをどう誘導するか——光や視線といった「情報」の設計に進みます。</p>
+  </section>
+
+  <section class="card f-mint">
+    <h2>用語メモ</h2>
+    <dl class="glossary">
+      <dt>Node <span class="term-en">ノード（場所）</span></dt>
+      <dd>意味：構造を模式化したときの「場所」の単位。部屋・広場などを、形や広さを脇に置いて「点」として扱う。<br>
+      具体例：マップを「場所A—場所B」のつながりだけで描き直す。</dd>
+      <dt>Linear <span class="term-en">直線型（リニア）</span></dt>
+      <dd>意味：場所が一列につながり、決まった順番に進む構造。<br>
+      具体例：部屋を順に進み、最後にボス部屋がある一本道のステージ。</dd>
+      <dt>Branching <span class="term-en">分岐型</span></dt>
+      <dd>意味：途中で経路が分かれ、選んだ先で再び合流する構造。<br>
+      具体例：安全な遠回りと危険な近道を選べる洞窟。</dd>
+      <dt>Hub-and-Spoke <span class="term-en">ハブ型（ハブ・アンド・スポーク）</span></dt>
+      <dd>意味：中心の場所から放射状につながり、行き来のたびに中心へ戻る構造。<br>
+      具体例：拠点の町から各地へ出かけ、町に戻ってくるRPGのワールド。</dd>
+      <dt>Loop <span class="term-en">ループ型</span></dt>
+      <dd>意味：場所が輪のようにつながり、一周したり逆回りしたりできる構造。<br>
+      具体例：環状の通路を一周でき、回るうちに近道が見つかるマップ。</dd>
+      <dt>Landmark <span class="term-en">ランドマーク（目印）</span></dt>
+      <dd>意味：遠くからでも見え、自分の位置や方角を把握する助けになる目立つ構造物。<br>
+      具体例：マップ中央の大きな塔。迷っても塔を見れば方角が分かる。</dd>
+    </dl>
+  </section>
+
+  <section class="card f-lemon">
+    <h2>考えてみよう</h2>
+    <p>入力内容はこのブラウザの中にだけ保存され、外部に送信されません。ページを開き直すと自動で復元されます。</p>
+    <p><button type="button" id="saveBtn">保存する</button>
+    <span id="saveStatus" aria-live="polite"></span></p>
+    <p><strong>質問1：</strong>最近遊んだゲームのマップを1つ思い出してみましょう。4つの型のどれに近いですか（組み合わせでも構いません）。その型だからこそ生まれていた体験は何ですか？</p>
+    <textarea id="q1" aria-label="質問1の回答"></textarea>
+    <p><strong>質問2：</strong>§7 と同じ場所の並びを「直線型」から「ループ型」に変えたら、プレイヤーの行動と感情はどう変わりそうですか？</p>
+    <textarea id="q2" aria-label="質問2の回答"></textarea>
+    <p><strong>質問3：</strong>初めて遊ぶ人向けのステージを作るなら、どの構造を選びますか？ 理由と、その構造の注意点への対策も考えてみましょう。</p>
+    <textarea id="q3" aria-label="質問3の回答"></textarea>
+  </section>
+
+  <section class="card f-sky">
+    <h2>実験で確かめる</h2>
+    <p>この Unit に対応する実験A「敵や報酬の配置実験」（経路比較のパート）は、現在準備中です。公開されしだい、ここから試せるようになります。</p>
+    <p>一足先に「構造の中での誘導」を試したい人は、Unit 4 対応の実験Cが公開中です。</p>
+    <p>→ <a href="../../experiments/exp-c-guidance/">実験C「プレイヤー誘導実験」</a>（Unit 4 対応）</p>
+  </section>
+
+  <nav class="unitnav">
+    <p>← 前の Unit：<a href="../unit-02/">Unit 2「プレイヤー体験の設計」</a></p>
+    <p>→ 次の Unit：Unit 4「プレイヤーの誘導と視線制御」（準備中）</p>
+    <p><a href="../../">← 講座ハブへ戻る</a></p>
+  </nav>
+</main>
+<script>
+  var KEYS = ["Linear", "Branch", "Hub", "Loop"];
+  var tabs = {}, panels = {};
+  KEYS.forEach(function (k) {
+    tabs[k] = document.getElementById("tab" + k);
+    panels[k] = document.getElementById("panel" + k);
+  });
+  function show(key) {
+    KEYS.forEach(function (k) {
+      var on = k === key;
+      panels[k].hidden = !on;
+      tabs[k].setAttribute("aria-pressed", String(on));
+      tabs[k].className = on ? "" : "secondary";
+    });
+  }
+  KEYS.forEach(function (k) {
+    tabs[k].addEventListener("click", function () { show(k); });
+  });
+</script>
+
+<script>
+(function () {
+  var PREFIX = "gld:unit03:";
+  var status = document.getElementById("saveStatus");
+  var fields = ["q1", "q2", "q3"].map(function (id) { return document.getElementById(id); }).filter(Boolean);
+  function setStatus(t) { if (status) status.textContent = t; }
+  function storageOK() {
+    try { var k = PREFIX + "__test"; localStorage.setItem(k, "1"); localStorage.removeItem(k); return true; }
+    catch (e) { return false; }
+  }
+  var ok = storageOK();
+  if (!ok) {
+    setStatus("このブラウザでは保存できません（保存機能が無効です）。");
+  } else {
+    var restored = false;
+    fields.forEach(function (el) {
+      try {
+        var v = localStorage.getItem(PREFIX + el.id);
+        if (v !== null && v !== "") { el.value = v; restored = true; }
+      } catch (e) {}
+    });
+    if (restored) setStatus("前回の入力を復元しました。");
+  }
+  function saveAll(manual) {
+    if (!ok) { setStatus("このブラウザでは保存できません（保存機能が無効です）。"); return; }
+    try { fields.forEach(function (el) { localStorage.setItem(PREFIX + el.id, el.value); }); }
+    catch (e) { setStatus("保存できませんでした。"); return; }
+    if (manual) {
+      var d = new Date();
+      var hh = ("0" + d.getHours()).slice(-2), mm = ("0" + d.getMinutes()).slice(-2);
+      setStatus("保存しました（" + hh + ":" + mm + "）");
+    } else {
+      setStatus("自動保存しました");
+    }
+  }
+  var timer = null;
+  fields.forEach(function (el) {
+    el.addEventListener("input", function () {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () { saveAll(false); }, 500);
+    });
+  });
+  var btn = document.getElementById("saveBtn");
+  if (btn) btn.addEventListener("click", function () { saveAll(true); });
+})();
+</script>
+</body>
+</html>
