@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 6：難易度曲線と学習設計 | ゲーム・レベルデザイン講座</title>
+<style>
+  :root{
+    --bg:#fff9f0; --card:#ffffff; --ink:#3d4451; --sub:#5a6274; --line:#efddcb;
+    --coral:#ffe0d1; --mint:#dcf2e3; --sky:#ddeefb; --lav:#eae3fb; --lemon:#fdf0bd; --peach:#ffedd6; --pink:#fbe3ee;
+    --link:#b23a1d; --btn:#c2502a;
+    --shadow:0 6px 20px rgba(146,90,32,.10);
+  }
+  *{box-sizing:border-box;}
+  body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic","Noto Sans JP",sans-serif;
+    font-size:17px; color:var(--ink); background:var(--bg); margin:0; line-height:1.9;}
+  main{max-width:880px; margin:0 auto; padding:28px 16px 56px;}
+  section.card{background:var(--card); border-radius:20px; box-shadow:var(--shadow); padding:24px 28px 14px; margin:0 0 30px;}
+  .f-coral{--fill:var(--coral);} .f-mint{--fill:var(--mint);} .f-sky{--fill:var(--sky);}
+  .f-lav{--fill:var(--lav);} .f-lemon{--fill:var(--lemon);} .f-peach{--fill:var(--peach);} .f-pink{--fill:var(--pink);}
+  h1{font-size:1.65rem; margin:2px 0 6px; display:inline-block; padding:0 .2em;
+    background:linear-gradient(transparent 68%, var(--lemon) 68%);}
+  h2{font-size:1.22rem; margin:0 0 14px; padding:.28em .9em; border-radius:999px; background:var(--fill,var(--peach));}
+  p{margin:.6em 0;}
+  ul{margin:.4em 0; padding-left:1.3em;}
+  li{margin:.25em 0;}
+  .sub{color:var(--sub); margin:0 0 10px; font-size:.95rem;}
+  .meta{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 6px;}
+  .meta span{border:2px solid var(--link); border-radius:999px; padding:0 14px; font-size:.88rem; font-weight:bold;}
+  .goals{background:var(--peach); border-radius:16px; padding:12px 18px 12px 34px; margin:14px 0 8px;}
+  .goals p{margin:2px 0 2px -18px; font-weight:bold;}
+  .note{background:var(--mint); border-radius:16px; padding:10px 16px; margin:12px 0;}
+  .warn{background:#fff3c4; color:#5b4300; border:2px solid #e0aa00; border-radius:16px; padding:10px 16px; margin:12px 0;}
+  .tbl{border:1px solid var(--line); border-radius:16px; overflow:hidden; margin:12px 0;}
+  table{border-collapse:collapse; width:100%; font-size:.94rem;}
+  th,td{border-bottom:1px solid var(--line); padding:7px 11px; text-align:left; color:var(--ink);}
+  tr:last-child td,tr:last-child th{border-bottom:none;}
+  th{background:var(--peach);}
+  button{font-family:inherit; font-size:1rem; font-weight:bold; padding:9px 22px; margin:4px 4px 4px 0;
+    border:2px solid var(--btn); background:var(--btn); color:#fff; border-radius:999px; cursor:pointer;}
+  button.secondary{background:#fff; color:var(--link);}
+  button[aria-pressed="true"]{outline:4px solid #f2b01e; outline-offset:1px;}
+  textarea{width:100%; min-height:60px; font-family:inherit; font-size:1rem; padding:8px 10px; background:#fff; color:var(--ink);
+    border:2px solid #c9b18c; border-radius:14px;}
+  .diagram{background:#fffaf2; border:2px solid #ead9c2; border-radius:18px; padding:14px; margin:14px 0;}
+  .diagram svg{display:block; width:100%; max-width:420px; height:auto; margin:0 auto;}
+  .diagram.wide svg{max-width:100%;}
+  figure.diagram{margin:14px 0;}
+  figcaption{font-size:.9rem; color:#5a6274; margin-top:8px;}
+  .glossary dt{font-weight:bold; margin-top:12px;}
+  .glossary dd{margin-left:0;}
+  .term-en{color:var(--sub); font-size:.88rem;}
+  nav.unitnav{padding:0 6px;}
+  nav.unitnav p{margin:4px 0;}
+  a{color:var(--link); font-weight:bold;}
+  @media (prefers-color-scheme: dark){
+    :root{--bg:#251f1b; --card:#322b26; --ink:#f5ede1; --sub:#d8c9b8; --line:#57493c; --link:#ffb59d;
+      --coral:#4a3428; --mint:#2e4034; --sky:#2c3a48; --lav:#3a3350; --lemon:#4a3d1e; --peach:#453527; --pink:#472f3a;
+      --shadow:0 6px 20px rgba(0,0,0,.45);}
+    .warn{background:#4a3d1e; color:#ffe9a8; border-color:#a97e12;}
+    /* .diagram の地色（#fffaf2）と中の SVG は両モード固定色。地の上に直接乗る HTML テキストも
+       ライト側の文字色に固定し、--ink の反転で読めなくなるのを防ぐ（Unit 2 §6 の教訓）。 */
+    .diagram{color:#3d4451;}
+    button.secondary{background:transparent;}
+    textarea{background:#2b2521; color:#f5ede1; border-color:#8a7967;}
+  }
+  .spot{display:block; width:100%; max-width:520px; height:auto; margin:14px auto; border-radius:20px;}
+</style>
+</head>
+<body>
+<main>
+  <section class="card f-peach">
+    <p class="sub"><a href="../../">ゲーム・レベルデザイン講座</a> ／ Part 3：難易度とゲームプレイの設計</p>
+    <h1>Unit 6：難易度曲線と学習設計</h1>
+    <div class="meta">
+      <span>主軸：挑戦</span>
+      <span>担当変数：新要素の導入ステップ（導入→練習→応用→組み合わせの刻み方）</span>
+    </div>
+    <div class="goals">
+      <p>この Unit の学習目標</p>
+      <ul>
+        <li>難易度曲線とは何か、「右肩上がり一辺倒ではない」理由を説明できる</li>
+        <li>新しい要素を「教える→試す→応用する→組み合わせる」のステップで導入する方法と、ステップを飛ばしたときに起きることを説明できる</li>
+        <li>導入ステップの刻み方（細かさ）が難易度曲線の形を作ることと、刻み方のトレードオフを考えられる</li>
+      </ul>
+    </div>
+    <p>Part 2 までは「空間」を作ってきました。Part 3 では「難易度」に進みます。その入口としてこの Unit が扱うのは、難易度の強さそのものではなく、<strong>時間軸に沿った出し方</strong>——新しい要素を、いつ、どの順番で、どれだけ細かく刻んで体験させるかです。</p>
+    <div class="note"><strong>この Unit の担当は「導入ステップ」</strong>（新しい要素を段階的に体験させる刻み方と、それが作る難易度曲線の形）。
+    報酬の置き方とリスクは Unit 7、敵やギミックの組み合わせ方は Unit 8 で扱います。緊張と緩和の「区間の配分」は Unit 9、リトライの仕組みそのものは Unit 10 の担当です。
+    また Unit 2 で扱ったフローは「その瞬間の挑戦とスキルのつり合い」の話でしたが、この Unit は「レベル全体を通した出し方の順序」に注目します。</div>
+  </section>
+
+  <section class="card f-coral">
+    <h2>1. 難易度曲線とは：挑戦は「推移」で設計する</h2>
+    <p><strong>難易度曲線</strong>（Difficulty Curve）は、プレイの進行に沿って、挑戦の強さがどう推移するかを描いたものです。「序盤はやさしく、終盤は難しい」という大まかな方向は多くのゲームに共通しますが、曲線はいつも滑らかな右肩上がりとは限りません。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 270" role="img" aria-label="難易度曲線の例：上がる局面と緩む局面を持つ折れ線">
+        <rect x="0" y="0" width="640" height="270" rx="18" fill="#fffaf2"></rect>
+        <path d="M70 30 V210 H590" stroke="#8a7967" stroke-width="2" fill="none"></path>
+        <text x="52" y="120" font-size="13" fill="#3d4451" text-anchor="middle" transform="rotate(-90 52 120)">挑戦の強さ</text>
+        <text x="330" y="238" font-size="13" fill="#3d4451" text-anchor="middle">プレイの進行 →</text>
+        <path d="M70 190 L180 168 L250 178 L330 128 L400 142 L480 88 L590 52" stroke="#c2502a" stroke-width="3.5" fill="none"></path>
+        <circle cx="70" cy="190" r="5" fill="#c2502a"></circle>
+        <circle cx="250" cy="178" r="5" fill="#c2502a"></circle>
+        <circle cx="400" cy="142" r="5" fill="#c2502a"></circle>
+        <circle cx="590" cy="52" r="5" fill="#c2502a"></circle>
+        <text x="130" y="150" font-size="12.5" fill="#3d4451" text-anchor="middle">少しずつ上がる</text>
+        <text x="325" y="112" font-size="12.5" fill="#3d4451" text-anchor="middle">新しい要素のあとは一度緩む</text>
+        <text x="520" y="118" font-size="12.5" fill="#3d4451" text-anchor="middle">仕上げに大きく上がる</text>
+      </svg>
+      <figcaption>図：難易度曲線の一例（模式図です。実測データではなく、設計の考え方を描いたもの）。全体としては上がっていくが、途中で緩む局面がある。</figcaption>
+    </figure>
+    <p>新しい要素が出た直後は、その要素に慣れるための余裕として、曲線が一度緩むことがよくあります。逆に、要素に慣れた頃に少し強めの挑戦が来ると、達成感が生まれやすい。つまり曲線の形は、「いつ何を出すか」という<strong>出し方の設計</strong>そのものです。</p>
+    <p>ただし、緩む局面をどう並べるか——緊張と緩和の区間の配分そのものは Unit 9 のテーマです。ここでは「新しい要素の出し方が曲線の形を作る」という点に絞ります。</p>
+  </section>
+
+  <section class="card f-sky">
+    <h2>2. 導入ステップ：「教える→試す→応用する→組み合わせる」</h2>
+    <p>教材全体の横断概念の1つ目、「教える → 試す → 応用する」は、この Unit の中心です。新しい敵・ギミック・操作は、いきなり本番で使わせるのではなく、段階を刻んで体験させます。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 210" role="img" aria-label="導入ステップの4段階：教える、試す、応用する、組み合わせる">
+        <rect x="0" y="0" width="640" height="210" rx="18" fill="#fffaf2"></rect>
+        <rect x="16" y="58" width="140" height="86" rx="14" fill="#ddeefb" stroke="#17557f" stroke-width="2"></rect>
+        <text x="86" y="94" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">1. 教える</text>
+        <text x="86" y="120" font-size="12" fill="#3d4451" text-anchor="middle">安全な場所で出会う</text>
+        <text x="166" y="108" font-size="20" fill="#3d4451" text-anchor="middle" font-weight="bold">→</text>
+        <rect x="176" y="58" width="140" height="86" rx="14" fill="#dcf2e3" stroke="#17663f" stroke-width="2"></rect>
+        <text x="246" y="94" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">2. 試す</text>
+        <text x="246" y="120" font-size="12" fill="#3d4451" text-anchor="middle">低リスクで練習する</text>
+        <text x="326" y="108" font-size="20" fill="#3d4451" text-anchor="middle" font-weight="bold">→</text>
+        <rect x="336" y="58" width="140" height="86" rx="14" fill="#fdf0bd" stroke="#6e5200" stroke-width="2"></rect>
+        <text x="406" y="94" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">3. 応用する</text>
+        <text x="406" y="120" font-size="12" fill="#3d4451" text-anchor="middle">本番の文脈で使う</text>
+        <text x="486" y="108" font-size="20" fill="#3d4451" text-anchor="middle" font-weight="bold">→</text>
+        <rect x="496" y="58" width="140" height="86" rx="14" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="566" y="94" font-size="15" fill="#3d4451" text-anchor="middle" font-weight="bold">4. 組み合わせる</text>
+        <text x="566" y="120" font-size="12" fill="#3d4451" text-anchor="middle">既存の要素と一緒に</text>
+        <text x="320" y="36" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">新しい要素の導入ステップ</text>
+        <text x="320" y="182" font-size="12.5" fill="#3d4451" text-anchor="middle">1つ進むごとに、求められることが少しずつ増える</text>
+      </svg>
+      <figcaption>図：導入ステップの4段階。各段階でプレイヤーが「できること」が1つずつ増えていく。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>教える</strong>：安全な状況で要素と出会う。「これは何か」「触るとどうなるか」が、失敗を気にせず分かる。</li>
+      <li><strong>試す</strong>：低リスクの課題で繰り返し使う。操作の感覚が手に入る。</li>
+      <li><strong>応用する</strong>：本番の文脈——失敗すると困る場面——で使う。学んだことが「使える」と実感できる。</li>
+      <li><strong>組み合わせる</strong>：すでに学んだ別の要素と同時に使う。新しい読みと判断が生まれる。</li>
+    </ul>
+    <p>この刻みは、言い換えれば<strong>足場（スキャフォールディング）</strong>を組む作業です。足場があるから高いところへ登れる。十分に登れたら、足場は外してよい——むしろ外さないと、いつまでも本番になりません。</p>
+  </section>
+
+  <section class="card f-mint">
+    <h2>3. 具体例：「跳ねるキノコ」の導入を辿る</h2>
+    <img class="spot" src="data:image/webp;base64,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" alt="ピンクのキノコで跳ねながら、旗の立つ丘を一段ずつ高く進んでいく芽生えのキャラクター" width="900" height="600" loading="lazy">
+    <p>題材として、踏むと高く跳ねる「跳ねるキノコ」を考えます。ステップごとに、場面とプレイヤーの状態を並べてみます。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 240" role="img" aria-label="跳ねるキノコの導入ステップ：平地で出会い、段差を登り、谷を越える">
+        <rect x="0" y="0" width="640" height="240" rx="18" fill="#fffaf2"></rect>
+        <text x="110" y="34" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">教える：平地で出会う</text>
+        <rect x="20" y="170" width="180" height="16" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M92 170 a16 10 0 0 1 32 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="103" y="170" width="10" height="10" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <circle cx="52" cy="152" r="11" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <path d="M64 138 q14 -16 30 -8" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="4 3"></path>
+        <text x="110" y="216" font-size="12" fill="#3d4451" text-anchor="middle">落ちる場所がない</text>
+        <text x="320" y="34" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">試す：低い段差を登る</text>
+        <rect x="230" y="170" width="100" height="16" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <rect x="330" y="140" width="80" height="46" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M282 170 a16 10 0 0 1 32 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="293" y="170" width="10" height="10" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <circle cx="352" cy="122" r="11" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <path d="M306 150 q20 -34 40 -24" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="4 3"></path>
+        <text x="320" y="216" font-size="12" fill="#3d4451" text-anchor="middle">失敗しても登り直せる</text>
+        <text x="530" y="34" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">応用：谷を越える</text>
+        <rect x="440" y="170" width="70" height="16" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <rect x="570" y="170" width="60" height="16" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M492 170 a16 10 0 0 1 32 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="503" y="170" width="10" height="10" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <circle cx="566" cy="96" r="11" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <path d="M514 148 q26 -56 50 -44" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="4 3"></path>
+        <text x="535" y="216" font-size="12" fill="#3d4451" text-anchor="middle">落ちたら谷底からやり直し</text>
+      </svg>
+      <figcaption>図：同じキノコでも、置かれる場面で役割が変わる。場面の「困り度」が、ステップの進みを決める。</figcaption>
+    </figure>
+    <p>ポイントは、キノコそのものは一度も変わっていないことです。変わったのは<strong>失敗したときの困り度</strong>だけ。平地（困らない）→ 段差（少し困る）→ 谷（困る）の順に置くことで、プレイヤーは「分かったつもり」ではなく「使える」状態で本番を迎えられます。</p>
+  </section>
+
+  <section class="card f-lav">
+    <h2>4. 失敗の設計：導入直後の失敗は「学び」に寄せる</h2>
+    <p>導入ステップと切り離せないのが、失敗したときの扱いです。新しい要素に出会った直後の失敗は、プレイヤーの腕のせいではなく、まだ学んでいる最中だから起きます。この段階の失敗が重すぎると、プレイヤーは「この要素は理不尽だ」と感じてしまいます。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 230" role="img" aria-label="導入直後の失敗コストの比較：すぐ戻れる場合と、遠くまで戻される場合">
+        <rect x="0" y="0" width="640" height="230" rx="18" fill="#fffaf2"></rect>
+        <text x="160" y="34" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">失敗コストが小さい</text>
+        <rect x="30" y="150" width="120" height="14" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <rect x="196" y="150" width="104" height="14" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M132 150 a14 9 0 0 1 28 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="142" y="150" width="9" height="9" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <circle cx="168" cy="182" r="10" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <path d="M158 176 q-14 -8 -10 -22" stroke="#17663f" stroke-width="2.5" fill="none"></path>
+        <text x="160" y="128" font-size="12" fill="#17663f" text-anchor="middle" font-weight="bold">すぐ目の前から再挑戦</text>
+        <text x="160" y="216" font-size="12" fill="#3d4451" text-anchor="middle">「もう一回」が軽い</text>
+        <text x="480" y="34" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">失敗コストが大きい</text>
+        <rect x="350" y="150" width="120" height="14" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <rect x="516" y="150" width="104" height="14" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M452 150 a14 9 0 0 1 28 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="462" y="150" width="9" height="9" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <circle cx="488" cy="182" r="10" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <path d="M478 174 q-70 6 -116 -6" stroke="#a83c17" stroke-width="2.5" fill="none" stroke-dasharray="5 4"></path>
+        <text x="420" y="196" font-size="12" fill="#a83c17" text-anchor="middle" font-weight="bold">遠くまで戻される</text>
+        <text x="480" y="216" font-size="12" fill="#3d4451" text-anchor="middle">学ぶ前に疲れてしまう</text>
+      </svg>
+      <figcaption>図：導入直後の失敗コストの違い。コストが小さいほど、試行錯誤そのものが学びになる。</figcaption>
+    </figure>
+    <p>導入直後は、失敗しても<strong>すぐ・近くから・少ない損失で</strong>やり直せるようにするのが基本です。失敗が「罰」ではなく「情報」になるからです。なお、チェックポイントの間隔やリトライにかかる時間の設計そのものは Unit 10 のテーマです。ここでは「導入ステップの間はコストを抑える」という原則だけを持ち帰ってください。</p>
+  </section>
+
+  <section class="card f-peach">
+    <h2>5. 比べてみよう：キノコの「出し方」だけを変える</h2>
+    <p>同じ「跳ねるキノコ」、同じ最終目標（谷を越えること）。変えるのは<strong>導入の刻み方だけ</strong>です。3つの出し方を切り替えて、プレイヤー体験の違いを比べてみましょう。</p>
+    <div>
+      <button type="button" id="tabSudden" aria-pressed="true">いきなり本番</button>
+      <button type="button" id="tabSteps" class="secondary" aria-pressed="false">3ステップで出す</button>
+      <button type="button" id="tabFine" class="secondary" aria-pressed="false">細かく刻む</button>
+    </div>
+    <div class="diagram wide" id="panelSudden">
+      <svg viewBox="0 0 640 300" role="img" aria-label="いきなり本番：谷の前で初めてキノコに出会う場面">
+        <rect x="0" y="0" width="640" height="300" rx="18" fill="#fffaf2"></rect>
+        <rect x="60" y="196" width="200" height="18" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <rect x="420" y="196" width="160" height="18" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M238 196 a18 11 0 0 1 36 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="250" y="196" width="11" height="11" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <circle cx="150" cy="176" r="12" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <text x="150" y="140" font-size="20" fill="#a83c17" text-anchor="middle" font-weight="bold">？</text>
+        <path d="M282 168 q60 -50 118 -18" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="4 3"></path>
+        <text x="340" y="252" font-size="12.5" fill="#3d4451" text-anchor="middle">谷の向こうにゴール。でも、キノコの使い方はまだ知らない</text>
+        <text x="320" y="284" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">いきなり本番：分からないまま、失敗の重い一発勝負になる</text>
+      </svg>
+    </div>
+    <div class="diagram wide" id="panelSteps" hidden>
+      <svg viewBox="0 0 640 300" role="img" aria-label="3ステップ：平地、段差、谷の順にキノコを体験する場面">
+        <rect x="0" y="0" width="640" height="300" rx="18" fill="#fffaf2"></rect>
+        <text x="110" y="36" font-size="13" fill="#3d4451" text-anchor="middle" font-weight="bold">1. 教える（平地）</text>
+        <rect x="20" y="196" width="180" height="16" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M92 196 a16 10 0 0 1 32 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="103" y="196" width="10" height="10" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <circle cx="52" cy="178" r="11" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <text x="320" y="36" font-size="13" fill="#3d4451" text-anchor="middle" font-weight="bold">2. 試す（低い段差）</text>
+        <rect x="230" y="196" width="100" height="16" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <rect x="330" y="166" width="80" height="46" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M282 196 a16 10 0 0 1 32 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="293" y="196" width="10" height="10" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <circle cx="352" cy="148" r="11" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <text x="530" y="36" font-size="13" fill="#3d4451" text-anchor="middle" font-weight="bold">3. 応用（谷）</text>
+        <rect x="440" y="196" width="70" height="16" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <rect x="570" y="196" width="60" height="16" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M492 196 a16 10 0 0 1 32 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="503" y="196" width="10" height="10" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <circle cx="566" cy="122" r="11" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <path d="M514 174 q26 -56 50 -44" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="4 3"></path>
+        <text x="320" y="248" font-size="12.5" fill="#3d4451" text-anchor="middle">場面は3つに分かれ、困り度が少しずつ上がる</text>
+        <text x="320" y="284" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">3ステップ：安全な出会い → 小さな成功 → 自信を持って本番へ</text>
+      </svg>
+    </div>
+    <div class="diagram wide" id="panelFine" hidden>
+      <svg viewBox="0 0 640 300" role="img" aria-label="細かく刻む：5つの小さな場面で少しずつキノコに慣れる場面">
+        <rect x="0" y="0" width="640" height="300" rx="18" fill="#fffaf2"></rect>
+        <rect x="14" y="206" width="104" height="14" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M56 206 a13 8 0 0 1 26 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="65" y="206" width="8" height="8" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <text x="66" y="248" font-size="11.5" fill="#3d4451" text-anchor="middle">1. 見るだけ</text>
+        <rect x="124" y="206" width="104" height="14" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M166 206 a13 8 0 0 1 26 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="175" y="206" width="8" height="8" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <circle cx="146" cy="190" r="9" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <text x="176" y="248" font-size="11.5" fill="#3d4451" text-anchor="middle">2. 平地で踏む</text>
+        <rect x="234" y="206" width="72" height="14" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <rect x="306" y="188" width="44" height="32" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M258 206 a13 8 0 0 1 26 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="267" y="206" width="8" height="8" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <text x="292" y="248" font-size="11.5" fill="#3d4451" text-anchor="middle">3. 低い段差</text>
+        <rect x="356" y="206" width="72" height="14" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <rect x="428" y="168" width="44" height="52" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M380 206 a13 8 0 0 1 26 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="389" y="206" width="8" height="8" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <text x="414" y="248" font-size="11.5" fill="#3d4451" text-anchor="middle">4. 中くらいの段差</text>
+        <rect x="478" y="206" width="52" height="14" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <rect x="576" y="206" width="52" height="14" fill="#d9c6ae" stroke="#8a7967" stroke-width="1.5"></rect>
+        <path d="M496 206 a13 8 0 0 1 26 0 Z" fill="#e5638c" stroke="#8e2f52" stroke-width="2"></path>
+        <rect x="505" y="206" width="8" height="8" fill="#f7ecda" stroke="#8e2f52" stroke-width="1.5"></rect>
+        <circle cx="556" cy="150" r="9" fill="#ffe0d1" stroke="#a83c17" stroke-width="2"></circle>
+        <path d="M516 190 q22 -44 38 -32" stroke="#8a7967" stroke-width="2" fill="none" stroke-dasharray="4 3"></path>
+        <text x="553" y="248" font-size="11.5" fill="#3d4451" text-anchor="middle">5. 谷を越える</text>
+        <text x="320" y="284" font-size="14.5" fill="#3d4451" text-anchor="middle" font-weight="bold">細かく刻む：失敗はほぼないが、人によっては本番までが長く感じる</text>
+      </svg>
+    </div>
+    <p>どの出し方が「正解」というわけではありません。プレイヤーの経験やゲームの狙いによって、ちょうどよい刻みは変わります。ただ、刻み方を<strong>意図して選ぶ</strong>ことと、なんとなく置くのとでは、体験が大きく違ってきます。</p>
+  </section>
+
+  <section class="card f-sky">
+    <h2>6. 曲線の形は、刻み方で作られる</h2>
+    <p>導入ステップの刻み方を変えると、難易度曲線の形も変わります。代表的な3つの形を比べてみます（いずれも模式図です）。</p>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 250" role="img" aria-label="難易度曲線の3つの形：階段状、なだらか、急上昇が混ざる">
+        <rect x="0" y="0" width="640" height="250" rx="18" fill="#fffaf2"></rect>
+        <text x="110" y="36" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">階段状に上がる</text>
+        <path d="M30 60 V180 H200" stroke="#8a7967" stroke-width="1.5" fill="none"></path>
+        <path d="M30 168 H80 V138 H125 V106 H165 V72 H200" stroke="#c2502a" stroke-width="3" fill="none"></path>
+        <text x="110" y="212" font-size="12" fill="#3d4451" text-anchor="middle">新要素ごとに一段上がる</text>
+        <text x="320" y="36" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">なだらかに上がる</text>
+        <path d="M240 60 V180 H410" stroke="#8a7967" stroke-width="1.5" fill="none"></path>
+        <path d="M240 170 Q320 150 410 84" stroke="#17663f" stroke-width="3" fill="none"></path>
+        <text x="320" y="212" font-size="12" fill="#3d4451" text-anchor="middle">少しずつ条件が増える</text>
+        <text x="530" y="36" font-size="13.5" fill="#3d4451" text-anchor="middle" font-weight="bold">急上昇が混ざる</text>
+        <path d="M450 60 V180 H620" stroke="#8a7967" stroke-width="1.5" fill="none"></path>
+        <path d="M450 166 L520 158 L548 78 L620 66" stroke="#51389e" stroke-width="3" fill="none"></path>
+        <text x="530" y="212" font-size="12" fill="#3d4451" text-anchor="middle">平坦なあとに壁が来る</text>
+      </svg>
+      <figcaption>図：曲線の形の例。階段状は「新しいことを覚えるたびに一段上がる」刻み方から生まれやすい。</figcaption>
+    </figure>
+    <p>たとえば、新要素を出すたびに「教える→試す→応用」を1セットとして刻むと、曲線は<strong>階段状</strong>になりやすい。段の平らな部分が「覚える時間」、上がる部分が「応用と組み合わせ」です。逆に、刻みを省いて新要素を本番に直結させると、その地点で曲線が<strong>急上昇</strong>しやすくなります。</p>
+    <p>つまり、難易度曲線は「あとから眺める結果」であると同時に、「導入の刻み方」という<strong>作る側の操作の結果</strong>でもあるのです。</p>
+  </section>
+
+  <section class="card f-pink">
+    <h2>7. 刻み方のトレードオフ：細かさは「ちょうどよさ」が人で変わる</h2>
+    <figure class="diagram wide">
+      <svg viewBox="0 0 640 190" role="img" aria-label="導入ステップの刻み方の両極：粗すぎる、ちょうどよい、細かすぎる">
+        <rect x="0" y="0" width="640" height="190" rx="18" fill="#fffaf2"></rect>
+        <rect x="20" y="52" width="190" height="76" rx="14" fill="#f6c6bd" stroke="#a83c17" stroke-width="2"></rect>
+        <text x="115" y="84" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">粗すぎる</text>
+        <text x="115" y="110" font-size="12" fill="#3d4451" text-anchor="middle">理不尽な壁になりやすい</text>
+        <rect x="225" y="52" width="190" height="76" rx="14" fill="#bfe3c0" stroke="#17663f" stroke-width="2"></rect>
+        <text x="320" y="84" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">ちょうどよい</text>
+        <text x="320" y="110" font-size="12" fill="#3d4451" text-anchor="middle">学びながら進める</text>
+        <rect x="430" y="52" width="190" height="76" rx="14" fill="#bcd7f0" stroke="#17557f" stroke-width="2"></rect>
+        <text x="525" y="84" font-size="14" fill="#3d4451" text-anchor="middle" font-weight="bold">細かすぎる</text>
+        <text x="525" y="110" font-size="12" fill="#3d4451" text-anchor="middle">退屈・説明過多になりやすい</text>
+        <text x="320" y="162" font-size="12.5" fill="#3d4451" text-anchor="middle">「ちょうどよい」の位置は、プレイヤーの経験やジャンルで動く</text>
+      </svg>
+      <figcaption>図：刻み方の両極。どちらの極端も、体験を損ないやすい。</figcaption>
+    </figure>
+    <ul>
+      <li><strong>粗すぎる刻み</strong>：ステップを飛ばすと、プレイヤーは「教わっていないこと」で失敗します。本人の上達ではなく、情報の不足が原因の失敗は、理不尽に感じられやすい。</li>
+      <li><strong>細かすぎる刻み</strong>：すでに分かったことを何度も練習させると、退屈や「説明されすぎている」感覚につながります。足場を外すタイミングも設計のうちです。</li>
+      <li><strong>人によって変わる</strong>：同じ刻みでも、シリーズ経験者には細かすぎ、新規プレイヤーには粗すぎる、ということがあります。対象プレイヤーの習熟度を想定して刻みを選ぶことが大切です。</li>
+    </ul>
+    <p>結局のところ、刻み方に唯一の正解はありません。「誰に、何を、どの順で体験させるか」を意図して決め、プレイテストで確かめる——仮説と検証の姿勢が、ここでも基本になります。</p>
+  </section>
+
+  <section class="card f-mint">
+    <h2>用語メモ</h2>
+    <dl class="glossary">
+      <dt>Difficulty Curve <span class="term-en">難易度曲線（ディフィカルティ・カーブ）</span></dt>
+      <dd>意味：プレイの進行に沿って難易度がどう推移するかを表す曲線。右肩上がりだけでなく、波や段差の設計も含む。<br>
+      具体例：序盤は緩やかに上げ、中盤で一度下げて新要素を覚えさせ、終盤で大きく上げる。</dd>
+      <dt>Learning Curve <span class="term-en">学習曲線（ラーニング・カーブ）</span></dt>
+      <dd>意味：プレイヤーが操作やルールに習熟していく速さ・道筋を表す考え方。難易度曲線はこれに合わせて設計する。<br>
+      具体例：チュートリアル直後は簡単な課題が続き、操作に慣れた頃に複合課題が出てくる。</dd>
+      <dt>Scaffolding <span class="term-en">スキャフォールディング（足場かけ）</span></dt>
+      <dd>意味：学習の初期段階では支援（足場）を用意し、習熟に合わせて支援を取り除いていく考え方。教育学で使われる比喩で、レベルデザインでは「安全な出会い→低リスクの練習」という導入ステップがこれにあたる。<br>
+      具体例：最初は落ちても痛くない平地で新ギミックに触らせ、慣れたら本番の場面で支援なしに使わせる。</dd>
+    </dl>
+  </section>
+
+  <section class="card f-lemon">
+    <h2>考えてみよう</h2>
+    <p>入力内容はこのブラウザの中にだけ保存され、外部に送信されません。ページを開き直すと自動で復元されます。</p>
+    <p><button type="button" id="saveBtn">保存する</button>
+    <span id="saveStatus" aria-live="polite"></span></p>
+    <p><strong>質問1：</strong>最近遊んだゲームで、新しい要素の「教え方」が上手いと感じた場面はありますか？ 「教える→試す→応用する」のステップに当てはめると、どうなっていましたか？</p>
+    <textarea id="q1" aria-label="質問1の回答"></textarea>
+    <p><strong>質問2：</strong>逆に、「教わっていないことで失敗した」と感じた場面はありますか？ どのステップが飛ばされていたと思いますか？</p>
+    <textarea id="q2" aria-label="質問2の回答"></textarea>
+    <p><strong>質問3：</strong>§5 の3つの出し方のうち、自分がプレイヤーならどれが一番気持ちよく谷を越えられそうですか？ また、作り手の立場ではどれを選びますか？ 理由も書いてみましょう。</p>
+    <textarea id="q3" aria-label="質問3の回答"></textarea>
+  </section>
+
+  <section class="card f-sky">
+    <h2>実験で確かめる</h2>
+    <p>この Unit に対応する実験B「難易度調整シミュレーター」は<strong>準備中</strong>です。パラメータを変えて難易度の感じ方の違いを比べるシミュレーターで、Unit 10 と共用する予定になっています。ただし、共用でも「一度に変える変数は1つ」の原則は守ります。この Unit では<strong>導入順序のモード</strong>として使い、新要素の出し方の順序だけを変えて、体験の違いを確かめる想定です。</p>
+    <p>実験がなくても、§5 の切替図で「出し方だけを変える」比較は体験できます。3つの出し方を切り替えながら、「自分はどこで不安になり、どこで退屈しそうか」を言葉にしてみましょう。</p>
+  </section>
+
+  <nav class="unitnav">
+    <p>← 前の Unit：<a href="../unit-05/">Unit 5「空間の意味と環境ストーリーテリング」</a></p>
+    <p>→ 次の Unit：Unit 7「チャレンジと報酬」（準備中）</p>
+    <p><a href="../../">← 講座ハブへ戻る</a></p>
+  </nav>
+</main>
+<script>
+  var KEYS = ["Sudden", "Steps", "Fine"];
+  var tabs = {}, panels = {};
+  KEYS.forEach(function (k) {
+    tabs[k] = document.getElementById("tab" + k);
+    panels[k] = document.getElementById("panel" + k);
+  });
+  function show(key) {
+    KEYS.forEach(function (k) {
+      var on = k === key;
+      panels[k].hidden = !on;
+      tabs[k].setAttribute("aria-pressed", String(on));
+      tabs[k].className = on ? "" : "secondary";
+    });
+  }
+  KEYS.forEach(function (k) {
+    tabs[k].addEventListener("click", function () { show(k); });
+  });
+</script>
+
+<script>
+(function () {
+  var PREFIX = "gld:unit06:";
+  var status = document.getElementById("saveStatus");
+  var fields = ["q1", "q2", "q3"].map(function (id) { return document.getElementById(id); }).filter(Boolean);
+  function setStatus(t) { if (status) status.textContent = t; }
+  function storageOK() {
+    try { var k = PREFIX + "__test"; localStorage.setItem(k, "1"); localStorage.removeItem(k); return true; }
+    catch (e) { return false; }
+  }
+  var ok = storageOK();
+  if (!ok) {
+    setStatus("このブラウザでは保存できません（保存機能が無効です）。");
+  } else {
+    var restored = false;
+    fields.forEach(function (el) {
+      try {
+        var v = localStorage.getItem(PREFIX + el.id);
+        if (v !== null && v !== "") { el.value = v; restored = true; }
+      } catch (e) {}
+    });
+    if (restored) setStatus("前回の入力を復元しました。");
+  }
+  function saveAll(manual) {
+    if (!ok) { setStatus("このブラウザでは保存できません（保存機能が無効です）。"); return; }
+    try { fields.forEach(function (el) { localStorage.setItem(PREFIX + el.id, el.value); }); }
+    catch (e) { setStatus("保存できませんでした。"); return; }
+    if (manual) {
+      var d = new Date();
+      var hh = ("0" + d.getHours()).slice(-2), mm = ("0" + d.getMinutes()).slice(-2);
+      setStatus("保存しました（" + hh + ":" + mm + "）");
+    } else {
+      setStatus("自動保存しました");
+    }
+  }
+  var timer = null;
+  fields.forEach(function (el) {
+    el.addEventListener("input", function () {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () { saveAll(false); }, 500);
+    });
+  });
+  var btn = document.getElementById("saveBtn");
+  if (btn) btn.addEventListener("click", function () { saveAll(true); });
+})();
+</script>
+</body>
+</html>
