@@ -65,6 +65,13 @@
     textarea{background:#2b2521; color:#f5ede1; border-color:#8a7967;}
   }
   .spot{display:block; width:100%; max-width:520px; height:auto; margin:14px auto; border-radius:20px;}
+  h3{font-size:1.08rem; margin:20px 0 4px;}
+  .game-canvas{display:block; width:100%; height:auto; border-radius:14px; background:#fffaf2; touch-action:none;}
+  .game-canvas:focus{outline:3px solid #f2b01e; outline-offset:2px;}
+  .game-status{font-weight:bold; margin:8px 0 0;}
+  .game-hint{font-size:.9rem; color:#5a6274; margin:4px 0 0;}
+  .game-btns{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+  .game-btns button{flex:1 1 0; min-width:84px; margin:0; touch-action:none; user-select:none; -webkit-user-select:none;}
 </style>
 </head>
 <body>
@@ -182,6 +189,19 @@
       </svg>
       <figcaption>図：同じキノコでも、置かれる場面で役割が変わる。場面の「困り度」が、ステップの進みを決める。</figcaption>
     </figure>
+    <h3>やってみよう：実際に跳んでみる</h3>
+    <p>下のミニゲームで、この3場面を実際に遊べます。←→キーで移動、スペースでジャンプ。キノコは横からは通れませんが、落下して上に着地すると大きく跳ねます。</p>
+    <div class="diagram wide">
+      <canvas id="mushCanvas" class="game-canvas" width="920" height="420" tabindex="0" role="img" aria-label="跳ねるキノコのミニゲーム。左から右へ、平地、低い台地、谷の3場面が並び、キノコで跳ねて旗を目指します。"></canvas>
+      <p class="game-status" id="mushStatus" aria-live="polite">旗までたどり着けばゴールです。</p>
+      <p class="game-hint">ゲーム画面をクリックすると、キーで遊べます（←→：移動、スペース：ジャンプ）。</p>
+      <div class="game-btns">
+        <button type="button" id="mushLeft" aria-label="左へ移動">← 左</button>
+        <button type="button" id="mushJump" aria-label="ジャンプ">ジャンプ</button>
+        <button type="button" id="mushRight" aria-label="右へ移動">右 →</button>
+        <button type="button" class="secondary" id="mushReset">リセット</button>
+      </div>
+    </div>
     <p>ポイントは、キノコそのものは一度も変わっていないことです。変わったのは<strong>失敗したときの困り度</strong>だけ。平地（困らない）→ 段差（少し困る）→ 谷（困る）の順に置くことで、プレイヤーは「分かったつもり」ではなく「使える」状態で本番を迎えられます。</p>
   </section>
 
@@ -452,6 +472,262 @@
   });
   var btn = document.getElementById("saveBtn");
   if (btn) btn.addEventListener("click", function () { saveAll(true); });
+})();
+</script>
+
+<script>
+(function () {
+  "use strict";
+  var canvas = document.getElementById("mushCanvas");
+  if (!canvas || !canvas.getContext) return;
+  var ctx = canvas.getContext("2d");
+  var statusEl = document.getElementById("mushStatus");
+
+  /*PHYS-CORE-START*/
+  var PHYS = { W: 920, H: 420, grav: 0.6, speed: 3.4, jumpVy: -11, bounceVy: -15.6, maxFall: 18, pw: 30, ph: 34 };
+  var LEVEL = {
+    solids: [
+      { x: 0, y: 340, w: 700, h: 80 },
+      { x: 835, y: 340, w: 85, h: 80 },
+      { x: 430, y: 200, w: 150, h: 140 }
+    ],
+    mushrooms: [
+      { x: 122, y: 304, w: 56, h: 36 },
+      { x: 332, y: 304, w: 56, h: 36 },
+      { x: 644, y: 304, w: 56, h: 36 }
+    ],
+    checkpoints: [ { x: 40, y: 306 }, { x: 312, y: 306 }, { x: 600, y: 306 } ],
+    flag: { x: 862, y: 252, w: 28, h: 88 },
+    start: { x: 40, y: 306 }
+  };
+  function createState(level) {
+    return { level: level, x: level.start.x, y: level.start.y, vx: 0, vy: 0,
+      onGround: true, goal: false, squash: 0, squashIdx: -1, bounces: 0, respawns: 0 };
+  }
+  function overlapR(s, r) {
+    return s.x < r.x + r.w && s.x + PHYS.pw > r.x && s.y < r.y + r.h && s.y + PHYS.ph > r.y;
+  }
+  function bounceOn(s, m, idx) {
+    s.y = m.y - PHYS.ph; s.vy = PHYS.bounceVy; s.onGround = false;
+    s.squash = 7; s.squashIdx = idx; s.bounces++;
+  }
+  function stepGame(s, input) {
+    var L = s.level, P = PHYS, i, r;
+    var vx = 0;
+    if (input.left) vx -= P.speed;
+    if (input.right) vx += P.speed;
+    s.vx = vx;
+    if (input.jump && s.onGround) { s.vy = P.jumpVy; s.onGround = false; }
+    s.vy += P.grav; if (s.vy > P.maxFall) s.vy = P.maxFall;
+    s.x += vx;
+    var walls = L.solids.concat(L.mushrooms);
+    for (i = 0; i < walls.length; i++) {
+      r = walls[i];
+      if (!overlapR(s, r)) continue;
+      if (vx > 0) s.x = r.x - P.pw;
+      else if (vx < 0) s.x = r.x + r.w;
+      else if (s.x + P.pw - r.x < r.x + r.w - s.x) s.x = r.x - P.pw;
+      else s.x = r.x + r.w;
+    }
+    if (s.x < 0) s.x = 0;
+    if (s.x > P.W - P.pw) s.x = P.W - P.pw;
+    var prevTop = s.y, prevBottom = s.y + P.ph;
+    s.y += s.vy;
+    s.onGround = false;
+    for (i = 0; i < L.solids.length; i++) {
+      r = L.solids[i];
+      if (!overlapR(s, r)) continue;
+      if (s.vy >= 0 && prevBottom <= r.y + 1) { s.y = r.y - P.ph; s.vy = 0; s.onGround = true; }
+      else if (s.vy < 0 && prevTop >= r.y + r.h - 1) { s.y = r.y + r.h; s.vy = 0; }
+      else if (s.vy >= 0) { s.y = r.y - P.ph; s.vy = 0; s.onGround = true; }
+    }
+    for (i = 0; i < L.mushrooms.length; i++) {
+      r = L.mushrooms[i];
+      if (!overlapR(s, r)) continue;
+      if (s.vy > 0 && prevBottom <= r.y + 12) { bounceOn(s, r, i); }
+      else if (s.vy < 0 && prevTop >= r.y + r.h - 1) { s.y = r.y + r.h; s.vy = 1; }
+      else if (s.x + P.pw - r.x < r.x + r.w - s.x) s.x = r.x - P.pw;
+      else s.x = r.x + r.w;
+    }
+    if (s.squash > 0) s.squash--;
+    if (!s.goal && overlapR(s, L.flag)) s.goal = true;
+    if (s.y > P.H + 30) {
+      var cp = L.checkpoints[0];
+      for (i = 0; i < L.checkpoints.length; i++) if (L.checkpoints[i].x <= s.x) cp = L.checkpoints[i];
+      s.x = cp.x; s.y = cp.y; s.vy = 0; s.onGround = true; s.respawns++;
+    }
+    return s;
+  }
+  /*PHYS-CORE-END*/
+
+  var dpr = 1;
+  function fitCanvas() {
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = PHYS.W * dpr;
+    canvas.height = PHYS.H * dpr;
+  }
+  fitCanvas();
+  window.addEventListener("resize", fitCanvas);
+
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+  function drawMushroom(m, squashed) {
+    var cx = m.x + m.w / 2;
+    var sq = squashed ? 0.55 : 1;
+    var capRx = (m.w / 2) * (squashed ? 1.15 : 1);
+    var capRy = 19 * sq;
+    var capBaseY = m.y + 20;
+    ctx.fillStyle = "#f7ecda"; ctx.strokeStyle = "#8e2f52"; ctx.lineWidth = 2;
+    rr(cx - 9, capBaseY - 2, 18, m.y + m.h - capBaseY + 2, 5); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(cx, capBaseY, capRx, capRy, 0, Math.PI, 0);
+    ctx.closePath();
+    ctx.fillStyle = "#e5638c"; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    var dots = [[-13, -8], [2, -13], [13, -6]];
+    for (var i = 0; i < dots.length; i++) {
+      ctx.beginPath();
+      ctx.arc(cx + dots[i][0], capBaseY + dots[i][1] * sq, 3.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  function draw() {
+    var s = state, i, r;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = "#fffaf2";
+    ctx.fillRect(0, 0, PHYS.W, PHYS.H);
+    ctx.fillStyle = "#8a7967";
+    ctx.font = "bold 15px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("1. 教える（平地）", 150, 34);
+    ctx.fillText("2. 試す（低い台地）", 450, 34);
+    ctx.fillText("3. 応用（谷を越える）", 765, 34);
+    for (i = 0; i < LEVEL.solids.length; i++) {
+      r = LEVEL.solids[i];
+      ctx.fillStyle = "#d9c6ae";
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.fillStyle = "#e8dcc8";
+      ctx.fillRect(r.x, r.y, r.w, 7);
+      ctx.strokeStyle = "#8a7967"; ctx.lineWidth = 2;
+      ctx.strokeRect(r.x, r.y, r.w, r.h);
+    }
+    var f = LEVEL.flag;
+    ctx.fillStyle = "#8a7967";
+    ctx.fillRect(f.x + 2, f.y, 5, f.h);
+    ctx.beginPath();
+    ctx.moveTo(f.x + 7, f.y + 2);
+    ctx.lineTo(f.x + 7 + f.w - 2, f.y + 14);
+    ctx.lineTo(f.x + 7, f.y + 26);
+    ctx.closePath();
+    ctx.fillStyle = "#c2502a"; ctx.fill();
+    for (i = 0; i < LEVEL.mushrooms.length; i++) {
+      drawMushroom(LEVEL.mushrooms[i], s.squash > 0 && s.squashIdx === i);
+    }
+    var cx = s.x + PHYS.pw / 2, cy = s.y + 19;
+    ctx.strokeStyle = "#57a773"; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(cx, cy - 13); ctx.quadraticCurveTo(cx + 1, cy - 19, cx, cy - 23); ctx.stroke();
+    ctx.fillStyle = "#57a773";
+    ctx.beginPath(); ctx.ellipse(cx - 5, cy - 23, 5, 3, -0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + 5, cy - 24, 5, 3, 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+    ctx.fillStyle = "#ff9e7d"; ctx.fill();
+    ctx.strokeStyle = "#a83c17"; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.fillStyle = "#3d4451";
+    ctx.beginPath(); ctx.arc(cx - 5, cy, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 5, cy, 2, 0, Math.PI * 2); ctx.fill();
+    if (s.goal) {
+      ctx.fillStyle = "rgba(255,250,242,0.88)";
+      rr(250, 140, 420, 118, 18); ctx.fill();
+      ctx.strokeStyle = "#c2502a"; ctx.lineWidth = 3; ctx.stroke();
+      ctx.fillStyle = "#c2502a";
+      ctx.font = "bold 36px sans-serif";
+      ctx.fillText("ゴール！", PHYS.W / 2, 192);
+      ctx.fillStyle = "#3d4451";
+      ctx.font = "15px sans-serif";
+      ctx.fillText("キノコのバウンドで谷を越えました", PHYS.W / 2, 226);
+    }
+  }
+
+  var keys = { left: false, right: false };
+  var btn = { left: false, right: false };
+  var jumpQueued = false;
+  function isJump(code) { return code === "Space" || code === "ArrowUp" || code === "KeyW"; }
+  function isLeft(code) { return code === "ArrowLeft" || code === "KeyA"; }
+  function isRight(code) { return code === "ArrowRight" || code === "KeyD"; }
+  canvas.addEventListener("keydown", function (e) {
+    if (!isJump(e.code) && !isLeft(e.code) && !isRight(e.code)) return;
+    e.preventDefault();
+    if (isLeft(e.code)) keys.left = true;
+    if (isRight(e.code)) keys.right = true;
+    if (isJump(e.code) && !e.repeat) jumpQueued = true;
+  });
+  canvas.addEventListener("keyup", function (e) {
+    if (isLeft(e.code)) keys.left = false;
+    if (isRight(e.code)) keys.right = false;
+  });
+  canvas.addEventListener("blur", function () { keys.left = false; keys.right = false; });
+  function bindHold(id, prop) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("pointerdown", function (e) {
+      e.preventDefault();
+      if (el.setPointerCapture) { try { el.setPointerCapture(e.pointerId); } catch (err) {} }
+      btn[prop] = true;
+    });
+    function off() { btn[prop] = false; }
+    el.addEventListener("pointerup", off);
+    el.addEventListener("pointercancel", off);
+    el.addEventListener("lostpointercapture", off);
+  }
+  bindHold("mushLeft", "left");
+  bindHold("mushRight", "right");
+  var jumpBtn = document.getElementById("mushJump");
+  if (jumpBtn) jumpBtn.addEventListener("pointerdown", function (e) { e.preventDefault(); jumpQueued = true; });
+  var resetBtn = document.getElementById("mushReset");
+  if (resetBtn) resetBtn.addEventListener("click", function () { resetGame(); });
+
+  var state = createState(LEVEL);
+  var goalShown = false;
+  function setStatus(t) { if (statusEl && statusEl.textContent !== t) statusEl.textContent = t; }
+  function resetGame() {
+    state = createState(LEVEL);
+    goalShown = false;
+    setStatus("旗までたどり着けばゴールです。");
+    draw();
+  }
+
+  var STEP_MS = 1000 / 60, acc = 0, lastT = null;
+  function frame(t) {
+    requestAnimationFrame(frame);
+    if (lastT === null) lastT = t;
+    var dt = t - lastT;
+    lastT = t;
+    if (dt > 250) dt = 250;
+    acc += dt;
+    while (acc >= STEP_MS) {
+      acc -= STEP_MS;
+      var before = state.respawns;
+      stepGame(state, { left: keys.left || btn.left, right: keys.right || btn.right, jump: jumpQueued });
+      jumpQueued = false;
+      if (state.respawns > before) {
+        setStatus("落ちてしまったので、区間の入口に戻りました。失敗しても、すぐやり直せます。");
+      }
+    }
+    if (state.goal && !goalShown) {
+      goalShown = true;
+      setStatus("ゴール！ キノコのバウンドで谷を越えられました。リセットでもう一度遊べます。");
+    }
+    draw();
+  }
+  draw();
+  requestAnimationFrame(frame);
 })();
 </script>
 </body>
