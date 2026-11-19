@@ -66,6 +66,15 @@
   }
   .spot{display:block; width:100%; max-width:520px; height:auto; margin:14px auto; border-radius:20px;}
   h3{font-size:1.08rem; margin:20px 0 4px;}
+  .game-canvas{display:block; width:100%; height:auto; border-radius:14px; background:#fffaf2; touch-action:none;}
+  .game-canvas:focus{outline:3px solid #f2b01e; outline-offset:2px;}
+  .game-status{font-weight:bold; margin:8px 0 0;}
+  .game-hint{font-size:.9rem; color:#5a6274; margin:4px 0 0;}
+  .game-btns{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+  .game-btns button{flex:1 1 0; min-width:84px; margin:0; touch-action:none; user-select:none; -webkit-user-select:none;}
+  .game-btns .game-slot-btn{background:#fff; color:#b23a1d;}
+  /* .diagram 内（固定色の地）の secondary ボタンは、ダークモードでも地に合わせた固定色にする */
+  .diagram button.secondary{background:#fff; color:#b23a1d;}
 </style>
 </head>
 <body>
@@ -472,8 +481,37 @@
 
   <section class="card f-sky">
     <h2>実験で確かめる</h2>
-    <p>この Unit に対応する実験A「敵や報酬の配置実験」の拡張と、新規のエンカウンター構成実験は、いずれも<strong>準備中</strong>です。実験Aは Unit 7 では「報酬の配置だけを変える」使い方を想定していましたが、この Unit では<strong>敵の組み合わせだけを変える</strong>使い方を想定します（Unit 7 の実験欄で予告したとおりです）。エンカウンター構成実験では、組み合わせに遮蔽物や逃げ道を加えたときの変化も比べる想定です。</p>
-    <p>実験がなくても、§5 の切替図で「組み合わせだけを変える」比較は体験できます。3つの出会い方を切り替えながら、「自分ならどこで詰まりそうか」を言葉にしてみましょう。</p>
+    <p>この Unit に対応する<strong>エンカウンター構成実験</strong>ができました。§5 の切替図で「見る」だけだった3つの出会い方を、今度は<strong>自分で遊んで</strong>確かめるミニゲームです。コースも敵の顔ぶれも §5 と同じで、変えるのは組み合わせだけ。まずプリセットで体験して、そのあと自由配置で自分の組み合わせを作ってみましょう。</p>
+    <h3>エンカウンター構成実験：組み合わせを作って遊ぶ</h3>
+    <p>プリセットは §5 の3パネルと対応しています。敵や矢に当たると、区間の入口に戻ります（失敗のコストは「戻される」だけです）。跳ねるキノコの使い方は Unit 6 と同じで、谷はキノコで跳び越えます。</p>
+    <div>
+      <button type="button" id="encP1" aria-pressed="true">① 単体ずつ</button>
+      <button type="button" id="encP2" class="secondary" aria-pressed="false">② 複合で重ねる</button>
+      <button type="button" id="encP3" class="secondary" aria-pressed="false">③ 複合＋逃げ道・遮蔽物</button>
+      <button type="button" id="encEdit" class="secondary" aria-pressed="false">自由配置</button>
+    </div>
+    <div class="diagram wide">
+      <canvas id="encCanvas" class="game-canvas" width="920" height="420" tabindex="0" role="img" aria-label="エンカウンター構成実験のミニゲーム。§5と同じコースで、敵の組み合わせを変えて遊べます。谷をキノコで跳び越え、旗を目指します。"></canvas>
+      <p class="game-status" id="encStatus" aria-live="polite">旗までたどり着けばゴールです。まずはプリセット①「単体ずつ」から遊べます。</p>
+      <p class="game-hint">ゲーム画面をクリックすると、キーで遊べます（←→：移動、スペース：ジャンプ）。自由配置モードでは、スロットをタップしても配置を変えられます。</p>
+      <div class="game-btns">
+        <button type="button" id="encLeft" aria-label="左へ移動">← 左</button>
+        <button type="button" id="encJump" aria-label="ジャンプ">ジャンプ</button>
+        <button type="button" id="encRight" aria-label="右へ移動">右 →</button>
+        <button type="button" class="secondary" id="encReset">リセット</button>
+      </div>
+      <div class="game-btns" id="encSlotRow" hidden>
+        <button type="button" class="game-slot-btn" id="encS1">S1：敵A</button>
+        <button type="button" class="game-slot-btn" id="encS2">S2：なし</button>
+        <button type="button" class="game-slot-btn" id="encS3">S3：なし</button>
+        <button type="button" class="game-slot-btn" id="encS4">S4：なし</button>
+        <button type="button" class="game-slot-btn" id="encS5">S5：敵B</button>
+        <button type="button" class="game-slot-btn" id="encS6">S6：なし</button>
+        <button type="button" id="encPlay">この配置で遊ぶ</button>
+      </div>
+    </div>
+    <p>遊び終わったら振り返ってみましょう。一番詰まった組み合わせはどれでしたか？ 何が「同時に」求められましたか？ プリセット②と③で、戻された回数はどう違いましたか？</p>
+    <p>なお、実験A「敵や報酬の配置実験」の拡張は、引き続き<strong>準備中</strong>です。実験Aは Unit 7 では「報酬の配置だけを変える」使い方を想定していましたが、この Unit では<strong>敵の組み合わせだけを変える</strong>使い方を想定します（Unit 7 の実験欄で予告したとおりです）。</p>
   </section>
 
   <nav class="unitnav">
@@ -546,6 +584,561 @@
   });
   var btn = document.getElementById("saveBtn");
   if (btn) btn.addEventListener("click", function () { saveAll(true); });
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+  var canvas = document.getElementById("encCanvas");
+  if (!canvas || !canvas.getContext) return;
+  var ctx = canvas.getContext("2d");
+  var statusEl = document.getElementById("encStatus");
+
+  /*PHYS-CORE-START*/
+  var PHYS = { W: 920, H: 420, grav: 0.6, speed: 3.4, jumpVy: -11, bounceVy: -15.6, maxFall: 18, pw: 30, ph: 34 };
+  var A_SPEED = 0.9, A_HALF = 40;
+  var B_RANGE = 480, B_PERIOD = 170, B_WARN = 24, ARROW_SPEED = 3.2;
+  var ROCK_W = 34, ROCK_H = 48;
+  var ENEMY_A = { w: 28, h: 26 }, ENEMY_B = { w: 28, h: 30 };
+  var SLOTS = [
+    { id: "S1", cx: 300, surf: 340, spanL: 0, spanR: 560 },
+    { id: "S2", cx: 430, surf: 340, spanL: 0, spanR: 560 },
+    { id: "S3", cx: 760, surf: 340, spanL: 700, spanR: 920 },
+    { id: "S4", cx: 825, surf: 340, spanL: 700, spanR: 920 },
+    { id: "S5", cx: 855, surf: 214, spanL: 720, spanR: 890 },
+    { id: "S6", cx: 765, surf: 214, spanL: 720, spanR: 890 }
+  ];
+  var BASE_SOLIDS = [
+    { x: 0, y: 340, w: 560, h: 80 },
+    { x: 700, y: 340, w: 220, h: 80 },
+    { x: 720, y: 214, w: 170, h: 18, perch: true }
+  ];
+  var MUSHROOM = { x: 500, y: 304, w: 56, h: 36 };
+  var CHECKPOINTS = [ { x: 40, y: 306 }, { x: 706, y: 306 } ];
+  var FLAG = { x: 876, y: 252, w: 28, h: 88 };
+  var COINS = [ { cx: 120, cy: 312 }, { cx: 175, cy: 312 }, { cx: 775, cy: 312 } ];
+
+  function buildLevel(config) {
+    var solids = BASE_SOLIDS.slice(), rocks = [], i, r;
+    for (i = 0; i < 6; i++) {
+      if (config[i] === 3) {
+        r = { x: SLOTS[i].cx - ROCK_W / 2, y: SLOTS[i].surf - ROCK_H, w: ROCK_W, h: ROCK_H, slot: i };
+        rocks.push(r); solids.push(r);
+      }
+    }
+    return { solids: solids, rocks: rocks, mushrooms: [MUSHROOM], checkpoints: CHECKPOINTS,
+      flag: FLAG, start: CHECKPOINTS[0], config: config.slice() };
+  }
+  function makeEnemies(config) {
+    var list = [], i, sl;
+    for (i = 0; i < 6; i++) {
+      sl = SLOTS[i];
+      if (config[i] === 1) {
+        list.push({ type: "A", slot: i, x: sl.cx, y: sl.surf - ENEMY_A.h, dir: 1,
+          lo: Math.max(sl.cx - A_HALF, sl.spanL + ENEMY_A.w / 2),
+          hi: Math.min(sl.cx + A_HALF, sl.spanR - ENEMY_A.w / 2) });
+      } else if (config[i] === 2) {
+        list.push({ type: "B", slot: i, x: sl.cx - ENEMY_B.w / 2, y: sl.surf - ENEMY_B.h,
+          cx: sl.cx, cy: sl.surf - ENEMY_B.h / 2,
+          timer: B_PERIOD - ((i * 53) % 100), warn: false, inRange: false });
+      }
+    }
+    return list;
+  }
+  function createState(level) {
+    return { level: level, x: level.start.x, y: level.start.y, vx: 0, vy: 0,
+      onGround: true, goal: false, squash: 0, squashIdx: -1, bounces: 0, respawns: 0,
+      lastHit: "", frame: 0, enemies: makeEnemies(level.config), arrows: [],
+      rockBlocks: 0, terrainBlocks: 0 };
+  }
+  function overlapR(s, r) {
+    return s.x < r.x + r.w && s.x + PHYS.pw > r.x && s.y < r.y + r.h && s.y + PHYS.ph > r.y;
+  }
+  function bounceOn(s, m, idx) {
+    s.y = m.y - PHYS.ph; s.vy = PHYS.bounceVy; s.onGround = false;
+    s.squash = 7; s.squashIdx = idx; s.bounces++;
+  }
+  function doRespawn(s, cause) {
+    var L = s.level, cp = L.checkpoints[0], i;
+    for (i = 0; i < L.checkpoints.length; i++) if (L.checkpoints[i].x <= s.x) cp = L.checkpoints[i];
+    s.x = cp.x; s.y = cp.y; s.vx = 0; s.vy = 0; s.onGround = true;
+    s.respawns++; s.lastHit = cause;
+    s.enemies = makeEnemies(L.config);
+    s.arrows = [];
+  }
+  function stepGame(s, input) {
+    var L = s.level, P = PHYS, i, j, r, e, a;
+    s.frame++;
+    var vx = 0;
+    if (input.left) vx -= P.speed;
+    if (input.right) vx += P.speed;
+    s.vx = vx;
+    if (input.jump && s.onGround) { s.vy = P.jumpVy; s.onGround = false; }
+    s.vy += P.grav; if (s.vy > P.maxFall) s.vy = P.maxFall;
+    s.x += vx;
+    var walls = L.solids.concat(L.mushrooms);
+    for (i = 0; i < walls.length; i++) {
+      r = walls[i];
+      // 上の段（perch）は、真下から上がってくる間は横壁として扱わない（頭打ちは垂直側で処理する）。
+      // 横壁として扱うと、段の下でジャンプしたプレイヤーが段の端へ押し出されてしまうため。
+      if (r.perch && s.y + P.ph > r.y + r.h) continue;
+      if (!overlapR(s, r)) continue;
+      if (vx > 0) s.x = r.x - P.pw;
+      else if (vx < 0) s.x = r.x + r.w;
+      else if (s.x + P.pw - r.x < r.x + r.w - s.x) s.x = r.x - P.pw;
+      else s.x = r.x + r.w;
+    }
+    if (s.x < 0) s.x = 0;
+    if (s.x > P.W - P.pw) s.x = P.W - P.pw;
+    var prevTop = s.y, prevBottom = s.y + P.ph;
+    s.y += s.vy;
+    s.onGround = false;
+    for (i = 0; i < L.solids.length; i++) {
+      r = L.solids[i];
+      if (!overlapR(s, r)) continue;
+      if (s.vy >= 0 && prevBottom <= r.y + 1) { s.y = r.y - P.ph; s.vy = 0; s.onGround = true; }
+      else if (s.vy < 0 && prevTop >= r.y + r.h - 1) { s.y = r.y + r.h; s.vy = 0; }
+      else if (s.vy >= 0) { s.y = r.y - P.ph; s.vy = 0; s.onGround = true; }
+    }
+    for (i = 0; i < L.mushrooms.length; i++) {
+      r = L.mushrooms[i];
+      if (!overlapR(s, r)) continue;
+      if (s.vy > 0 && prevBottom <= r.y + 12) { bounceOn(s, r, i); }
+      else if (s.vy < 0 && prevTop >= r.y + r.h - 1) { s.y = r.y + r.h; s.vy = 1; }
+      else if (s.x + P.pw - r.x < r.x + r.w - s.x) s.x = r.x - P.pw;
+      else s.x = r.x + r.w;
+    }
+    if (s.squash > 0) s.squash--;
+    if (!s.goal && overlapR(s, L.flag)) { s.goal = true; return s; }
+    if (s.goal) return s;
+    if (s.y > P.H + 30) { doRespawn(s, "fall"); return s; }
+    var pcx = s.x + P.pw / 2, pcy = s.y + P.ph / 2;
+    for (i = 0; i < s.enemies.length; i++) {
+      e = s.enemies[i];
+      if (e.type === "A") {
+        e.x += e.dir * A_SPEED;
+        if (e.x > e.hi) { e.x = e.hi; e.dir = -1; }
+        else if (e.x < e.lo) { e.x = e.lo; e.dir = 1; }
+      } else {
+        e.inRange = Math.abs(pcx - e.cx) <= B_RANGE;
+        e.warn = false;
+        if (e.inRange) {
+          e.timer--;
+          if (e.timer <= B_WARN) e.warn = true;
+          if (e.timer <= 0) {
+            var ddx = pcx - e.cx, ddy = pcy - e.cy;
+            var len = Math.sqrt(ddx * ddx + ddy * ddy) || 1;
+            var perch = null;
+            for (j = 0; j < L.solids.length; j++) {
+              r = L.solids[j];
+              if (r.y === e.cy + ENEMY_B.h / 2 && e.cx >= r.x && e.cx <= r.x + r.w) { perch = r; break; }
+            }
+            s.arrows.push({ x: e.cx, y: e.cy, vx: ddx / len * ARROW_SPEED, vy: ddy / len * ARROW_SPEED, ignore: perch });
+            e.timer = B_PERIOD;
+            e.warn = false;
+          }
+        }
+      }
+    }
+    var kept = [];
+    for (i = 0; i < s.arrows.length; i++) {
+      a = s.arrows[i];
+      a.x += a.vx; a.y += a.vy;
+      if (a.x < -10 || a.x > P.W + 10 || a.y < -10 || a.y > P.H + 10) continue;
+      var dead = false;
+      for (j = 0; j < L.solids.length; j++) {
+        r = L.solids[j];
+        if (r === a.ignore) continue;
+        if (a.x >= r.x && a.x <= r.x + r.w && a.y >= r.y && a.y <= r.y + r.h) {
+          dead = true;
+          if (r.slot !== undefined) s.rockBlocks++; else s.terrainBlocks++;
+          break;
+        }
+      }
+      if (dead) continue;
+      if (a.x > s.x - 3 && a.x < s.x + P.pw + 3 && a.y > s.y - 3 && a.y < s.y + P.ph + 3) {
+        doRespawn(s, "arrow");
+        return s;
+      }
+      kept.push(a);
+    }
+    s.arrows = kept;
+    for (i = 0; i < s.enemies.length; i++) {
+      e = s.enemies[i];
+      var er = e.type === "A"
+        ? { x: e.x - ENEMY_A.w / 2, y: e.y, w: ENEMY_A.w, h: ENEMY_A.h }
+        : { x: e.x, y: e.y, w: ENEMY_B.w, h: ENEMY_B.h };
+      if (overlapR(s, er)) { doRespawn(s, "enemy"); return s; }
+    }
+    return s;
+  }
+  function slotHitRect(i) {
+    var sl = SLOTS[i];
+    return { x: sl.cx - 30, y: sl.surf - 58, w: 60, h: 58 };
+  }
+  function slotAtPoint(lx, ly) {
+    for (var i = 0; i < 6; i++) {
+      var r = slotHitRect(i);
+      if (lx >= r.x && lx <= r.x + r.w && ly >= r.y && ly <= r.y + r.h) return i;
+    }
+    return -1;
+  }
+  function toLogical(cx, cy, rect) {
+    return { x: (cx - rect.left) * (PHYS.W / rect.width), y: (cy - rect.top) * (PHYS.H / rect.height) };
+  }
+  /*PHYS-CORE-END*/
+
+  var SLOT_NAMES = ["なし", "敵A", "敵B", "岩"];
+  var PRESETS = [
+    { label: "①「単体ずつ」", config: [1, 0, 0, 0, 2, 0] },
+    { label: "②「複合で重ねる」", config: [0, 0, 1, 0, 2, 0] },
+    { label: "③「複合＋逃げ道・遮蔽物」", config: [0, 0, 3, 1, 2, 0] }
+  ];
+  var HIT_TEXT = {
+    enemy: "敵に当たってしまったので、区間の入口に戻りました。",
+    arrow: "矢に当たってしまったので、区間の入口に戻りました。",
+    fall: "落ちてしまったので、区間の入口に戻りました。"
+  };
+
+  var dpr = 1;
+  function fitCanvas() {
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = PHYS.W * dpr;
+    canvas.height = PHYS.H * dpr;
+  }
+  fitCanvas();
+  window.addEventListener("resize", fitCanvas);
+
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+  function drawMushroom(m, squashed) {
+    var cx = m.x + m.w / 2;
+    var sq = squashed ? 0.55 : 1;
+    var capRx = (m.w / 2) * (squashed ? 1.15 : 1);
+    var capRy = 19 * sq;
+    var capBaseY = m.y + 20;
+    ctx.fillStyle = "#f7ecda"; ctx.strokeStyle = "#8e2f52"; ctx.lineWidth = 2;
+    rr(cx - 9, capBaseY - 2, 18, m.y + m.h - capBaseY + 2, 5); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(cx, capBaseY, capRx, capRy, 0, Math.PI, 0);
+    ctx.closePath();
+    ctx.fillStyle = "#e5638c"; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    var dots = [[-13, -8], [2, -13], [13, -6]];
+    for (var i = 0; i < dots.length; i++) {
+      ctx.beginPath();
+      ctx.arc(cx + dots[i][0], capBaseY + dots[i][1] * sq, 3.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  function drawEnemyA(e) {
+    var cx = e.x, cy = e.y + ENEMY_A.h / 2, k;
+    ctx.strokeStyle = "#3d4451"; ctx.lineWidth = 2.5;
+    for (k = 0; k < 8; k++) {
+      var ang = (Math.PI / 4) * k + 0.4;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(ang) * 11, cy + Math.sin(ang) * 11);
+      ctx.lineTo(cx + Math.cos(ang) * 17, cy + Math.sin(ang) * 17);
+      ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+    ctx.fillStyle = "#6a5a8e"; ctx.fill();
+    ctx.strokeStyle = "#3d4451"; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath(); ctx.arc(cx - 4.5, cy - 2, 3.4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 4.5, cy - 2, 3.4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#3d4451";
+    ctx.beginPath(); ctx.arc(cx - 4.5, cy - 2, 1.7, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 4.5, cy - 2, 1.7, 0, Math.PI * 2); ctx.fill();
+  }
+  function drawEnemyB(e, s) {
+    var cx = e.cx, cy = e.cy;
+    ctx.strokeStyle = "#17557f"; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(cx - 13, cy, 9, -1.1, 1.1); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx - 13 + Math.cos(-1.1) * 9, cy + Math.sin(-1.1) * 9);
+    ctx.lineTo(cx - 13 + Math.cos(1.1) * 9, cy + Math.sin(1.1) * 9);
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, 13, 0, Math.PI * 2);
+    ctx.fillStyle = "#7fb3c8"; ctx.fill();
+    ctx.strokeStyle = "#17557f"; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath(); ctx.arc(cx - 3, cy - 2, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#3d4451";
+    ctx.beginPath(); ctx.arc(cx - 4, cy - 2, 1.8, 0, Math.PI * 2); ctx.fill();
+    if (e.warn) {
+      var pcx = s.x + PHYS.pw / 2, pcy = s.y + PHYS.ph / 2;
+      var dx = pcx - cx, dy = pcy - cy, len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var ux = dx / len, uy = dy / len;
+      ctx.strokeStyle = "#c2502a"; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - 8, cy);
+      ctx.lineTo(cx - 8 + ux * 20, cy + uy * 20);
+      ctx.stroke();
+      ctx.fillStyle = "#c2502a";
+      ctx.beginPath(); ctx.arc(cx - 8 + ux * 20, cy + uy * 20, 3, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  function draw() {
+    var s = state, i, r;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = "#fffaf2";
+    ctx.fillRect(0, 0, PHYS.W, PHYS.H);
+    for (i = 0; i < COINS.length; i++) {
+      ctx.beginPath(); ctx.arc(COINS[i].cx, COINS[i].cy, 9, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffd94d"; ctx.fill();
+      ctx.strokeStyle = "#a86e00"; ctx.lineWidth = 2; ctx.stroke();
+    }
+    for (i = 0; i < level.solids.length; i++) {
+      r = level.solids[i];
+      if (r.slot !== undefined) {
+        ctx.fillStyle = "#b8a888";
+        rr(r.x, r.y, r.w, r.h, 7); ctx.fill();
+        ctx.strokeStyle = "#8a7967"; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = "#cfc0a0";
+        rr(r.x + 5, r.y + 5, r.w - 10, 8, 4); ctx.fill();
+      } else {
+        ctx.fillStyle = "#d9c6ae";
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+        ctx.fillStyle = "#e8dcc8";
+        ctx.fillRect(r.x, r.y, r.w, 7);
+        ctx.strokeStyle = "#8a7967"; ctx.lineWidth = 2;
+        ctx.strokeRect(r.x, r.y, r.w, r.h);
+      }
+    }
+    var f = level.flag;
+    ctx.fillStyle = "#8a7967";
+    ctx.fillRect(f.x + 2, f.y, 5, f.h);
+    ctx.beginPath();
+    ctx.moveTo(f.x + 7, f.y + 2);
+    ctx.lineTo(f.x + 7 + f.w - 2, f.y + 14);
+    ctx.lineTo(f.x + 7, f.y + 26);
+    ctx.closePath();
+    ctx.fillStyle = "#c2502a"; ctx.fill();
+    for (i = 0; i < level.mushrooms.length; i++) {
+      drawMushroom(level.mushrooms[i], s.squash > 0 && s.squashIdx === i);
+    }
+    for (i = 0; i < s.enemies.length; i++) {
+      if (s.enemies[i].type === "A") drawEnemyA(s.enemies[i]);
+      else drawEnemyB(s.enemies[i], s);
+    }
+    ctx.strokeStyle = "#17557f"; ctx.lineWidth = 3; ctx.lineCap = "round";
+    for (i = 0; i < s.arrows.length; i++) {
+      var a = s.arrows[i];
+      var alen = Math.sqrt(a.vx * a.vx + a.vy * a.vy) || 1;
+      var ux = a.vx / alen, uy = a.vy / alen;
+      ctx.beginPath();
+      ctx.moveTo(a.x - ux * 8, a.y - uy * 8);
+      ctx.lineTo(a.x + ux * 6, a.y + uy * 6);
+      ctx.stroke();
+      ctx.fillStyle = "#17557f";
+      ctx.beginPath(); ctx.arc(a.x + ux * 7, a.y + uy * 7, 2.6, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.lineCap = "butt";
+    var cx = s.x + PHYS.pw / 2, cy = s.y + 19;
+    ctx.strokeStyle = "#57a773"; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(cx, cy - 13); ctx.quadraticCurveTo(cx + 1, cy - 19, cx, cy - 23); ctx.stroke();
+    ctx.fillStyle = "#57a773";
+    ctx.beginPath(); ctx.ellipse(cx - 5, cy - 23, 5, 3, -0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + 5, cy - 24, 5, 3, 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+    ctx.fillStyle = "#ff9e7d"; ctx.fill();
+    ctx.strokeStyle = "#a83c17"; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.fillStyle = "#3d4451";
+    ctx.beginPath(); ctx.arc(cx - 5, cy, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 5, cy, 2, 0, Math.PI * 2); ctx.fill();
+    if (editMode) {
+      ctx.font = "bold 13px sans-serif";
+      ctx.textAlign = "center";
+      for (i = 0; i < 6; i++) {
+        r = slotHitRect(i);
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+        ctx.strokeStyle = "#c2502a"; ctx.lineWidth = 2;
+        ctx.setLineDash([5, 4]);
+        ctx.strokeRect(r.x, r.y, r.w, r.h);
+        ctx.setLineDash([]);
+        var label = SLOTS[i].id + "：" + SLOT_NAMES[config[i]];
+        ctx.lineWidth = 4; ctx.strokeStyle = "#fffaf2";
+        ctx.strokeText(label, SLOTS[i].cx, SLOTS[i].surf - 66);
+        ctx.fillStyle = "#3d4451";
+        ctx.fillText(label, SLOTS[i].cx, SLOTS[i].surf - 66);
+      }
+    }
+    if (s.goal) {
+      ctx.fillStyle = "rgba(255,250,242,0.88)";
+      rr(250, 140, 420, 118, 18); ctx.fill();
+      ctx.strokeStyle = "#c2502a"; ctx.lineWidth = 3; ctx.stroke();
+      ctx.fillStyle = "#c2502a";
+      ctx.font = "bold 36px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("ゴール！", PHYS.W / 2, 192);
+      ctx.fillStyle = "#3d4451";
+      ctx.font = "15px sans-serif";
+      ctx.fillText("この組み合わせでは " + s.respawns + " 回戻されました", PHYS.W / 2, 226);
+    }
+  }
+
+  var config = PRESETS[0].config.slice();
+  var level = buildLevel(config);
+  var state = createState(level);
+  var editMode = false;
+  var goalShown = false;
+
+  function setStatus(t) { if (statusEl && statusEl.textContent !== t) statusEl.textContent = t; }
+  function rebuild() {
+    level = buildLevel(config);
+    state = createState(level);
+    goalShown = false;
+  }
+  var presetBtns = [document.getElementById("encP1"), document.getElementById("encP2"), document.getElementById("encP3")];
+  var editBtn = document.getElementById("encEdit");
+  var slotRow = document.getElementById("encSlotRow");
+  var slotBtns = [];
+  for (var si = 0; si < 6; si++) slotBtns.push(document.getElementById("encS" + (si + 1)));
+  function markPresets(active) {
+    presetBtns.forEach(function (b, i) {
+      if (!b) return;
+      var on = i === active;
+      b.setAttribute("aria-pressed", String(on));
+      b.className = on ? "" : "secondary";
+    });
+    if (editBtn) {
+      editBtn.setAttribute("aria-pressed", String(editMode));
+      editBtn.className = editMode ? "" : "secondary";
+    }
+  }
+  function refreshSlotLabels() {
+    slotBtns.forEach(function (b, i) {
+      if (b) b.textContent = SLOTS[i].id + "：" + SLOT_NAMES[config[i]];
+    });
+  }
+  function applyPreset(i) {
+    config = PRESETS[i].config.slice();
+    editMode = false;
+    if (slotRow) slotRow.hidden = true;
+    rebuild();
+    markPresets(i);
+    refreshSlotLabels();
+    setStatus("プリセット" + PRESETS[i].label + "をセットしました。旗までたどり着けばゴールです。");
+    draw();
+  }
+  presetBtns.forEach(function (b, i) {
+    if (b) b.addEventListener("click", function () { applyPreset(i); });
+  });
+  function cycleSlot(i) {
+    config[i] = (config[i] + 1) % 4;
+    rebuild();
+    refreshSlotLabels();
+    draw();
+  }
+  if (editBtn) editBtn.addEventListener("click", function () {
+    if (editMode) return;
+    editMode = true;
+    if (slotRow) slotRow.hidden = false;
+    rebuild();
+    markPresets(-1);
+    refreshSlotLabels();
+    setStatus("自由配置モードです。スロットをタップ（または下のボタン）で「なし→敵A→敵B→岩」が切り替わります。決まったら「この配置で遊ぶ」を押してください。");
+    draw();
+  });
+  var playBtn = document.getElementById("encPlay");
+  if (playBtn) playBtn.addEventListener("click", function () {
+    editMode = false;
+    if (slotRow) slotRow.hidden = true;
+    rebuild();
+    markPresets(-1);
+    setStatus("自分の組み合わせでスタート！ 旗までたどり着けばゴールです。");
+    draw();
+  });
+  slotBtns.forEach(function (b, i) {
+    if (b) b.addEventListener("click", function () { if (editMode) cycleSlot(i); });
+  });
+  canvas.addEventListener("click", function (e) {
+    if (!editMode) return;
+    var p = toLogical(e.clientX, e.clientY, canvas.getBoundingClientRect());
+    var idx = slotAtPoint(p.x, p.y);
+    if (idx >= 0) cycleSlot(idx);
+  });
+
+  var keys = { left: false, right: false };
+  var btn = { left: false, right: false };
+  var jumpQueued = false;
+  function isJump(code) { return code === "Space" || code === "ArrowUp" || code === "KeyW"; }
+  function isLeft(code) { return code === "ArrowLeft" || code === "KeyA"; }
+  function isRight(code) { return code === "ArrowRight" || code === "KeyD"; }
+  canvas.addEventListener("keydown", function (e) {
+    if (editMode) return;
+    if (!isJump(e.code) && !isLeft(e.code) && !isRight(e.code)) return;
+    e.preventDefault();
+    if (isLeft(e.code)) keys.left = true;
+    if (isRight(e.code)) keys.right = true;
+    if (isJump(e.code) && !e.repeat) jumpQueued = true;
+  });
+  canvas.addEventListener("keyup", function (e) {
+    if (isLeft(e.code)) keys.left = false;
+    if (isRight(e.code)) keys.right = false;
+  });
+  canvas.addEventListener("blur", function () { keys.left = false; keys.right = false; });
+  function bindHold(id, prop) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("pointerdown", function (e) {
+      e.preventDefault();
+      if (el.setPointerCapture) { try { el.setPointerCapture(e.pointerId); } catch (err) {} }
+      btn[prop] = true;
+    });
+    function off() { btn[prop] = false; }
+    el.addEventListener("pointerup", off);
+    el.addEventListener("pointercancel", off);
+    el.addEventListener("lostpointercapture", off);
+  }
+  bindHold("encLeft", "left");
+  bindHold("encRight", "right");
+  var jumpBtn = document.getElementById("encJump");
+  if (jumpBtn) jumpBtn.addEventListener("pointerdown", function (e) { e.preventDefault(); jumpQueued = true; });
+  var resetBtn = document.getElementById("encReset");
+  if (resetBtn) resetBtn.addEventListener("click", function () {
+    rebuild();
+    if (!editMode) setStatus("リセットしました。旗までたどり着けばゴールです。");
+    draw();
+  });
+
+  markPresets(0);
+  refreshSlotLabels();
+
+  var STEP_MS = 1000 / 60, acc = 0, lastT = null;
+  function frame(t) {
+    requestAnimationFrame(frame);
+    if (lastT === null) lastT = t;
+    var dt = t - lastT;
+    lastT = t;
+    if (dt > 250) dt = 250;
+    acc += dt;
+    while (acc >= STEP_MS) {
+      acc -= STEP_MS;
+      if (!editMode) {
+        var before = state.respawns;
+        stepGame(state, { left: keys.left || btn.left, right: keys.right || btn.right, jump: jumpQueued });
+        jumpQueued = false;
+        if (state.respawns > before && HIT_TEXT[state.lastHit]) setStatus(HIT_TEXT[state.lastHit]);
+      }
+    }
+    if (state.goal && !goalShown && !editMode) {
+      goalShown = true;
+      setStatus("ゴール！ この組み合わせでは " + state.respawns + " 回戻されました。別の組み合わせでも試してみましょう。");
+    }
+    draw();
+  }
+  draw();
+  requestAnimationFrame(frame);
 })();
 </script>
 </body>
