@@ -71,6 +71,9 @@
   .game-status{font-weight:bold; margin:8px 0 0;}
   .game-hint{font-size:.9rem; color:#5a6274; margin:4px 0 0;}
   .game-btns{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+  /* .game-btns の display:flex が UA スタイルシートの [hidden] ルールを上書きしてしまうため、
+     hidden 属性による表示切替を効かせるにはこのルールが要る */
+  .game-btns[hidden]{display:none;}
   .game-btns button{flex:1 1 0; min-width:84px; margin:0; touch-action:none; user-select:none; -webkit-user-select:none;}
   .game-btns .game-slot-btn{background:#fff; color:#b23a1d;}
   /* .diagram 内（固定色の地）の secondary ボタンは、ダークモードでも地に合わせた固定色にする */
@@ -493,7 +496,7 @@
     <div class="diagram wide">
       <canvas id="encCanvas" class="game-canvas" width="920" height="420" tabindex="0" role="img" aria-label="エンカウンター構成実験のミニゲーム。§5と同じコースで、敵の組み合わせを変えて遊べます。谷をキノコで跳び越え、旗を目指します。"></canvas>
       <p class="game-status" id="encStatus" aria-live="polite">旗までたどり着けばゴールです。まずはプリセット①「単体ずつ」から遊べます。</p>
-      <p class="game-hint">ゲーム画面をクリックすると、キーで遊べます（←→：移動、スペース：ジャンプ）。自由配置モードでは、スロットをタップしても配置を変えられます。</p>
+      <p class="game-hint">ゲーム画面をクリックすると、キーで遊べます（←→：移動、スペース：ジャンプ）。自由配置モードでは、Sボタン（またはコース上の点線枠）で中身を切り替えて、「この配置で遊ぶ」を押すとその配置で遊べます。</p>
       <div class="game-btns">
         <button type="button" id="encLeft" aria-label="左へ移動">← 左</button>
         <button type="button" id="encJump" aria-label="ジャンプ">ジャンプ</button>
@@ -990,6 +993,7 @@
   var level = buildLevel(config);
   var state = createState(level);
   var editMode = false;
+  var customPlay = false; // 自由配置で作った配置でプレイ中かどうか（「自由配置」ボタンの選択表示を保つため）
   var goalShown = false;
 
   function setStatus(t) { if (statusEl && statusEl.textContent !== t) statusEl.textContent = t; }
@@ -1011,8 +1015,9 @@
       b.className = on ? "" : "secondary";
     });
     if (editBtn) {
-      editBtn.setAttribute("aria-pressed", String(editMode));
-      editBtn.className = editMode ? "" : "secondary";
+      var editOn = editMode || customPlay;
+      editBtn.setAttribute("aria-pressed", String(editOn));
+      editBtn.className = editOn ? "" : "secondary";
     }
   }
   function refreshSlotLabels() {
@@ -1023,6 +1028,7 @@
   function applyPreset(i) {
     config = PRESETS[i].config.slice();
     editMode = false;
+    customPlay = false;
     if (slotRow) slotRow.hidden = true;
     rebuild();
     markPresets(i);
@@ -1042,6 +1048,7 @@
   if (editBtn) editBtn.addEventListener("click", function () {
     if (editMode) return;
     editMode = true;
+    customPlay = false;
     if (slotRow) slotRow.hidden = false;
     rebuild();
     markPresets(-1);
@@ -1052,6 +1059,7 @@
   var playBtn = document.getElementById("encPlay");
   if (playBtn) playBtn.addEventListener("click", function () {
     editMode = false;
+    customPlay = true;
     if (slotRow) slotRow.hidden = true;
     rebuild();
     markPresets(-1);
